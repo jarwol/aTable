@@ -1,0 +1,103 @@
+.atableParent {
+    border: solid thin silver;
+}
+
+.atableContainer {
+    overflow-y: hidden;
+    overflow-x: auto;
+    position: relative;
+    border-top: solid 1px silver;
+    border-bottom: solid 1px silver;
+}
+
+.atableTitleBar, .atableBottomBar {
+    padding: 8px;
+    background: #e2e2e2; /* Old browsers */
+    background: -moz-linear-gradient(top, #e2e2e2 0%, #dbdbdb 50%, #d1d1d1 51%, #fefefe 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #e2e2e2), color-stop(50%, #dbdbdb), color-stop(51%, #d1d1d1), color-stop(100%, #fefefe)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top, #e2e2e2 0%, #dbdbdb 50%, #d1d1d1 51%, #fefefe 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top, #e2e2e2 0%, #dbdbdb 50%, #d1d1d1 51%, #fefefe 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top, #e2e2e2 0%, #dbdbdb 50%, #d1d1d1 51%, #fefefe 100%); /* IE10+ */
+    background: linear-gradient(to bottom, #e2e2e2 0%, #dbdbdb 50%, #d1d1d1 51%, #fefefe 100%); /* W3C */
+}
+
+.atableBottomBar {
+    height: 20px;
+}
+
+.atableTitleBar input {
+    border-radius: 10px;
+    padding: 3px;
+}
+
+.atableTitle {
+    font-size: large;
+    float: left;
+    margin-right: 25px;
+}
+
+.atable {
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+.atable th.over {
+    border: 1px dashed #000000;
+}
+
+.atable th:hover {
+    opacity: .75;
+}
+
+.atable tbody {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.atable thead>tr, tbody {
+    display: block;
+}
+
+.atable td>div {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.atable td, th {
+    border: solid 1px silver;
+    border-top: none;
+    padding: 3px;
+}
+
+.atable th {
+    background: #e2e2e2;
+    font-size: 12;
+    cursor: pointer;
+}
+
+.atable td:first-child, .atable th:first-child {
+    border-left: none;
+}
+
+.atable tr:last-child td {
+    border-bottom: none;
+}
+
+.atable .sortArrow {
+    float: right;
+    margin-left: 5px;
+}
+
+.editColumnDialog {
+    position: absolute;
+    display: none;
+    padding: 20px 20px 10px 20px;
+}
+
+#grayout {
+    display: none;
+    position: absolute;
+    background: gray;
+    opacity: .5;
+}
