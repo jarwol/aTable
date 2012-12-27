@@ -2,7 +2,13 @@ var ATable = (function () {
     // Private constants
     var SORT_ARROW_WIDTH = 8;
     var DEFAULT_ROWS_TO_RENDER = 100;
+    var TOP_SCROLL_THRESHOLD = .1;
+    var BOTTOM_SCROLL_THRESHOLD = .8;
 
+    /**
+     *
+     * @type {ATable}
+     */
     var ATable = Backbone.View.extend({
         initialize : function (options) {
             _.bindAll(this);
@@ -36,13 +42,14 @@ var ATable = (function () {
             this.dataWorker = createDataWorker(options.fetchData, this.receivedData);
             this.height = options.height;
             this.rowsToRender = options.rowsToRender || DEFAULT_ROWS_TO_RENDER;
+            this.prevScrollTop = 0;
             this.rowRange = {
                 first : 0,
                 last : this.rowsToRender
             };
             this.prevRowRange = {
-                first : -1,
-                last : -1
+                first : 0,
+                last : this.rowsToRender
             };
         },
 
@@ -61,7 +68,7 @@ var ATable = (function () {
         /**
          * Generates the ATable and adds it to the DOM
          * @param {function} callback function to call when the ATable is rendered
-         * @return {ATable} a reference to the ATable
+         * @return {ATable} a reference to this ATable
          */
         render : function (callback) {
             if (typeof callback === 'function') {
@@ -70,7 +77,7 @@ var ATable = (function () {
             var params = {};
             if (!this.rows.init) {
                 this.rows.bind("reset", this.render, this);
-                this.rows.bind("sort", this.render, this);
+                this.rows.bind("sort", this.renderRows, this);
                 this.dataWorker.postMessage(null);
                 return this;
             }
@@ -84,6 +91,7 @@ var ATable = (function () {
                 this.parentElt = this.$el.find(".tableParent");
                 // Set up on-demand row rendering variables
                 this.tbodyElt = this.tableElt.find("tbody");
+                this.tbodyElt[0].scrollTop = this.prevScrollTop;
                 this.tbodyElt.scroll(this.scrollTable);
                 this.rowHeight = this.tbodyElt.find('tr:first-child').height();
                 this.visibleRows = parseInt(this.tbodyElt.height() / this.rowHeight);
@@ -104,6 +112,9 @@ var ATable = (function () {
             return this;
         },
 
+        /**
+         * Add/remove rows from the DOM, or replace data in the current rows
+         */
         renderRows : function () {
             if (this.rowRange.first < this.prevRowRange.first) {
                 this.removeRows(this.prevRowRange.first - this.rowRange.first, false);
@@ -114,7 +125,7 @@ var ATable = (function () {
                 this.addRows(this.prevRowRange.last, this.rowRange.last, false);
             }
             else {
-                //    this.replaceRows();
+                this.refreshRows();
             }
         },
 
@@ -130,20 +141,26 @@ var ATable = (function () {
                 var tr = document.createElement("tr");
                 for (var j = 0; j < this.columns.length; j++) {
                     var div = document.createElement("div");
-                    var width = this.columns.at(j).get('element').width();
-                    div.style.width = width + "px";
+                    div.style.width = this.columns.at(j).get('element')[0].style.width;
                     var text = document.createTextNode(this.rows.getValue(i, j));
                     var td = document.createElement("td");
                     div.appendChild(text);
                     td.appendChild(div);
                     tr.appendChild(td);
                 }
+
                 if (prepend) {
                     this.tbodyElt[0].insertBefore(tr, firstRow);
                 }
                 else {
                     this.tbodyElt[0].appendChild(tr);
                 }
+            }
+            if (prepend) {
+                this.tbodyElt[0].scrollTop = this.tbodyElt[0].scrollHeight * TOP_SCROLL_THRESHOLD;
+            }
+            else{
+                this.tbodyElt[0].scrollTop = (this.tbodyElt[0].scrollHeight - this.tbodyElt[0].clientHeight) * BOTTOM_SCROLL_THRESHOLD;
             }
         },
 
@@ -169,14 +186,17 @@ var ATable = (function () {
             }
         },
 
-        replaceRows : function () {
+        /**
+         * Refresh the data in the rendered table rows with what is currently in the row data collection
+         */
+        refreshRows : function () {
             var rows = this.tbodyElt[0].getElementsByTagName("tr");
-            if (rows.length > i) {
+            for (var i = 0; i < rows.length; i++) {
                 var tr = rows[i];
                 var tdList = tr.getElementsByTagName("div");
                 for (var j = 0; j < tdList.length; j++) {
                     var div = tdList[j];
-                    div.innerText = Util.formatEntityField(this.rows.getValue(i, j));
+                    div.innerText = Util.formatEntityField(this.rows.getValue(this.rowRange.first + i, j));
                 }
             }
         },
@@ -186,23 +206,25 @@ var ATable = (function () {
          * @param {jQuery.Event} e jQuery scroll event
          */
         scrollTable : function (e) {
+            var firstRow, lastRow;
             this.prevRowRange.first = this.rowRange.first;
             this.prevRowRange.last = this.rowRange.last;
-            var firstRow, lastRow;
-            var bottomThreshold = this.tbodyElt[0].scrollHeight * .7;
-            var topThreshold = this.tbodyElt[0].scrollHeight * .3;
-            if(e.target.scrollTop > bottomThreshold){
+            var bottomThreshold = (this.tbodyElt[0].scrollHeight - this.tbodyElt[0].clientHeight) * BOTTOM_SCROLL_THRESHOLD;
+            var topThreshold = this.tbodyElt[0].scrollHeight * TOP_SCROLL_THRESHOLD;
+            if (e.target.scrollTop > bottomThreshold && e.target.scrollTop > this.prevScrollTop) {
                 var rowsPast = parseInt((e.target.scrollTop - bottomThreshold) / this.rowHeight);
                 firstRow = this.rowRange.first + rowsPast;
                 lastRow = this.rowRange.last + rowsPast;
+                this.prevScrollTop = e.target.scrollTop;
             }
-            else if(e.target.scrollTop < topThreshold)
-            {
+            else if (e.target.scrollTop < topThreshold && e.target.scrollTop < this.prevScrollTop) {
                 var rowsPast = parseInt((topThreshold - e.target.scrollTop) / this.rowHeight);
                 firstRow = this.rowRange.first - rowsPast;
                 lastRow = this.rowRange.last - rowsPast;
+                this.prevScrollTop = e.target.scrollTop;
             }
-            else{
+            else {
+                this.prevScrollTop = e.target.scrollTop;
                 return;
             }
             if (firstRow > this.rows.length - this.rowsToRender) {
@@ -380,17 +402,25 @@ var ATable = (function () {
                 else {
                     target = $(e.target);
                 }
-                var pos = target.offset();
-                var containerHeight = this.parentElt.height();
-                var tableHeight = this.tableElt.height() + 2;
-                var height = containerHeight < tableHeight ? containerHeight : tableHeight;
+                var posCol = target.offset();
+                var posTable = this.tableElt.parent().offset();
+                var height = this.tableElt.height() + 2;
                 var leftPad = target.css("padding-left");
                 var rightPad = target.css("padding-right");
+                var left, diff;
+                if (posCol.left < posTable.left) {
+                    left = posTable.left;
+                    diff = posTable.left - posCol.left;
+                }
+                else {
+                    left = posCol.left;
+                    diff = 0;
+                }
                 // subtract 5 from width because if the grayout div overlaps the cursor, dragend is immediately invoked
-                var width = target.width() + Number(leftPad.substring(0, leftPad.length - 2))
+                var width = target.width() - diff + Number(leftPad.substring(0, leftPad.length - 2))
                     + Number(rightPad.substring(0, rightPad.length - 2)) - 5;
                 var gray = $("#grayout");
-                gray.css("display", "block").css("left", pos.left).css("top", pos.top - 1).css("height", height + 1)
+                gray.css("display", "block").css("left", left).css("top", posCol.top - 1).css("height", height + 1)
                     .css("width", width).attr('title', target[0].cellIndex);
                 // Firefox doesn't provide mouse coordinates in the 'drag' event, so we must use a document-level
                 // 'dragover' as a workaround
@@ -415,7 +445,7 @@ var ATable = (function () {
             var colIdx = this.rows.getColumnIndex(Number(e.dataTransfer.getData("text")));
             var col = this.columns.at(colIdx).get('element');
             var width = e.pageX - pos.left;
-            var textWidth = 15; //Util.getTextWidth(col.text()) + SORT_ARROW_WIDTH;
+            var textWidth = Util.getTextWidth(col.text()) + SORT_ARROW_WIDTH;
             if (width >= textWidth) {
                 gray.css("width", width);
             }
@@ -437,10 +467,15 @@ var ATable = (function () {
                 document.removeEventListener('dragover', this.resizeGrayout, false);
                 var width = parseInt(e.originalEvent.clientX - gray.position().left - 10);
                 var grayWidth = gray.width();
-                width = width < grayWidth ? grayWidth : width;
-                gray.css("display", "none");
                 var colIndex = Number(gray.attr('title'));
                 var col = this.columns.at(colIndex);
+                var posCol = col.get('element').offset();
+                var posTable = this.tableElt.parent().offset();
+                if (posCol.left < posTable.left) {
+                    grayWidth += (posTable.left - posCol.left);
+                }
+                width = width < grayWidth ? grayWidth : width;
+                gray.css("display", "none");
                 col.set({width : width});
                 col.get('element').width(width);
                 this.tableElt.find('td:nth-child(' + (colIndex + 1) + ') div').width(width);
@@ -485,6 +520,7 @@ var ATable = (function () {
                 var srcCol = Number(e.originalEvent.dataTransfer.getData("text"));
                 var destCol = e.target.cellIndex;
                 this.reRenderTable = true;
+                this.prevScrollTop = this.tbodyElt[0].scrollTop;
                 this.rows.moveColumn(srcCol, destCol);
                 this.columns.moveColumn(srcCol, destCol);
             }
@@ -590,7 +626,7 @@ var ATable = (function () {
 
     /**
      * Initialize the collection of table columns
-     * @param {Table} table The Table which is being initialized
+     * @param {ATable} table The Table which is being initialized
      * @param {Array} columns Array of objects representing table columns
      * @return {ColumnCollection} collection of the table's Column models
      */
