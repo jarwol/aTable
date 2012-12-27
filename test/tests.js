@@ -47,7 +47,7 @@ asyncTest("Remove rows", 5, function () {
     });
 });
 
-asyncTest("Scroll table", 16, function () {
+asyncTest("Scroll table", 20, function () {
     var table = createTable();
     table.render(function () {
         start();
@@ -59,24 +59,34 @@ asyncTest("Scroll table", 16, function () {
         equal(table.prevRowRange.last, 100, "previous last row to render should be 100");
 
         // Scroll down enough to render new rows
-        table.scrollTable({target : {scrollTop : 2000}});
+        var threshold = (table.tbodyElt[0].scrollHeight - table.tbodyElt[0].clientHeight) * .75;
+        table.scrollTable({target : {scrollTop : threshold + 1000}});
         var rows = table.tbodyElt.find("tr");
-        var expectedFirstRow = parseInt(2000 / table.rowHeight) - table.bufferRows;
-        equal(table.rowRange.first, expectedFirstRow, "first row to render should be (2000 / rowHeight) - bufferRows = " + expectedFirstRow);
+        var expectedFirstRow = parseInt(1000 / table.rowHeight);
+        equal(table.rowRange.first, expectedFirstRow, "first row to render should be " + expectedFirstRow);
         equal(table.rowRange.last, expectedFirstRow + table.rowsToRender, "last row to render should be (firstRow + rowsToRender)");
         equal(parseInt(rows[0].cells[0].innerText), table.rowRange.first * 4, "first cell rendered should contain " + table.rowRange.first * 4);
         equal(parseInt(rows[99].cells[0].innerText), (table.rowRange.last - 1) * 4, "last row's first cell should contain " + (table.rowRange.last - 1) * 4);
 
         // Scroll back up some
-        table.scrollTable({target : {scrollTop : 1500}});
+        table.scrollTable({target : {scrollTop : threshold - 100}});
         rows = table.tbodyElt.find("tr");
-        var expectedFirstRow = parseInt(1500 / table.rowHeight) - table.bufferRows;
-        equal(table.rowRange.first, expectedFirstRow, "first row to render should be (1500 / rowHeight) - bufferRows = " + expectedFirstRow);
+        equal(table.rowRange.first, expectedFirstRow, "first row to render should be " + expectedFirstRow);
         equal(table.rowRange.last, expectedFirstRow + table.rowsToRender, "last row to render should be (firstRow + rowsToRender)");
         equal(parseInt(rows[0].cells[0].innerText), table.rowRange.first * 4, "first cell rendered should contain " + table.rowRange.first * 4);
         equal(parseInt(rows[99].cells[0].innerText), (table.rowRange.last - 1) * 4, "last row's first cell should contain " + (table.rowRange.last - 1) * 4);
 
-        // Scroll back to the top
+        // Scroll up past the upper threshold
+        threshold = table.tbodyElt[0].scrollHeight * .25;
+        table.scrollTable({target : {scrollTop : threshold - 400}});
+        rows = table.tbodyElt.find("tr");
+        expectedFirstRow -= parseInt(400 / table.rowHeight);
+        equal(table.rowRange.first, expectedFirstRow, "first row to render should be " + expectedFirstRow);
+        equal(table.rowRange.last, expectedFirstRow + table.rowsToRender, "last row to render should be " + (expectedFirstRow + table.rowsToRender));
+        equal(parseInt(rows[0].cells[0].innerText), expectedFirstRow * 4, "first cell rendered should contain 0");
+        equal(parseInt(rows[99].cells[0].innerText), (table.rowRange.last - 1) * 4, "last row's first cell should contain " + (table.rowRange.last - 1) * 4);
+
+        // Scroll up to the top
         table.scrollTable({target : {scrollTop : 0}});
         rows = table.tbodyElt.find("tr");
         equal(table.rowRange.first, 0, "first row to render should 0");
@@ -86,19 +96,33 @@ asyncTest("Scroll table", 16, function () {
     });
 });
 
-asyncTest("Random scroll stress test", 400, function () {
+asyncTest("Random scroll stress test", 4000, function () {
     var table = createTable();
     table.render(function () {
         start();
         var scrollHeight = table.tbodyElt[0].scrollHeight;
-        for (var i = 1; i <= 100; i++) {
+        var bottomThreshold = (table.tbodyElt[0].scrollHeight - table.tbodyElt[0].clientHeight) * .8;
+        var topThreshold = table.tbodyElt[0].scrollHeight * .1;
+        for (var i = 1; i <= 1000; i++) {
             var scrollTop = Math.floor(Math.random() * (scrollHeight + 1));
             table.scrollTable({target : {scrollTop : scrollTop}});
             var rows = table.tbodyElt.find("tr");
-            var expectedFirstRow = parseInt(scrollTop / table.rowHeight) - table.bufferRows;
+            var expectedFirstRow;
+            if(scrollTop > bottomThreshold && table.rowRange.first > table.prevRowRange.first){
+                var rowsPast = parseInt((scrollTop - bottomThreshold) / table.rowHeight);
+                expectedFirstRow = table.prevRowRange.first + rowsPast;
+            }
+            else if(scrollTop < topThreshold && table.rowRange.first < table.prevRowRange.first){
+                var rowsPast = parseInt((topThreshold - scrollTop) / table.rowHeight);
+                expectedFirstRow = table.prevRowRange.first - rowsPast;
+            }
+            else{
+                expectedFirstRow = table.prevRowRange.first;
+            }
             expectedFirstRow = expectedFirstRow >= 0 ? expectedFirstRow : 0;
             var expectedLastRow = expectedFirstRow + table.rowsToRender;
             expectedLastRow = expectedLastRow < table.rows.length ? expectedLastRow : table.rows.length - 1;
+            if(expectedLastRow === table.rows.length) expectedFirstRow = expectedLastRow - table.rowsToRender;
             equal(table.rowRange.first, expectedFirstRow, "first row to render should be  " + expectedFirstRow);
             equal(table.rowRange.last, expectedLastRow, "last row to render should be " + expectedLastRow);
             equal(parseInt(rows[0].cells[0].innerText), table.rowRange.first * 4, "first cell rendered should contain " + table.rowRange.first * 4);
