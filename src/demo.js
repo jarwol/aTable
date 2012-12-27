@@ -1,5 +1,5 @@
 $(document).ready(function () {
-    var table = new Table({
+    var table = new ATable({
         fetchData : "fetchData",
         columns : [
             {name : "Column 1"},

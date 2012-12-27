@@ -105,7 +105,6 @@ var ATable = (function () {
         },
 
         renderRows : function () {
-            if (this.rowRange.first === 0 || this.rowRange.first === this.rows.length - this.rowsToRender) return;
             if (this.rowRange.first < this.prevRowRange.first) {
                 this.removeRows(this.prevRowRange.first - this.rowRange.first, false);
                 this.addRows(this.rowRange.first, this.prevRowRange.first, true);
@@ -189,7 +188,23 @@ var ATable = (function () {
         scrollTable : function (e) {
             this.prevRowRange.first = this.rowRange.first;
             this.prevRowRange.last = this.rowRange.last;
-            var firstRow = parseInt(e.target.scrollTop / this.rowHeight) - this.bufferRows;
+            var firstRow, lastRow;
+            var bottomThreshold = this.tbodyElt[0].scrollHeight * .7;
+            var topThreshold = this.tbodyElt[0].scrollHeight * .3;
+            if(e.target.scrollTop > bottomThreshold){
+                var rowsPast = parseInt((e.target.scrollTop - bottomThreshold) / this.rowHeight);
+                firstRow = this.rowRange.first + rowsPast;
+                lastRow = this.rowRange.last + rowsPast;
+            }
+            else if(e.target.scrollTop < topThreshold)
+            {
+                var rowsPast = parseInt((topThreshold - e.target.scrollTop) / this.rowHeight);
+                firstRow = this.rowRange.first - rowsPast;
+                lastRow = this.rowRange.last - rowsPast;
+            }
+            else{
+                return;
+            }
             if (firstRow > this.rows.length - this.rowsToRender) {
                 firstRow = this.rows.length - this.rowsToRender;
             }
@@ -197,7 +212,6 @@ var ATable = (function () {
                 firstRow = 0;
             }
             this.rowRange.first = firstRow;
-            var lastRow = firstRow + this.rowsToRender;
             if (lastRow < this.rowsToRender) {
                 lastRow = this.rowsToRender;
             }
