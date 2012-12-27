@@ -76,7 +76,7 @@ asyncTest("Scroll table", 16, function () {
         equal(parseInt(rows[0].cells[0].innerText), table.rowRange.first * 4, "first cell rendered should contain " + table.rowRange.first * 4);
         equal(parseInt(rows[99].cells[0].innerText), (table.rowRange.last - 1) * 4, "last row's first cell should contain " + (table.rowRange.last - 1) * 4);
 
-        // Scroll up to where the first row rendered should be 0
+        // Scroll back to the top
         table.scrollTable({target : {scrollTop : 0}});
         rows = table.tbodyElt.find("tr");
         equal(table.rowRange.first, 0, "first row to render should 0");
@@ -90,11 +90,11 @@ asyncTest("Random scroll stress test", 400, function () {
     var table = createTable();
     table.render(function () {
         start();
-        var rows = table.tbodyElt.find("tr");
         var scrollHeight = table.tbodyElt[0].scrollHeight;
         for (var i = 1; i <= 100; i++) {
             var scrollTop = Math.floor(Math.random() * (scrollHeight + 1));
             table.scrollTable({target : {scrollTop : scrollTop}});
+            var rows = table.tbodyElt.find("tr");
             var expectedFirstRow = parseInt(scrollTop / table.rowHeight) - table.bufferRows;
             expectedFirstRow = expectedFirstRow >= 0 ? expectedFirstRow : 0;
             var expectedLastRow = expectedFirstRow + table.rowsToRender;
@@ -104,7 +104,5 @@ asyncTest("Random scroll stress test", 400, function () {
             equal(parseInt(rows[0].cells[0].innerText), table.rowRange.first * 4, "first cell rendered should contain " + table.rowRange.first * 4);
             equal(parseInt(rows[99].cells[0].innerText), (table.rowRange.last - 1) * 4, "last row's first cell should contain " + (table.rowRange.last - 1) * 4);
         }
-
-
     });
 });
