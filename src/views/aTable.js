@@ -119,12 +119,12 @@ var ATable = (function () {
              */
             renderRows : function () {
                 //if (this.rowRange.first < this.prevRowRange.first) {
-                if(this.tbodyElt[0].scrollTop < this.prevScrollTop){
+                if (this.tbodyElt[0].scrollTop < this.prevScrollTop) {
                     this.removeRows(this.prevRowRange.first - this.rowRange.first, false);
                     this.addRows(this.rowRange.first, this.prevRowRange.first, true);
                 }
                 //else if (this.rowRange.last > this.prevRowRange.last) {
-                else if(this.tbodyElt[0].scrollTop > this.prevScrollTop){
+                else if (this.tbodyElt[0].scrollTop > this.prevScrollTop) {
                     this.removeRows(this.rowRange.last - this.prevRowRange.last, true);
                     this.addRows(this.prevRowRange.last, this.rowRange.last, false);
                 }
@@ -143,6 +143,7 @@ var ATable = (function () {
             addRows : function (start, end, prepend) {
                 var firstRow = this.tbodyElt[0].firstChild;
                 var lastRow = this.tbodyElt[0].lastChild;
+                var rowToInsertBefore = firstRow.nextSibling;
                 for (var i = start; i < end; i++) {
                     var tr = document.createElement("tr");
                     for (var j = 0; j < this.columns.length; j++) {
@@ -154,9 +155,8 @@ var ATable = (function () {
                         td.appendChild(div);
                         tr.appendChild(td);
                     }
-
                     if (prepend) {
-                        this.tbodyElt[0].insertBefore(tr, firstRow.nextSibling); // TODO - need to fix the order of insertion
+                        this.tbodyElt[0].insertBefore(tr, rowToInsertBefore);
                     }
                     else {
                         this.tbodyElt[0].insertBefore(tr, lastRow);
@@ -164,14 +164,12 @@ var ATable = (function () {
                 }
                 var sizeChange = Math.abs(this.tbodyElt[0].scrollTop - this.prevScrollTop);
                 if (prepend) {
-                    //this.tbodyElt[0].scrollTop = this.tbodyElt[0].scrollHeight * TOP_SCROLL_THRESHOLD;
                     var bottomHeight = lastRow.style.height;
                     lastRow.style.height = Number(bottomHeight.substr(0, bottomHeight.length - 2)) + sizeChange + "px";
                     var topHeight = firstRow.style.height;
                     firstRow.style.height = Number(topHeight.substr(0, topHeight.length - 2)) - sizeChange + "px";
                 }
                 else {
-                    //this.tbodyElt[0].scrollTop = (this.tbodyElt[0].scrollHeight - this.tbodyElt[0].clientHeight) * BOTTOM_SCROLL_THRESHOLD;
                     var bottomHeight = lastRow.style.height;
                     lastRow.style.height = Number(bottomHeight.substr(0, bottomHeight.length - 2)) - sizeChange + "px";
                     var topHeight = firstRow.style.height;
@@ -185,20 +183,23 @@ var ATable = (function () {
              * @param {boolean} removeFromBeginning remove the rows from the beginning of the table rather than the end
              */
             removeRows : function (num, removeFromBeginning) {
-                var rows = this.tbodyElt[0].getElementsByTagName("tr");
+                //var rows = this.tbodyElt[0].getElementsByTagName("tr");
                 var start, end;
                 if (removeFromBeginning) {
                     start = 1;
                     end = num + 1;
                 }
                 else {
-                    start = rows.length - num + 1;
-                    end = rows.length - 1;
+                    //start = rows.length - num + 1;
+                    //end = rows.length - 1;
+                    start = this.rowsToRender + 1 - num;
+                    end = this.rowsToRender - 1;
                 }
                 for (var i = start; i < end; i++) {
-                    rows = this.tbodyElt[0].getElementsByTagName("tr");
-                    var tr = rows[start];       // As rows are removed from DOM, they are removed from this array
-                    this.tbodyElt[0].removeChild(tr);
+                    //rows = this.tbodyElt[0].getElementsByTagName("tr");
+                    //var tr = rows[start];       // As rows are removed from DOM, they are removed from this array
+                    //this.tbodyElt[0].removeChild(tr);
+                    this.tableElt[0].deleteRow(start);
                 }
             },
 
@@ -232,7 +233,7 @@ var ATable = (function () {
                     var rowsPast = parseInt((e.target.scrollTop - this.prevScrollTop) / this.rowHeight);//parseInt((e.target.scrollTop - bottomThreshold) / this.rowHeight);
                     firstRow = this.rowRange.first + rowsPast;
                     lastRow = this.rowRange.last + rowsPast;
-                    
+
                 }
                 //else if (e.target.scrollTop < topThreshold && e.target.scrollTop < this.prevScrollTop) {
                 else if (e.target.scrollTop < this.prevScrollTop) {
