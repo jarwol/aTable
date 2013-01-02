@@ -185,8 +185,8 @@ var ATable = (function () {
                     end = num + 2;
                 }
                 else {
-                    start = this.rowsToRender - num;
-                    end = this.rowsToRender;
+                    start = this.rowsToRender - num + 2;
+                    end = this.rowsToRender + 2;
                 }
                 for (var i = start; i < end; i++) {
                     this.tableElt[0].deleteRow(start);

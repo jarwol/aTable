@@ -75,13 +75,13 @@ asyncTest("Scroll table", 20, function () {
         equal(table.rowRange.first, expectedFirstRow, "first row to render should be " + expectedFirstRow);
         equal(table.rowRange.last, expectedFirstRow + table.rowsToRender, "last row to render should be " + (expectedFirstRow + table.rowsToRender));
         equal(parseInt(rows[1].cells[0].innerText), table.rowRange.first * 4, "first cell rendered should contain " + table.rowRange.first * 4);
-        equal(parseInt(rows[100].cells[0].innerText), (table.rowRange.last) * 4, "last row's first cell should contain " + (table.rowRange.last - 1) * 4);
+        equal(parseInt(rows[100].cells[0].innerText), (table.rowRange.last - 1) * 4, "last row's first cell should contain " + (table.rowRange.last - 1) * 4);
 
         // Scroll up more
         table.tbodyElt[0].scrollTop = 100;
         table.scrollTable({target : {scrollTop : 100}});
         rows = table.tbodyElt.find("tr");
-        expectedFirstRow = parseInt(100 / table.rowHeight) + 1;
+        expectedFirstRow = parseInt(100 / table.rowHeight);
         equal(table.rowRange.first, expectedFirstRow, "first row to render should be " + expectedFirstRow);
         equal(table.rowRange.last, expectedFirstRow + table.rowsToRender, "last row to render should be " + (expectedFirstRow + table.rowsToRender));
         equal(parseInt(rows[1].cells[0].innerText), expectedFirstRow * 4, "first cell rendered should contain 0");
