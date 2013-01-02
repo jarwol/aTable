@@ -2,8 +2,6 @@ var ATable = (function () {
     // Private constants
     var SORT_ARROW_WIDTH = 8;
     var DEFAULT_ROWS_TO_RENDER = 100;
-    var TOP_SCROLL_THRESHOLD = .1;
-    var BOTTOM_SCROLL_THRESHOLD = .8;
 
     /**
      *
@@ -118,12 +116,10 @@ var ATable = (function () {
              * Add/remove rows from the DOM, or replace data in the current rows
              */
             renderRows : function () {
-                //if (this.rowRange.first < this.prevRowRange.first) {
                 if (this.tbodyElt[0].scrollTop < this.prevScrollTop) {
                     this.removeRows(this.prevRowRange.first - this.rowRange.first, false);
                     this.addRows(this.rowRange.first, this.prevRowRange.first, true);
                 }
-                //else if (this.rowRange.last > this.prevRowRange.last) {
                 else if (this.tbodyElt[0].scrollTop > this.prevScrollTop) {
                     this.removeRows(this.rowRange.last - this.prevRowRange.last, true);
                     this.addRows(this.prevRowRange.last, this.rowRange.last, false);
@@ -183,22 +179,16 @@ var ATable = (function () {
              * @param {boolean} removeFromBeginning remove the rows from the beginning of the table rather than the end
              */
             removeRows : function (num, removeFromBeginning) {
-                //var rows = this.tbodyElt[0].getElementsByTagName("tr");
                 var start, end;
                 if (removeFromBeginning) {
-                    start = 1;
-                    end = num + 1;
+                    start = 2;
+                    end = num + 2;
                 }
                 else {
-                    //start = rows.length - num + 1;
-                    //end = rows.length - 1;
-                    start = this.rowsToRender + 1 - num;
-                    end = this.rowsToRender - 1;
+                    start = this.rowsToRender - num;
+                    end = this.rowsToRender;
                 }
                 for (var i = start; i < end; i++) {
-                    //rows = this.tbodyElt[0].getElementsByTagName("tr");
-                    //var tr = rows[start];       // As rows are removed from DOM, they are removed from this array
-                    //this.tbodyElt[0].removeChild(tr);
                     this.tableElt[0].deleteRow(start);
                 }
             },
@@ -226,18 +216,14 @@ var ATable = (function () {
                 var firstRow, lastRow;
                 this.prevRowRange.first = this.rowRange.first;
                 this.prevRowRange.last = this.rowRange.last;
-                var bottomThreshold = (this.tbodyElt[0].scrollHeight - this.tbodyElt[0].clientHeight) * BOTTOM_SCROLL_THRESHOLD;
-                var topThreshold = this.tbodyElt[0].scrollHeight * TOP_SCROLL_THRESHOLD;
-                //if (e.target.scrollTop > bottomThreshold && e.target.scrollTop > this.prevScrollTop) {
                 if (e.target.scrollTop > this.prevScrollTop) {
-                    var rowsPast = parseInt((e.target.scrollTop - this.prevScrollTop) / this.rowHeight);//parseInt((e.target.scrollTop - bottomThreshold) / this.rowHeight);
+                    var rowsPast = parseInt((e.target.scrollTop - this.prevScrollTop) / this.rowHeight);
                     firstRow = this.rowRange.first + rowsPast;
                     lastRow = this.rowRange.last + rowsPast;
 
                 }
-                //else if (e.target.scrollTop < topThreshold && e.target.scrollTop < this.prevScrollTop) {
                 else if (e.target.scrollTop < this.prevScrollTop) {
-                    var rowsPast = parseInt((this.prevScrollTop - e.target.scrollTop) / this.rowHeight);//parseInt((topThreshold - e.target.scrollTop) / this.rowHeight);
+                    var rowsPast = parseInt((this.prevScrollTop - e.target.scrollTop) / this.rowHeight);
                     firstRow = this.rowRange.first - rowsPast;
                     lastRow = this.rowRange.last - rowsPast;
                 }
@@ -583,7 +569,7 @@ var ATable = (function () {
                     '<div class="atableContainer">' +
                     '<table class="atable">' +
                     '<thead>' + headerRow + '</thead>' +
-                    '<tbody style="height: ' + this.height + 'px;"><tr style="height: 0px;"></tr>' + body + '<tr style="height: 5000px;"></tr></tbody>' +
+                    '<tbody style="height: ' + this.height + 'px;"><tr style="height: 0px;"></tr>' + body + '</tbody>' +
                     '</table></div>' +
                     '<div class="atableBottomBar"></div></div>' +
                     '<div id="grayout"></div>';
