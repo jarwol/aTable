@@ -81,7 +81,7 @@ asyncTest("Scroll table", 20, function () {
         table.tbodyElt[0].scrollTop = 100;
         table.scrollTable({target : {scrollTop : 100}});
         rows = table.tbodyElt.find("tr");
-        expectedFirstRow = parseInt(100 / table.rowHeight);
+        expectedFirstRow -= parseInt(800 / table.rowHeight);
         equal(table.rowRange.first, expectedFirstRow, "first row to render should be " + expectedFirstRow);
         equal(table.rowRange.last, expectedFirstRow + table.rowsToRender, "last row to render should be " + (expectedFirstRow + table.rowsToRender));
         equal(parseInt(rows[1].cells[0].innerText), expectedFirstRow * 4, "first cell rendered should contain 0");

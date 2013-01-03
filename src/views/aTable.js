@@ -115,9 +115,9 @@ var ATable = (function () {
             /**
              * Add/remove rows from the DOM, or replace data in the current rows
              */
-            renderRows : function () {
-                if (this.tbodyElt[0].scrollTop < this.prevScrollTop) {
-                    this.removeRows(this.prevRowRange.first - this.rowRange.first, false);
+            renderRows : function (prevScrollTop, scrollTop) {
+                if (scrollTop < prevScrollTop) {
+                    this.removeRows(prevScrollTop - scrollTop, false);
                     this.addRows(this.rowRange.first, this.prevRowRange.first, true);
                 }
                 else if (this.tbodyElt[0].scrollTop > this.prevScrollTop) {
@@ -178,14 +178,15 @@ var ATable = (function () {
              * @param {number} num number of rows to remove
              * @param {boolean} removeFromBeginning remove the rows from the beginning of the table rather than the end
              */
-            removeRows : function (num, removeFromBeginning) {
+            removeRows : function (prevScrollTop, scrollTop) {
                 var start, end;
-                if (removeFromBeginning) {
+                var numRows = Math.abs(scrollTop) / this.rowHeight;
+                if (scrollTop < prevScrollTop) {
                     start = 2;
-                    end = num + 2;
+                    end = numRows + 2;
                 }
                 else {
-                    start = this.rowsToRender - num + 2;
+                    start = this.rowsToRender - numRows + 2;
                     end = this.rowsToRender + 2;
                 }
                 for (var i = start; i < end; i++) {
@@ -241,7 +242,7 @@ var ATable = (function () {
                     lastRow = this.rowsToRender;
                 }
                 this.rowRange.last = lastRow > this.rows.length ? this.rows.length : lastRow;
-                this.renderRows();
+                this.renderRows(e.target.scrollTop - this.prevScrollTop);
             },
 
             /**
