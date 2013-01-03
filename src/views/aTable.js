@@ -107,25 +107,39 @@ var ATable = (function () {
                     }
                 }
                 else {
-                    this.renderRows();
+                    this.renderRows(this.prevScrollTop, this.tbodyElt[0].scrollTop);
                 }
                 return this;
             },
 
             /**
              * Add/remove rows from the DOM, or replace data in the current rows
+             * @param {number} prevScrollTop previous scrollTop value in pixels
+             * @param {number} scrollTop current scrollTop value in pixels
              */
             renderRows : function (prevScrollTop, scrollTop) {
+                var prevFirstRow = parseInt(prevScrollTop / this.rowHeight);
+                var firstRow = parseInt(scrollTop / this.rowHeight);
+                var sizeChange = Math.abs(scrollTop - prevScrollTop);
+                var numRows = Math.abs(prevFirstRow - firstRow);
                 if (scrollTop < prevScrollTop) {
-                    this.removeRows(prevScrollTop - scrollTop, false);
-                    this.addRows(this.rowRange.first, this.prevRowRange.first, true);
+                    this.removeRows(numRows, false);
+                    this.addRows(firstRow, prevFirstRow, sizeChange, true);
                 }
-                else if (this.tbodyElt[0].scrollTop > this.prevScrollTop) {
-                    this.removeRows(this.rowRange.last - this.prevRowRange.last, true);
-                    this.addRows(this.prevRowRange.last, this.rowRange.last, false);
+                else if (scrollTop > prevScrollTop) {
+                    this.removeRows(numRows, true);
+                    var first = prevFirstRow + numRows;
+                    var last = first + this.rowsToRender;
+                    if (first > this.rows.length) {
+                        first = last = this.rows.length;
+                    }
+                    else if (last > this.rows.length) {
+                        last = this.rows.length;
+                    }
+                    this.addRows(first, last, sizeChange, false);
                 }
                 else {
-                    this.refreshRows();
+                    this.refreshRows(firstRow);
                 }
                 this.prevScrollTop = this.tbodyElt[0].scrollTop;
             },
@@ -134,9 +148,10 @@ var ATable = (function () {
              * Append or prepend table rows to the DOM
              * @param {number} start index in the row data collection of the first row to add
              * @param {number} end index in the row data collection of the last row to add
-             * @param {boolean} prepend add rows to the beginning of the table instead of the end
+             * @param {number} sizeChange number of pixels to adjust the buffer rows by to maintain the scroll position
+             * @param {boolean} prepend add rows to the beginning of the table
              */
-            addRows : function (start, end, prepend) {
+            addRows : function (start, end, sizeChange, prepend) {
                 var firstRow = this.tbodyElt[0].firstChild;
                 var lastRow = this.tbodyElt[0].lastChild;
                 var rowToInsertBefore = firstRow.nextSibling;
@@ -158,7 +173,7 @@ var ATable = (function () {
                         this.tbodyElt[0].insertBefore(tr, lastRow);
                     }
                 }
-                var sizeChange = Math.abs(this.tbodyElt[0].scrollTop - this.prevScrollTop);
+
                 if (prepend) {
                     var bottomHeight = lastRow.style.height;
                     lastRow.style.height = Number(bottomHeight.substr(0, bottomHeight.length - 2)) + sizeChange + "px";
@@ -175,19 +190,23 @@ var ATable = (function () {
 
             /**
              * Remove table rows from the DOM
-             * @param {number} num number of rows to remove
-             * @param {boolean} removeFromBeginning remove the rows from the beginning of the table rather than the end
+             * @param {number} numRows number of rows to remove
+             * @param {boolean} removeFromBeginning remove rows from the beginning of the table
              */
-            removeRows : function (prevScrollTop, scrollTop) {
+            removeRows : function (numRows, removeFromBeginning) {
                 var start, end;
-                var numRows = Math.abs(scrollTop) / this.rowHeight;
-                if (scrollTop < prevScrollTop) {
+                var count = this.tbodyElt[0].childElementCount;
+                if (numRows >= this.rowsToRender) {
+                    numRows = this.rowsToRender;
+                }
+                if (removeFromBeginning) {
                     start = 2;
                     end = numRows + 2;
                 }
                 else {
-                    start = this.rowsToRender - numRows + 2;
-                    end = this.rowsToRender + 2;
+                    var count = this.tbodyElt[0].childElementCount;
+                    start = count - numRows;
+                    end = count;
                 }
                 for (var i = start; i < end; i++) {
                     this.tableElt[0].deleteRow(start);
@@ -196,15 +215,16 @@ var ATable = (function () {
 
             /**
              * Refresh the data in the rendered table rows with what is currently in the row data collection
+             * @param {number} firstRow index of the first row rendered
              */
-            refreshRows : function () {
+            refreshRows : function (firstRow) {
                 var rows = this.tbodyElt[0].getElementsByTagName("tr");
                 for (var i = 1; i <= rows.length; i++) {
                     var tr = rows[i];
                     var tdList = tr.getElementsByTagName("div");
                     for (var j = 0; j < tdList.length; j++) {
                         var div = tdList[j];
-                        div.innerText = Util.formatEntityField(this.rows.getValue(this.rowRange.first + i - 1, j));
+                        div.innerText = Util.formatEntityField(this.rows.getValue(firstRow + i - 1, j));
                     }
                 }
             },
@@ -214,35 +234,7 @@ var ATable = (function () {
              * @param {jQuery.Event} e jQuery scroll event
              */
             scrollTable : function (e) {
-                var firstRow, lastRow;
-                this.prevRowRange.first = this.rowRange.first;
-                this.prevRowRange.last = this.rowRange.last;
-                if (e.target.scrollTop > this.prevScrollTop) {
-                    var rowsPast = parseInt((e.target.scrollTop - this.prevScrollTop) / this.rowHeight);
-                    firstRow = this.rowRange.first + rowsPast;
-                    lastRow = this.rowRange.last + rowsPast;
-
-                }
-                else if (e.target.scrollTop < this.prevScrollTop) {
-                    var rowsPast = parseInt((this.prevScrollTop - e.target.scrollTop) / this.rowHeight);
-                    firstRow = this.rowRange.first - rowsPast;
-                    lastRow = this.rowRange.last - rowsPast;
-                }
-                else {
-                    return;
-                }
-                if (firstRow > this.rows.length - this.rowsToRender) {
-                    firstRow = this.rows.length - this.rowsToRender;
-                }
-                else if (firstRow < 0) {
-                    firstRow = 0;
-                }
-                this.rowRange.first = firstRow;
-                if (lastRow < this.rowsToRender) {
-                    lastRow = this.rowsToRender;
-                }
-                this.rowRange.last = lastRow > this.rows.length ? this.rows.length : lastRow;
-                this.renderRows(e.target.scrollTop - this.prevScrollTop);
+                this.renderRows(this.prevScrollTop, e.target.scrollTop);
             },
 
             /**
