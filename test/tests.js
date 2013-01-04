@@ -14,15 +14,13 @@ function createTable() {
 }
 
 module("Row rendering");
-asyncTest("Initial render 500 rows", 6, function () {
+asyncTest("Initial render 500 rows", 4, function () {
     var table = createTable();
     table.render(function () {
         start();
         ok(table.rowHeight > 0, "table.rowHeight should be positive");
         ok(table.visibleRows > 0, "table.visibleRows should be positive");
         equal(table.rows.length, 500, "table.rows should have 10 rows");
-        equal(table.rowRange.first, 0, "first row to render should be 0");
-        equal(table.rowRange.last, 100, "last row to render should be 100");
         var rows = table.tbodyElt.find("tr");
         equal(rows.length, 102, "DOM table should have 102 rows");
     });
@@ -45,7 +43,7 @@ asyncTest("Remove rows", 5, function () {
     });
 });
 
-asyncTest("Scroll table", 14, function () {
+asyncTest("Scroll table", 16, function () {
     var table = createTable();
     table.render(function () {
         start();
@@ -63,50 +61,34 @@ asyncTest("Scroll table", 14, function () {
         scrollAndTestContents(table, table.rowHeight * 102);
         // Scroll to the bottom
         scrollAndTestContents(table, table.rows.length * table.rowHeight);
+        // Scroll up a lot
+        scrollAndTestContents(table, 5000);
     });
 });
 
-function scrollAndTestContents(table, scrollTop){
+asyncTest("Random scroll stress test", 2000, function () {
+    var table = createTable();
+    table.render(function () {
+        start();
+        var scrollHeight = table.tbodyElt[0].scrollHeight;
+        for (var i = 1; i <= 1000; i++) {
+            var scrollTop = Math.floor(Math.random() * (scrollHeight + 1));
+            table.scrollTable({target : {scrollTop : scrollTop}});
+            scrollAndTestContents(table, scrollTop);
+        }
+    });
+});
+
+function scrollAndTestContents(table, scrollTop) {
     table.tbodyElt[0].scrollTop = scrollTop;
     table.scrollTable({target : {scrollTop : scrollTop}});
     var rows = table.tbodyElt.find("tr");
     var expectedFirstRow = parseInt(scrollTop / table.rowHeight);
     var expectedLastRow = expectedFirstRow + table.rowsToRender;
-    equal(parseInt(rows[1].cells[0].innerText), expectedFirstRow * 4, "first cell rendered should contain " + expectedFirstRow * 4);
+    if (expectedLastRow >= table.rows.length) {
+        expectedLastRow = table.rows.length - 1;
+        expectedFirstRow = expectedLastRow - table.rowsToRender;
+    }
+    equal(parseInt(rows[1].cells[0].innerText), expectedFirstRow * 4, "scrollTop = " + scrollTop + ": first cell rendered should contain " + expectedFirstRow * 4);
     equal(parseInt(rows[100].cells[0].innerText), (expectedLastRow - 1) * 4, "last row's first cell should contain " + (expectedLastRow - 1) * 4);
 }
-
-asyncTest("Random scroll stress test", 4000, function () {
-    var table = createTable();
-    table.render(function () {
-        start();
-        var scrollHeight = table.tbodyElt[0].scrollHeight;
-        var bottomThreshold = (table.tbodyElt[0].scrollHeight - table.tbodyElt[0].clientHeight) * .8;
-        var topThreshold = table.tbodyElt[0].scrollHeight * .1;
-        for (var i = 1; i <= 1000; i++) {
-            var scrollTop = Math.floor(Math.random() * (scrollHeight + 1));
-            table.scrollTable({target : {scrollTop : scrollTop}});
-            var rows = table.tbodyElt.find("tr");
-            var expectedFirstRow;
-            if(scrollTop > table.prevScrollTop && table.rowRange.first > table.prevRowRange.first){
-                var rowsPast = parseInt((scrollTop - bottomThreshold) / table.rowHeight);
-                expectedFirstRow = table.prevRowRange.first + rowsPast;
-            }
-            else if(scrollTop < topThreshold && table.rowRange.first < table.prevRowRange.first){
-                var rowsPast = parseInt((topThreshold - scrollTop) / table.rowHeight);
-                expectedFirstRow = table.prevRowRange.first - rowsPast;
-            }
-            else{
-                expectedFirstRow = table.prevRowRange.first;
-            }
-            expectedFirstRow = expectedFirstRow >= 0 ? expectedFirstRow : 0;
-            var expectedLastRow = expectedFirstRow + table.rowsToRender;
-            expectedLastRow = expectedLastRow < table.rows.length ? expectedLastRow : table.rows.length - 1;
-            if(expectedLastRow === table.rows.length) expectedFirstRow = expectedLastRow - table.rowsToRender;
-            equal(table.rowRange.first, expectedFirstRow, "first row to render should be  " + expectedFirstRow);
-            equal(table.rowRange.last, expectedLastRow, "last row to render should be " + expectedLastRow);
-            equal(parseInt(rows[0].cells[0].innerText), table.rowRange.first * 4, "first cell rendered should contain " + table.rowRange.first * 4);
-            equal(parseInt(rows[99].cells[0].innerText), (table.rowRange.last - 1) * 4, "last row's first cell should contain " + (table.rowRange.last - 1) * 4);
-        }
-    });
-});

@@ -137,7 +137,7 @@ var ATable = (function () {
                     else if (numRows > this.rowsToRender) {
                         first = prevFirstRow + numRows;
                     }
-                    if (first > prevFirstRow + this.rowsToRender) {
+                    if (first < prevFirstRow + this.rowsToRender) {
                         first = prevFirstRow + this.rowsToRender;
                     }
                     this.addRows(first, last, sizeChange, false);
