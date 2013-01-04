@@ -45,27 +45,24 @@ asyncTest("Remove rows", 5, function () {
     });
 });
 
-asyncTest("Scroll table", 12, function () {
+asyncTest("Scroll table", 14, function () {
     var table = createTable();
     table.render(function () {
         start();
         // Scroll down, but not enough to render any new rows in the table
         scrollAndTestContents(table, 4);
-
         // Scroll down enough to render new rows
         scrollAndTestContents(table, 1000);
-
         // Scroll back up some
         scrollAndTestContents(table, 900);
-
         // Scroll up more
         scrollAndTestContents(table, 100);
-
         // Scroll up to the top
         scrollAndTestContents(table, 0);
-
-        // Scroll way down
+        // Scroll down past the rowsToRender mark
         scrollAndTestContents(table, table.rowHeight * 102);
+        // Scroll to the bottom
+        scrollAndTestContents(table, table.rows.length * table.rowHeight);
     });
 });
 

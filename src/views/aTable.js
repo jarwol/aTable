@@ -128,13 +128,17 @@ var ATable = (function () {
                 }
                 else if (scrollTop > prevScrollTop) {
                     this.removeRows(numRows, true);
-                    var first = prevFirstRow + numRows;
-                    var last = first + this.rowsToRender;
-                    if (first > this.rows.length) {
-                        first = last = this.rows.length;
+                    var first = prevFirstRow + this.rowsToRender;
+                    var last = first + numRows;
+                    if (last >= this.rows.length) {
+                        last = this.rows.length - 1;
+                        first = last - this.rowsToRender;
                     }
-                    else if (last > this.rows.length) {
-                        last = this.rows.length;
+                    else if (numRows > this.rowsToRender) {
+                        first = prevFirstRow + numRows;
+                    }
+                    if (first > prevFirstRow + this.rowsToRender) {
+                        first = prevFirstRow + this.rowsToRender;
                     }
                     this.addRows(first, last, sizeChange, false);
                 }
