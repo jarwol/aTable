@@ -75,7 +75,7 @@ var ATable = (function () {
                 var params = {};
                 if (!this.rows.init) {
                     this.rows.bind("reset", this.render, this);
-                    this.rows.bind("sort", this.renderRows, this);
+                    this.rows.bind("sort", this.render, this);
                     this.dataWorker.postMessage(null);
                     return this;
                 }
@@ -208,9 +208,9 @@ var ATable = (function () {
                     end = numRows + 2;
                 }
                 else {
-                    var count = this.tbodyElt[0].childElementCount;
-                    start = count - numRows;
-                    end = count;
+                    var count = this.tbodyElt[0].childElementCount - 2;
+                    start = count + 1 - numRows;
+                    end = count + 1;
                 }
                 for (var i = start; i < end; i++) {
                     this.tableElt[0].deleteRow(start);
@@ -223,7 +223,7 @@ var ATable = (function () {
              */
             refreshRows : function (firstRow) {
                 var rows = this.tbodyElt[0].getElementsByTagName("tr");
-                for (var i = 1; i <= rows.length; i++) {
+                for (var i = 1; i < rows.length - 1; i++) {
                     var tr = rows[i];
                     var tdList = tr.getElementsByTagName("div");
                     for (var j = 0; j < tdList.length; j++) {
@@ -587,9 +587,19 @@ var ATable = (function () {
                 if (!this.rows.init) {
                     this.rows.init = true;
                 }
-                this.rows.reset(data.map(function (row) {
-                    return {row : row};
-                }));
+                var comp = this.rows.comparator;
+                this.rows.__proto__.comparator = null;
+                var rows = [];
+                for (var i = 0; i < data.length; i++) {
+                    this.rows.add({row : data[i]}, {silent : true});
+                }
+                this.rows.trigger("reset");
+                /*
+                 this.rows.reset(data.map(function (row) {
+                 return {row : row};
+                 }));*/
+                this.rows.__proto__.comparator = comp;
+                //this.rows.reset(rows);
             },
 
             close : function () {
