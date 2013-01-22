@@ -8,8 +8,7 @@ $(document).ready(function () {
             {name : "Column 4"}
         ],
         el : "#content",
-        height : 600,
-        rowsToRender : 40
+        height : 600
     });
     table.render();
 });
