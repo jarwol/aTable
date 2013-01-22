@@ -107,24 +107,27 @@ var ATable = (function () {
             var numRows = Math.abs(this.rowRange.prevFirst - this.rowRange.first);
             if (scrollTop < prevScrollTop) {
                 this.removeRows(numRows, false);
-                
-                this.addRows(this.rowRange.first, this.rowRange.prevFirst, sizeChange, true);
+                var first = this.rowRange.first;
+                var last = this.rowRange.prevFirst;
+                if (this.rowRange.last <= this.rowRange.prevFirst) {
+                    first = this.rowRange.first;
+                    last = this.rowRange.last;
+                }
+                this.addRows(first, last, sizeChange, true);
             }
             else if (scrollTop > prevScrollTop) {
                 this.removeRows(numRows, true);
                 var first = this.rowRange.prevLast;
-                var last = first + numRows;
-                
+                var last = this.rowRange.last;
+
                 if (this.rowRange.first >= this.rowRange.prevLast) {
-                    first = rhis.rowRange.first;
-                }
-                if (first < prevFirstRow + this.rowsToRender) {
-                    first = prevFirstRow + this.rowsToRender;
+                    first = this.rowRange.first;
+                    last = this.rowRange.last;
                 }
                 this.addRows(first, last, sizeChange, false);
             }
             else {
-                this.refreshRows(firstRow);
+                this.refreshRows(this.rowRange.first);
             }
             this.prevScrollTop = this.tbodyElt[0].scrollTop;
         },
@@ -214,15 +217,15 @@ var ATable = (function () {
         },
 
         /**
-         * Track the rows that are visible in the table, and render/remove rows as the table is scrolled
+         * Determine the rows that should be rendered in the DOM based on the scroll position
          * @param {jQuery.Event} e jQuery scroll event
          */
         scrollTable : function (e) {
             var firstRow = parseInt(e.target.scrollTop / this.rowHeight) - BUFFER_ROWS;
             this.rowRange.prevFirst = this.rowRange.first;
             this.rowRange.prevLast = this.rowRange.last;
-            this.rowRange.first = firstRow;
             if (firstRow < 0) firstRow = 0;
+            this.rowRange.first = firstRow;
             this.rowRange.last = firstRow + this.visibleRows + BUFFER_ROWS;
             if (this.rowRange.last > this.rows.length) {
                 this.rowRange.last = this.rows.length;

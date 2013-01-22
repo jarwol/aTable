@@ -12,16 +12,18 @@ function createTable(dataFunc, cols) {
     });
 }
 
+var BUFFER_ROWS = 5;
+
 module("Row rendering");
-asyncTest("Initial render 500 rows", 4, function () {
+asyncTest("Initial render 100 rows", 4, function () {
     var table = createTable('fetchData100Rows1Col', 1);
     table.render(function () {
         start();
         ok(table.rowHeight > 0, "table.rowHeight should be positive");
         ok(table.visibleRows > 0, "table.visibleRows should be positive");
-        equal(table.rows.length, 100, "table.rows should have 10 rows");
+        equal(table.rows.length, 100, "table.rows should have 100 rows");
         var rows = table.tbodyElt.find("tr");
-        equal(rows.length, 102, "DOM table should have 102 rows");
+        equal(rows.length, table.visibleRows + BUFFER_ROWS + 2, "DOM table should have " + (table.visibleRows + BUFFER_ROWS + 2) + " rows");
     });
 });
 
@@ -30,15 +32,16 @@ asyncTest("Remove rows", 5, function () {
     table.render(function () {
         start();
         var rows = table.tbodyElt.find("tr");
-        equal(rows.length, 102, "DOM table should have 102 rows");
+        equal(rows.length, table.visibleRows + BUFFER_ROWS + 2, "DOM table should have " + (table.visibleRows + BUFFER_ROWS + 2) + " rows");
         table.removeRows(2, true);
         rows = table.tbodyElt.find("tr");
-        equal(rows.length, 100, "DOM table should have 100 rows");
+        equal(rows.length, table.visibleRows + BUFFER_ROWS, "DOM table should have " + (table.visibleRows + BUFFER_ROWS) + " rows");
         equal(parseInt(rows[1].cells[0].innerText), 2, "first cell rendered should contain 2");
         table.removeRows(2, false);
         rows = table.tbodyElt.find("tr");
-        equal(rows.length, 98, "DOM table should have 98 rows");
-        equal(parseInt(rows[96].cells[0].innerText), 97, "last cell rendered should contain 97");
+        equal(rows.length, table.visibleRows + BUFFER_ROWS - 2, "DOM table should have " + (table.visibleRows + BUFFER_ROWS - 2) + " rows");
+        var expectedLastVal = rows.length - 1;
+        equal(parseInt(rows[table.visibleRows + BUFFER_ROWS - 4].cells[0].innerText), expectedLastVal, "last cell rendered should contain " + expectedLastVal);
     });
 });
 
@@ -84,13 +87,12 @@ function scrollAndTestContents(table, scrollTop) {
     table.scrollTable({target : {scrollTop : scrollTop}});
     var rows = table.tbodyElt.find("tr");
     var expectedFirstRow = parseInt(scrollTop / table.rowHeight);
-    var expectedLastRow = expectedFirstRow + table.rowsToRender;
-    if (expectedFirstRow >= table.rows.length) {
-        expectedFirstRow = table.rows.length - 1;
-    }
+    var expectedLastRow = expectedFirstRow + table.visibleRows + BUFFER_ROWS;
     if (expectedLastRow > table.rows.length) {
         expectedLastRow = table.rows.length;
+        expectedFirstRow = expectedLastRow - table.visibleRows - BUFFER_ROWS;
+        if (expectedFirstRow < 0) expectedFirstRow = 0;
     }
     equal(parseInt(rows[1].cells[0].innerText), expectedFirstRow * cols, "scrollTop = " + scrollTop + ": first cell rendered should contain " + expectedFirstRow * cols);
-    equal(parseInt(rows[100].cells[0].innerText), (expectedLastRow - 1) * cols, "last row's first cell should contain " + (expectedLastRow - 1) * cols);
+    equal(parseInt(rows[rows.length - 2].cells[0].innerText), (expectedLastRow - 1) * cols, "last row's first cell should contain " + (expectedLastRow - 1) * cols);
 }
