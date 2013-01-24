@@ -86,7 +86,8 @@ function scrollAndTestContents(table, scrollTop) {
     table.tbodyElt[0].scrollTop = scrollTop;
     table.scrollTable({target : {scrollTop : scrollTop}});
     var rows = table.tbodyElt.find("tr");
-    var expectedFirstRow = parseInt(scrollTop / table.rowHeight);
+    var expectedFirstRow = parseInt(scrollTop / table.rowHeight) - BUFFER_ROWS;
+    if (expectedFirstRow < 0) expectedFirstRow = 0;
     var expectedLastRow = expectedFirstRow + table.visibleRows + BUFFER_ROWS;
     if (expectedLastRow > table.rows.length) {
         expectedLastRow = table.rows.length;

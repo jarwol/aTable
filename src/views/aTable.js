@@ -104,19 +104,17 @@ var ATable = (function () {
          */
         renderRows : function (prevScrollTop, scrollTop) {
             var sizeChange = Math.abs(scrollTop - prevScrollTop);
-            var numRows = Math.abs(this.rowRange.prevFirst - this.rowRange.first);
             if (scrollTop < prevScrollTop) {
-                this.removeRows(numRows, false);
                 var first = this.rowRange.first;
                 var last = this.rowRange.prevFirst;
                 if (this.rowRange.last <= this.rowRange.prevFirst) {
                     first = this.rowRange.first;
                     last = this.rowRange.last;
                 }
+                this.removeRows(last - first, false);
                 this.addRows(first, last, sizeChange, true);
             }
             else if (scrollTop > prevScrollTop) {
-                this.removeRows(numRows, true);
                 var first = this.rowRange.prevLast;
                 var last = this.rowRange.last;
 
@@ -124,6 +122,7 @@ var ATable = (function () {
                     first = this.rowRange.first;
                     last = this.rowRange.last;
                 }
+                this.removeRows(last - first, true);
                 this.addRows(first, last, sizeChange, false);
             }
             else {
