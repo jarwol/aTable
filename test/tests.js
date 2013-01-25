@@ -45,30 +45,30 @@ asyncTest("Remove rows", 5, function () {
     });
 });
 
-asyncTest("Scroll table", 16, function () {
+asyncTest("Scroll table", 32, function () {
     var table = createTable('fetchData100Rows1Col', 1);
     table.render(function () {
         start();
         // Scroll down, but not enough to render any new rows in the table
         scrollAndTestContents(table, 4);
         // Scroll down enough to render new rows
-        scrollAndTestContents(table, 1000);
+        scrollAndTestContents(table, 300);
         // Scroll back up some
-        scrollAndTestContents(table, 900);
+        scrollAndTestContents(table, 200);
         // Scroll up more
         scrollAndTestContents(table, 100);
         // Scroll up to the top
         scrollAndTestContents(table, 0);
-        // Scroll down past the rowsToRender mark
-        scrollAndTestContents(table, table.rowHeight * 102);
+        // Scroll down past the visibleRows + BUFFER_ROWS mark
+        scrollAndTestContents(table, table.rowHeight * (table.visibleRows + BUFFER_ROWS));
         // Scroll to the bottom
         scrollAndTestContents(table, table.rows.length * table.rowHeight);
         // Scroll up a lot
-        scrollAndTestContents(table, 5000);
+        scrollAndTestContents(table, 100);
     });
 });
 
-asyncTest("Random scroll stress test", 2000, function () {
+asyncTest("Random scroll stress test", 4000, function () {
     var table = createTable('fetchData100Rows1Col', 1);
     table.render(function () {
         start();
@@ -96,4 +96,6 @@ function scrollAndTestContents(table, scrollTop) {
     }
     equal(parseInt(rows[1].cells[0].innerText), expectedFirstRow * cols, "scrollTop = " + scrollTop + ": first cell rendered should contain " + expectedFirstRow * cols);
     equal(parseInt(rows[rows.length - 2].cells[0].innerText), (expectedLastRow - 1) * cols, "last row's first cell should contain " + (expectedLastRow - 1) * cols);
+    equal(table.rowRange.first * table.rowHeight, rows[0].clientHeight, "height of top buffer row should equal " + table.rowRange.first * table.rowHeight);
+    equal((table.rows.length - table.rowRange.last) * table.rowHeight, rows[rows.length - 1].clientHeight, "height of bottom buffer row should equal " + (table.rows.length - table.rowRange.last) * table.rowHeight);
 }

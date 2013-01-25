@@ -79,7 +79,7 @@ var ATable = (function () {
                 this.tbodyElt[0].scrollTop = this.prevScrollTop;
                 this.tbodyElt.scroll(this.scrollTable);
                 var bufferRow = document.createElement("tr");
-                bufferRow.style.height = this.rowHeight * (this.rows.length - this.rowsToRender) + "px";
+                bufferRow.style.height = this.rowHeight * (this.rows.length - this.visibleRows - BUFFER_ROWS) + "px";
                 this.tbodyElt[0].appendChild(bufferRow);
                 var cols = this.tableElt.find("th");
                 for (var i = 0; i < cols.length; i++) {
@@ -103,7 +103,6 @@ var ATable = (function () {
          * @param {number} scrollTop current scrollTop value in pixels
          */
         renderRows : function (prevScrollTop, scrollTop) {
-            var sizeChange = Math.abs(scrollTop - prevScrollTop);
             if (scrollTop < prevScrollTop) {
                 var first = this.rowRange.first;
                 var last = this.rowRange.prevFirst;
@@ -112,7 +111,7 @@ var ATable = (function () {
                     last = this.rowRange.last;
                 }
                 this.removeRows(last - first, false);
-                this.addRows(first, last, sizeChange, true);
+                this.addRows(first, last, true);
             }
             else if (scrollTop > prevScrollTop) {
                 var first = this.rowRange.prevLast;
@@ -123,7 +122,7 @@ var ATable = (function () {
                     last = this.rowRange.last;
                 }
                 this.removeRows(last - first, true);
-                this.addRows(first, last, sizeChange, false);
+                this.addRows(first, last, false);
             }
             else {
                 this.refreshRows(this.rowRange.first);
@@ -135,13 +134,13 @@ var ATable = (function () {
          * Append or prepend table rows to the DOM
          * @param {number} start index in the row data collection of the first row to add
          * @param {number} end index in the row data collection of the last row to add
-         * @param {number} sizeChange number of pixels to adjust the buffer rows by to maintain the scroll position
          * @param {boolean} prepend add rows to the beginning of the table
          */
-        addRows : function (start, end, sizeChange, prepend) {
+        addRows : function (start, end, prepend) {
             var firstRow = this.tbodyElt[0].firstChild;
             var lastRow = this.tbodyElt[0].lastChild;
             var rowToInsertBefore = firstRow.nextSibling;
+            var sizeChange = Math.abs(end - start) * this.rowHeight;
             for (var i = start; i < end; i++) {
                 var tr = document.createElement("tr");
                 for (var j = 0; j < this.columns.length; j++) {
@@ -160,18 +159,19 @@ var ATable = (function () {
                     this.tbodyElt[0].insertBefore(tr, lastRow);
                 }
             }
-
-            if (prepend) {
-                var bottomHeight = lastRow.style.height;
-                lastRow.style.height = Number(bottomHeight.substr(0, bottomHeight.length - 2)) + sizeChange + "px";
-                var topHeight = firstRow.style.height;
-                firstRow.style.height = Number(topHeight.substr(0, topHeight.length - 2)) - sizeChange + "px";
-            }
-            else {
-                var bottomHeight = lastRow.style.height;
-                lastRow.style.height = Number(bottomHeight.substr(0, bottomHeight.length - 2)) - sizeChange + "px";
-                var topHeight = firstRow.style.height;
-                firstRow.style.height = Number(topHeight.substr(0, topHeight.length - 2)) + sizeChange + "px";
+            if (sizeChange > 0) {
+                if (prepend) {
+                    var bottomHeight = lastRow.style.height;
+                    lastRow.style.height = Number(bottomHeight.substr(0, bottomHeight.length - 2)) + sizeChange + "px";
+                    var topHeight = firstRow.style.height;
+                    firstRow.style.height = Number(topHeight.substr(0, topHeight.length - 2)) - sizeChange + "px";
+                }
+                else {
+                    var bottomHeight = lastRow.style.height;
+                    lastRow.style.height = Number(bottomHeight.substr(0, bottomHeight.length - 2)) - sizeChange + "px";
+                    var topHeight = firstRow.style.height;
+                    firstRow.style.height = Number(topHeight.substr(0, topHeight.length - 2)) + sizeChange + "px";
+                }
             }
         },
 
@@ -182,8 +182,8 @@ var ATable = (function () {
          */
         removeRows : function (numRows, removeFromBeginning) {
             var start, end;
-            if (numRows >= this.rowsToRender) {
-                numRows = this.rowsToRender;
+            if (numRows > this.visibleRows + BUFFER_ROWS * 2) {
+                numRows = this.visibleRows + BUFFER_ROWS * 2;
             }
             if (removeFromBeginning) {
                 start = 2;
