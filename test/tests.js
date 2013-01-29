@@ -60,7 +60,7 @@ asyncTest("Scroll table", 32, function () {
         // Scroll up to the top
         scrollAndTestContents(table, 0);
         // Scroll down past the visibleRows + BUFFER_ROWS mark
-        scrollAndTestContents(table, table.rowHeight * (table.visibleRows + BUFFER_ROWS));
+        scrollAndTestContents(table, table.rowHeight * (table.visibleRows + BUFFER_ROWS) + 50);
         // Scroll to the bottom
         scrollAndTestContents(table, table.rows.length * table.rowHeight);
         // Scroll up a lot
