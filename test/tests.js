@@ -81,6 +81,19 @@ asyncTest("Random scroll stress test", 4000, function () {
     });
 });
 
+asyncTest("Random scroll stress test - big table", 4000, function () {
+    var table = createTable('fetchData100000Rows1Col', 1);
+    table.render(function () {
+        start();
+        var scrollHeight = table.tbodyElt[0].scrollHeight;
+        for (var i = 1; i <= 1000; i++) {
+            var scrollTop = Math.floor(Math.random() * (scrollHeight + 1));
+            table.scrollTable({target : {scrollTop : scrollTop}});
+            scrollAndTestContents(table, scrollTop);
+        }
+    });
+});
+
 function scrollAndTestContents(table, scrollTop) {
     var cols = table.columns.length;
     table.tbodyElt[0].scrollTop = scrollTop;

@@ -15,11 +15,11 @@
     <script type="text/javascript" src="../src/util.js"></script>
     <script type="text/javascript" src="../src/views/aTable.js"></script>
     <script type="text/javascript" src="tests.js"></script>
-    <script type="text/javascript" id="fetchData500Rows4Cols">
+    <script type="text/javascript" id="fetchData100000Rows1Col">
         function fetchData(params) {
             var rows = [];
-            for (var i = 0; i < 2000; i += 4) {
-                rows.push([i, i + 1, i + 2, i + 3]);
+            for (var i = 0; i < 100000; i ++) {
+                rows.push([i]);
             }
             return rows;
         }
