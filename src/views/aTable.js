@@ -39,6 +39,7 @@ var ATable = (function () {
             this.dataWorker = createDataWorker(options.fetchData, this.receivedData);
             this.height = options.height;
             this.prevScrollTop = 0;
+            this.scrollbarWidth = getScrollbarWidth();
         },
 
         events : {
@@ -370,14 +371,13 @@ var ATable = (function () {
          * Explicitly set the width of the table based on the sum of the column widths
          */
         sizeTable : function () {
-            var cols = this.$el.find("tbody>tr:first td");
+            var cols = this.tableElt.find("th");
             var newWidth = 1;
             for (var i = 0; i < cols.length; i++) {
                 newWidth += $(cols[i])[0].offsetWidth;
             }
-            var minWidth = this.parentElt.width();
-            if (newWidth < minWidth) newWidth = minWidth;
             this.tableElt.width(newWidth);
+            this.parentElt.width(newWidth);
         },
 
         /**
@@ -412,7 +412,7 @@ var ATable = (function () {
                 var width = target.width() - diff + Number(leftPad.substring(0, leftPad.length - 2))
                     + Number(rightPad.substring(0, rightPad.length - 2)) - 5;
                 var gray = $("#grayout");
-                gray.css("display", "block").css("left", left).css("top", posCol.top - 1).css("height", height + 1)
+                gray.css("display", "block").css("left", left).css("top", posCol.top - 1).css("height", height)
                     .css("width", width).attr('title', target[0].cellIndex);
                 // Firefox doesn't provide mouse coordinates in the 'drag' event, so we must use a document-level
                 // 'dragover' as a workaround
@@ -546,32 +546,21 @@ var ATable = (function () {
             var frag = document.createDocumentFragment();
             var parent = document.createElement("div");
             parent.className = "atableParent";
-            var titleBar = document.createElement("div");
-            titleBar.className = "atableTitleBar";
-            if (params.title) {
-                var title = document.createElement("span");
-                title.className = "atableTitle";
-                titleBar.appendChild(title);
-            }
-            parent.appendChild(titleBar);
-            var container = document.createElement("div");
-            container.className = "atableContainer";
-            parent.appendChild(container);
             var table = document.createElement("table");
             table.className = "atable";
-            container.appendChild(table);
+            parent.appendChild(table);
             var thead = document.createElement("thead");
             table.appendChild(thead);
             var tbody = document.createElement("tbody");
             tbody.style.height = this.height + "px";
             table.appendChild(tbody);
-            var bottomBar = document.createElement("div");
-            bottomBar.className = "atableBottomBar";
-            parent.appendChild(bottomBar);
             var grayout = document.createElement("div");
             grayout.id = "grayout";
             frag.appendChild(parent);
             frag.appendChild(grayout);
+            if (this.parentElt) {
+                this.el.removeChild(this.parentElt[0]);
+            }
             this.el.appendChild(frag);
 
             this.tableElt = $(table);
@@ -601,7 +590,11 @@ var ATable = (function () {
             for (var i = this.rowRange.first; i < params.rows.length && i < this.rowRange.last; i++) {
                 body += '<tr>';
                 for (var j = 0; j < params.rows[i].row.length; j++) {
-                    body += '<td><div style="width: ' + (params.columns[j].width + SORT_ARROW_WIDTH) + 'px;">' + params.rows[i].row[j] + '</div></td>';
+                    var width = params.columns[j].width + SORT_ARROW_WIDTH;
+                    if (j == params.rows[i].row.length - 1) {
+                        width -= this.scrollbarWidth;
+                    }
+                    body += '<td><div style="width: ' + width + 'px;">' + params.rows[i].row[j] + '</div></td>';
                 }
                 body += '</tr>';
             }
@@ -713,6 +706,19 @@ var ATable = (function () {
             }
             tableElt.find('th:nth-child(' + (rows.sortColumn + 1) + ')').append(arrow);
         }
+    }
+
+    /**
+     * Get the width of the scrollbar
+     * @return {Number} width in pixels
+     */
+    function getScrollbarWidth() {
+        var scrollDiv = document.createElement("div");
+        scrollDiv.className = "atable-scrollbar-measure";
+        document.body.appendChild(scrollDiv);
+        var scrollbarWidth = scrollDiv.offsetWidth - scrollDiv.clientWidth;
+        document.body.removeChild(scrollDiv);
+        return scrollbarWidth;
     }
 
     return ATable;

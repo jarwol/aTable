@@ -1,13 +1,6 @@
 .atableParent {
     border: solid thin silver;
-}
-
-.atableContainer {
-    overflow-y: hidden;
-    overflow-x: auto;
-    position: relative;
-    border-top: solid 1px silver;
-    border-bottom: solid 1px silver;
+    border-right: none;
 }
 
 .atableTitleBar, .atableBottomBar {
@@ -100,4 +93,12 @@
     position: absolute;
     background: gray;
     opacity: .5;
+}
+
+.atable-scrollbar-measure {
+    width: 100px;
+    height: 100px;
+    overflow: scroll;
+    position: absolute;
+    top: -9999px;
 }
