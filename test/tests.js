@@ -7,8 +7,7 @@ function createTable(dataFunc, cols) {
         fetchData : dataFunc,
         columns : columns,
         el : "#qunit-fixture",
-        height : 300,
-        rowsToRender : 100
+        height : 300
     });
 }
 
@@ -24,6 +23,32 @@ asyncTest("Initial render 100 rows", 4, function () {
         equal(table.rows.length, 100, "table.rows should have 100 rows");
         var rows = table.tbodyElt.find("tr");
         equal(rows.length, table.visibleRows + BUFFER_ROWS + 2, "DOM table should have " + (table.visibleRows + BUFFER_ROWS + 2) + " rows");
+    });
+});
+
+asyncTest("Initial render 10 rows", 4, function () {
+    var table = createTable('fetchData10Rows1Col', 1);
+    table.render(function () {
+        start();
+        ok(table.rowHeight > 0, "table.rowHeight should be positive");
+        ok(table.visibleRows > 0, "table.visibleRows should be positive");
+        equal(table.rows.length, 10, "table.rows should have 10 rows");
+        var rows = table.tbodyElt.find("tr");
+        var expectedRows = table.visibleRows + BUFFER_ROWS + 2;
+        if (expectedRows > 12) expectedRows = 12;
+        equal(rows.length, expectedRows, "DOM table should have " + expectedRows + " rows");
+    });
+});
+
+asyncTest("Initial render 0 rows", 4, function () {
+    var table = createTable('fetchData0Rows', 1);
+    table.render(function () {
+        start();
+        ok(table.rowHeight > 0, "table.rowHeight should be positive");
+        ok(table.visibleRows > 0, "table.visibleRows should be positive");
+        equal(table.rows.length, 0, "table.rows should have 0 rows");
+        var rows = table.tbodyElt.find("tr");
+        equal(rows.length, 2, "DOM table should have 2 rows");
     });
 });
 
