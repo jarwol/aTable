@@ -469,8 +469,9 @@ var ATable = (function () {
                 width = width < grayWidth ? grayWidth : width;
                 gray.css("display", "none");
                 col.set({width : width});
-                col.get('element').width(width);
+                col.get('element')[0].style.width = width + "px";
                 this.tableElt.find('td:nth-child(' + (colIndex + 1) + ') div').width(width);
+                //resizeColumn(this.tbodyElt[0], colIndex, width + "px");
                 this.sizeTable();
             }
         },
@@ -719,6 +720,12 @@ var ATable = (function () {
         var scrollbarWidth = scrollDiv.offsetWidth - scrollDiv.clientWidth;
         document.body.removeChild(scrollDiv);
         return scrollbarWidth;
+    }
+
+    function resizeColumn(tbodyElt, colIdx, width) {
+        for (var i = 1; i < tbodyElt.childNodes.length - 1; i++) {
+            tbodyElt.childNodes[i].cells[colIdx].style.width = width;
+        }
     }
 
     return ATable;

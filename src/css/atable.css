@@ -73,6 +73,10 @@
     border-left: none;
 }
 
+.atable td:last-child {
+    border-right: none;
+}
+
 .atable tr:last-child td {
     border-bottom: none;
 }
