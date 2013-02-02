@@ -146,7 +146,12 @@ var ATable = (function () {
                 var tr = document.createElement("tr");
                 for (var j = 0; j < this.columns.length; j++) {
                     var div = document.createElement("div");
-                    div.style.width = this.columns.at(j).get('element')[0].style.width;
+                    var width = this.columns.at(j).get('element')[0].style.width;
+                    width = width.substr(0, width.length - 2);
+                    if (j == this.columns.length - 1) {
+                        width -= this.scrollbarWidth;
+                    }
+                    div.style.width = width + "px";
                     var text = document.createTextNode(this.rows.getValue(i, j));
                     var td = document.createElement("td");
                     div.appendChild(text);

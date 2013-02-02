@@ -78,7 +78,6 @@ var RowCollection = Backbone.Collection.extend({
                 Util.swap(this.columnOrder, i, i - 1);
             }
         }
-
     },
 
     /**
