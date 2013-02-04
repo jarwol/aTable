@@ -73,7 +73,7 @@ var ATable = (function () {
             else if (this.reRenderTable) {
                 this.reRenderTable = false;
                 params.columns = this.columns.toJSON();
-                params.rows = getRowData(this.rows, this.maxRows);
+                params.rows = getRowData(this.rows);
                 params.title = this.title;
                 this.generateTableHtml(params);
                 // Set up on-demand row rendering variables
@@ -303,11 +303,11 @@ var ATable = (function () {
             var column = this.columns.getByName(this.columnTarget);
             if (!this.columns.getByName(col) && this.availableColumnsHash[col]) {
                 // Increase the ordering of columns after insert
-                var rank = column.get("rank");
-                for (var i = rank; i < this.columns.length; i++) {
+                var order = column.get("order");
+                for (var i = order; i < this.columns.length; i++) {
                     var val = this.columns.at(i);
                     val.set({
-                        rank : val.get("rank") + 1
+                        order : val.get("order") + 1
                     }, {
                         silent : true
                     });
@@ -317,7 +317,7 @@ var ATable = (function () {
                     columnName : col,
                     entityField : col,
                     blotterName : this.blotterType,
-                    rank : rank,
+                    order : order,
                     width : textWidth
                 });
                 this.columns.save(this.admin);
@@ -328,13 +328,12 @@ var ATable = (function () {
             var col = this.columns.getByName(name);
             col.destroy();
             // Decrease the ordering of columns after delete
-            for (var i = col.get('rank'); i < this.columns.length; i++) {
+            for (var i = col.get('order'); i < this.columns.length; i++) {
                 var val = this.columns.at(i);
                 val.set({
-                    rank : val.get("rank") - 1
+                    order : val.get("order") - 1
                 });
             }
-            this.columns.save(this.admin);
         },
 
         renameColumn : function (newName, field) {
@@ -473,10 +472,10 @@ var ATable = (function () {
                 }
                 width = width < grayWidth ? grayWidth : width;
                 gray.css("display", "none");
-                col.set({width : width});
                 col.get('element')[0].style.width = width + "px";
-                this.tableElt.find('td:nth-child(' + (colIndex + 1) + ') div').width(width);
-                //resizeColumn(this.tbodyElt[0], colIndex, width + "px");
+                //col.get('element').width(width);
+                //this.tableElt.find('td:nth-child(' + (colIndex + 1) + ') div').width(width);
+                resizeColumn(this.tbodyElt[0], colIndex, width);
                 this.sizeTable();
             }
         },
@@ -729,7 +728,7 @@ var ATable = (function () {
 
     function resizeColumn(tbodyElt, colIdx, width) {
         for (var i = 1; i < tbodyElt.childNodes.length - 1; i++) {
-            tbodyElt.childNodes[i].cells[colIdx].style.width = width;
+            tbodyElt.childNodes[i].cells[colIdx].firstChild.style.width = width + "px";
         }
     }
 
