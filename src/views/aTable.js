@@ -473,6 +473,7 @@ var ATable = (function () {
                 width = width < grayWidth ? grayWidth : width;
                 gray.css("display", "none");
                 col.get('element')[0].style.width = width + "px";
+                col.set('width', width);
                 //col.get('element').width(width);
                 //this.tableElt.find('td:nth-child(' + (colIndex + 1) + ') div').width(width);
                 resizeColumn(this.tbodyElt[0], colIndex, width);
