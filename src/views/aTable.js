@@ -48,10 +48,10 @@ var ATable = (function () {
             "mouseleave th" : "mouseLeaveColumn",
             "dragstart th" : "startDragColumn",
             "dragend" : "endDragColumn",
-            "dragenter th" : "dragEnterColumn",
-            "dragover th" : "dragOverColumn",
-            "dragleave th" : "dragLeaveColumn",
-            "drop th" : "dropColumn"
+            "dragenter th div" : "dragEnterColumn",
+            "dragover th div" : "dragOverColumn",
+            "dragleave th div" : "dragLeaveColumn",
+            "drop th div" : "dropColumn"
         },
 
         /**
@@ -87,7 +87,9 @@ var ATable = (function () {
                     this.columns.at(i).set('element', $(cols[i]));
                 }
                 this.sizeTable();
-                displaySortArrow(this.rows, this.tableElt);
+                if (typeof this.rows.sortColumn === "number") {
+                    displaySortArrow(this.columns.at(this.rows.sortColumn).get('element')[0], this.rows.sortDescending);
+                }
                 if (typeof this.renderCallback === 'function') {
                     this.renderCallback();
                 }
@@ -149,7 +151,7 @@ var ATable = (function () {
                     var width = this.columns.at(j).get('element')[0].style.width;
                     width = width.substr(0, width.length - 2);
                     if (j == this.columns.length - 1) {
-                        width -= this.scrollbarWidth;
+                        width -= (this.scrollbarWidth - 1);
                     }
                     div.style.width = width + "px";
                     var text = document.createTextNode(this.rows.getValue(i, j));
@@ -216,7 +218,7 @@ var ATable = (function () {
                 var tdList = tr.getElementsByTagName("div");
                 for (var j = 0; j < tdList.length; j++) {
                     var div = tdList[j];
-                    div.innerText = Util.formatEntityField(this.rows.getValue(firstRow + i - 1, j));
+                    div.innerHTML = Util.formatEntityField(this.rows.getValue(firstRow + i - 1, j));
                 }
             }
         },
@@ -268,15 +270,40 @@ var ATable = (function () {
         },
 
         /**
+         * Sort the table rows by the specified column and order
+         * @param {int} columnIndex index of the column to sort on
+         * @param {boolean} [descending] sort in descending order
+         */
+        sort : function (columnIndex, descending) {
+            if (columnIndex < 0 || columnIndex > this.columns.length) {
+                throw "Invalid column index: " + columnIndex;
+            }
+            this.tableElt.find(".sortArrow").remove();
+            this.rows.setSortColumn(columnIndex);
+            if (typeof descending === "boolean") {
+                this.rows.sortDescending = descending;
+            }
+            displaySortArrow(this.columns.at(columnIndex).get('element')[0], this.rows.sortDescending);
+            this.rows.sort();
+        },
+
+        /**
          * Sort the row collection when a column header is clicked
          * @param {Event} e jQuery click event object
          */
         sortTable : function (e) {
             if (!this.mouseInResizePosition(e)) {
-                this.tableElt.find(".sortArrow").remove();
-                this.rows.setSortColumn(e.target.cellIndex);
-                displaySortArrow(this.rows, this.tableElt);
-                this.rows.sort();
+                if (e.target.tagName === "DIV") {
+                    if (e.target.className === "sortArrow") {
+                        this.sort(e.target.parentElement.parentElement.cellIndex);
+                    }
+                    else {
+                        this.sort(e.target.parentElement.cellIndex);
+                    }
+                }
+                else {
+                    this.sort(e.target.cellIndex);
+                }
             }
         },
 
@@ -340,21 +367,46 @@ var ATable = (function () {
             this.columns.renameColumn(field, newName);
         },
 
+        /**
+         * Move a column to a different position, shifting all columns in between
+         * @param {int} srcColumnIdx index of the column to be moved
+         * @param {int} destColumnIdx destination index of the column
+         */
+        moveColumn : function (srcColumnIdx, destColumnIdx) {
+            this.reRenderTable = true;
+            this.prevScrollTop = this.tbodyElt[0].scrollTop;
+            this.rows.moveColumn(srcColumnIdx, destColumnIdx);
+            this.columns.moveColumn(srcColumnIdx, destColumnIdx);
+        },
+
+        /**
+         * Resize a column
+         * @param {int} columnIndex index of the column to resize
+         * @param {number} newWidth new column size in pixels
+         */
+        resizeColumn : function (columnIndex, newWidth) {
+            var col = this.columns.at(columnIndex);
+            if (!col) {
+                throw "Invalid column index: " + columnIndex;
+            }
+            col.get('element')[0].style.width = newWidth + "px";
+            col.set('width', newWidth);
+            this.reRenderTable = true;
+            this.render();
+        },
+
         mouseMoveColumn : function (event) {
             if (this.mouseInResizePosition(event)) {
                 if ($(event.target).css("cursor") !== "e-resize") {
                     $(event.target).css("cursor", "e-resize");
-                    $(event.target).css("opacity", 1);
                 }
             }
             else {
-                $(event.target).css("opacity", .8);
                 $(event.target).css("cursor", "pointer");
             }
         },
 
         mouseLeaveColumn : function (event) {
-            $(event.target).css("opacity", 1);
         },
 
         mouseInResizePosition : function (event) {
@@ -379,6 +431,9 @@ var ATable = (function () {
             var newWidth = 1;
             for (var i = 0; i < cols.length; i++) {
                 newWidth += $(cols[i])[0].offsetWidth;
+            }
+            if ($.browser.mozilla) { // TODO - figure out a less hacky way size the table elements correctly
+                newWidth--;
             }
             this.tableElt.width(newWidth);
             this.parentElt.width(newWidth);
@@ -472,12 +527,7 @@ var ATable = (function () {
                 }
                 width = width < grayWidth ? grayWidth : width;
                 gray.css("display", "none");
-                col.get('element')[0].style.width = width + "px";
-                col.set('width', width);
-                //col.get('element').width(width);
-                //this.tableElt.find('td:nth-child(' + (colIndex + 1) + ') div').width(width);
-                resizeColumn(this.tbodyElt[0], colIndex, width);
-                this.sizeTable();
+                this.resizeColumn(colIndex, width);
             }
         },
 
@@ -486,7 +536,8 @@ var ATable = (function () {
          * @param {Event} e jQuery dragenter event
          */
         dragEnterColumn : function (e) {
-            if ($("#grayout").css("display") === "none") {
+            var colNum = e.originalEvent.dataTransfer.getData("text");
+            if ($("#grayout").css("display") === "none" && e.target.parentElement.cellIndex != colNum) {
                 e.target.classList.add("over");
             }
         },
@@ -513,14 +564,18 @@ var ATable = (function () {
             if (e.preventDefault) {
                 e.preventDefault();
             }
-            e.target.classList.remove("over");
+
             if ($("#grayout").css("display") === "none") {
                 var srcCol = Number(e.originalEvent.dataTransfer.getData("text"));
-                var destCol = e.target.cellIndex;
-                this.reRenderTable = true;
-                this.prevScrollTop = this.tbodyElt[0].scrollTop;
-                this.rows.moveColumn(srcCol, destCol);
-                this.columns.moveColumn(srcCol, destCol);
+                var destCol = e.target.parentElement.cellIndex;
+                if (e.target.tagName === "TH") {
+                    destCol = e.target.cellIndex;
+                    e.target.firstChild.classList.remove("over");
+                }
+                else {
+                    e.target.classList.remove("over");
+                }
+                this.moveColumn(srcCol, destCol);
             }
         },
 
@@ -545,7 +600,7 @@ var ATable = (function () {
                 if (params.columns[i].width) {
                     widthStr = 'style="width: ' + (params.columns[i].width + SORT_ARROW_WIDTH) + 'px;"';
                 }
-                headerRow += '<th draggable="true" ' + widthStr + '>' + params.columns[i].name + '</th>';
+                headerRow += '<th draggable="true" ' + widthStr + '><div>' + params.columns[i].name + '</div></th>';
             }
             headerRow += '</tr>';
 
@@ -566,6 +621,7 @@ var ATable = (function () {
             frag.appendChild(grayout);
             if (this.parentElt) {
                 this.el.removeChild(this.parentElt[0]);
+                this.el.removeChild(document.getElementById("grayout"));
             }
             this.el.appendChild(frag);
 
@@ -598,7 +654,7 @@ var ATable = (function () {
                 for (var j = 0; j < params.rows[i].row.length; j++) {
                     var width = params.columns[j].width + SORT_ARROW_WIDTH;
                     if (j == params.rows[i].row.length - 1) {
-                        width -= this.scrollbarWidth;
+                        width -= (this.scrollbarWidth - 1);
                     }
                     body += '<td><div style="width: ' + width + 'px;">' + params.rows[i].row[j] + '</div></td>';
                 }
@@ -697,24 +753,6 @@ var ATable = (function () {
     }
 
     /**
-     * Add an arrow indicating sort direction on the sort column header
-     * @param {RowCollection} rows the table's row collection
-     * @param {object} tableElt the table's jQuery object
-     */
-    function displaySortArrow(rows, tableElt) {
-        if (typeof rows.sortColumn !== "undefined") {
-            var arrow;
-            if (rows.sortAscending) {
-                arrow = "<div class='sortArrow'>&uarr;</div>";
-            }
-            else {
-                arrow = "<div class='sortArrow'>&darr;</div>";
-            }
-            tableElt.find('th:nth-child(' + (rows.sortColumn + 1) + ')').append(arrow);
-        }
-    }
-
-    /**
      * Get the width of the scrollbar
      * @return {Number} width in pixels
      */
@@ -727,10 +765,21 @@ var ATable = (function () {
         return scrollbarWidth;
     }
 
-    function resizeColumn(tbodyElt, colIdx, width) {
-        for (var i = 1; i < tbodyElt.childNodes.length - 1; i++) {
-            tbodyElt.childNodes[i].cells[colIdx].firstChild.style.width = width + "px";
+    /**
+     * Add an arrow indicating sort direction on the sort column header
+     * @param {HTMLElement} column the column header to which to add the sort arrow
+     * @param {boolean} descending table is sorted descending
+     */
+    function displaySortArrow(column, descending) {
+        var arrow = document.createElement("div");
+        arrow.classList.add("sortArrow");
+        if (descending) {
+            arrow.innerHTML = "&darr;";
         }
+        else {
+            arrow.innerHTML = "&uarr;";
+        }
+        column.firstChild.appendChild(arrow);
     }
 
     return ATable;

@@ -3,11 +3,11 @@ var RowCollection = Backbone.Collection.extend({
         this.columnOrder = [];
         if (options) {
             this.sortColumn = options.sortColumn;
-            this.sortAscending = options.sortAscending != null ? options.sortAscending : false;
+            this.sortDescending = options.sortDescending != null ? options.sortDescending : false;
         }
         else {
             this.sortColumn = null;
-            this.sortAscending = false;
+            this.sortDescending = false;
         }
         for (var i = 0; i < options.numColumns; i++) {
             this.columnOrder.push(i);
@@ -86,7 +86,7 @@ var RowCollection = Backbone.Collection.extend({
      */
     setSortColumn : function (col) {
         if (this.sortColumn === col) {
-            this.sortAscending = !this.sortAscending;
+            this.sortDescending = !this.sortDescending;
         }
         else {
             this.sortColumn = col;
@@ -109,7 +109,7 @@ var RowCollection = Backbone.Collection.extend({
             }
         }
         else if (typeof val === "string") {
-            if (this.sortAscending) {
+            if (!this.sortDescending) {
                 return val;
             }
             else {
@@ -121,10 +121,9 @@ var RowCollection = Backbone.Collection.extend({
                 return val.join('');
             }
         }
-        if (this.sortAscending) {
+        if (!this.sortDescending) {
             return ret;
         }
-
         return -ret;
     }
 });

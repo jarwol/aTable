@@ -18,7 +18,7 @@
     <script type="text/javascript" id="fetchData100000Rows1Col">
         function fetchData(params) {
             var rows = [];
-            for (var i = 0; i < 100000; i ++) {
+            for (var i = 0; i < 100000; i++) {
                 rows.push([i]);
             }
             return rows;
@@ -43,6 +43,15 @@
             var rows = [];
             for (var i = 0; i < 100; i++) {
                 rows.push([i]);
+            }
+            return rows;
+        }
+    </script>
+    <script type="text/javascript" id="fetchData1Row4Cols">
+        function fetchData(params) {
+            var rows = [];
+            for (var i = 0; i < 4; i++) {
+                rows.push([i, i + 1, i + 2, i + 3]);
             }
             return rows;
         }
