@@ -119,6 +119,76 @@ asyncTest("Random scroll stress test - big table", 4000, function () {
     });
 });
 
+module("Column Operations");
+asyncTest("Reorder columns", 12, function () {
+    var table = createTable('fetchData1Row4Cols', 4);
+    table.render(function () {
+        start();
+        table.moveColumn(0, 1);
+        var row = table.tbodyElt.find("tr")[1];
+        equal(row.cells[0].firstChild.innerHTML, 1, "first cell should contain 1");
+        equal(row.cells[1].firstChild.innerHTML, 0, "second cell should contain 0");
+        table.moveColumn(1, 0);
+        row = table.tbodyElt.find("tr")[1];
+        equal(row.cells[0].firstChild.innerHTML, 0, "first cell should contain 0");
+        equal(row.cells[1].firstChild.innerHTML, 1, "second cell should contain 1");
+        table.moveColumn(0, 3);
+        row = table.tbodyElt.find("tr")[1];
+        equal(row.cells[0].firstChild.innerHTML, 1, "first cell should contain 1");
+        equal(row.cells[1].firstChild.innerHTML, 2, "second cell should contain 2");
+        equal(row.cells[2].firstChild.innerHTML, 3, "first cell should contain 3");
+        equal(row.cells[3].firstChild.innerHTML, 0, "second cell should contain 0");
+        table.moveColumn(2, 0);
+        row = table.tbodyElt.find("tr")[1];
+        equal(row.cells[0].firstChild.innerHTML, 3, "first cell should contain 3");
+        equal(row.cells[1].firstChild.innerHTML, 1, "second cell should contain 1");
+        equal(row.cells[2].firstChild.innerHTML, 2, "first cell should contain 2");
+        equal(row.cells[3].firstChild.innerHTML, 0, "second cell should contain 0");
+    });
+});
+
+asyncTest("Resize columns", 19, function () {
+    var table = createTable('fetchData1Row4Cols', 4);
+    table.render(function () {
+        start();
+        resizeColumnAndTest(table, 0, 5);
+        resizeColumnAndTest(table, 0, -3);
+        resizeColumnAndTest(table, 1, 5);
+        resizeColumnAndTest(table, 3, 5);
+        resizeColumnAndTest(table, 3, -5);
+        resizeColumnAndTest(table, 2, 0);
+        resizeColumnAndTest(table, 0, -100);
+        throws(function () {
+            table.resizeColumn(5, 0);
+        }, "resizing an invalid column index should throw an exception");
+    });
+});
+
+asyncTest("Move sorted columns", 12, function () {
+    var table = createTable('fetchData1Row4Cols', 4);
+    table.render(function () {
+        start();
+    });
+});
+
+function resizeColumnAndTest(table, colIdx, change) {
+    var row = table.tbodyElt.find("tr")[1];
+    var col = table.columns.at(colIdx);
+    var actualWidth = col.get('element').width();
+    var attrWidth = col.get('width');
+    var minWidth = Util.getTextWidth(col.get('name')) + 20;
+    var expectedWidth = actualWidth + change;
+    if (expectedWidth < minWidth) expectedWidth = minWidth;
+    stop();
+    table.resizeColumn(colIdx, attrWidth + change, function () {
+        start();
+        row = table.tbodyElt.find("tr")[1];
+        equal(col.get('element').width(), expectedWidth, "TH width should change by " + change + "px");
+        equal(col.get('width'), attrWidth + change, "width attribute should change by " + change + "px");
+        equal($(row.cells[colIdx]).width(), expectedWidth, "TD width should match TH width");
+    });
+}
+
 function scrollAndTestContents(table, scrollTop) {
     var cols = table.columns.length;
     table.tbodyElt[0].scrollTop = scrollTop;
@@ -137,47 +207,3 @@ function scrollAndTestContents(table, scrollTop) {
     equal(table.rowRange.first * table.rowHeight, rows[0].clientHeight, "height of top buffer row should equal " + table.rowRange.first * table.rowHeight);
     equal((table.rows.length - table.rowRange.last) * table.rowHeight, rows[rows.length - 1].clientHeight, "height of bottom buffer row should equal " + (table.rows.length - table.rowRange.last) * table.rowHeight);
 }
-
-module("Column Operations");
-asyncTest("Reorder columns", 12, function () {
-    var table = createTable('fetchData1Row4Cols', 4);
-    table.render(function () {
-        start();
-        var row = table.tbodyElt.find("tr")[1];
-        table.moveColumn(0, 1);
-        equal(row.cells[0].firstChild.innerHTML, 1, "first cell should contain 1");
-        equal(row.cells[1].firstChild.innerHTML, 0, "second cell should contain 0");
-        table.moveColumn(1, 0);
-        equal(row.cells[0].firstChild.innerHTML, 0, "first cell should contain 0");
-        equal(row.cells[1].firstChild.innerHTML, 1, "second cell should contain 1");
-        table.moveColumn(0, 3);
-        equal(row.cells[0].firstChild.innerHTML, 1, "first cell should contain 1");
-        equal(row.cells[1].firstChild.innerHTML, 2, "second cell should contain 2");
-        equal(row.cells[2].firstChild.innerHTML, 3, "first cell should contain 3");
-        equal(row.cells[3].firstChild.innerHTML, 0, "second cell should contain 0");
-        table.moveColumn(2, 0);
-        equal(row.cells[0].firstChild.innerHTML, 3, "first cell should contain 3");
-        equal(row.cells[1].firstChild.innerHTML, 1, "second cell should contain 1");
-        equal(row.cells[2].firstChild.innerHTML, 2, "first cell should contain 2");
-        equal(row.cells[3].firstChild.innerHTML, 0, "second cell should contain 0");
-    });
-});
-
-asyncTest("Resize columns", 12, function () {
-    var table = createTable('fetchData1Row4Cols', 4);
-    table.render(function () {
-        start();
-        var row = table.tbodyElt.find("tr")[1];
-        var width = table.columns.at(0).get('width');
-        var actualWidth = table.columns.at(0).get('element').width();
-        equal(width, actualWidth, "stored width and actual width should be equal");
-    });
-});
-
-asyncTest("Move sorted columns", 12, function () {
-    var table = createTable('fetchData1Row4Cols', 4);
-    table.render(function () {
-        start();
-        var row = table.tbodyElt.find("tr")[1];
-    });
-});

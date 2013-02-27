@@ -90,8 +90,12 @@ var ATable = (function () {
                 if (typeof this.rows.sortColumn === "number") {
                     displaySortArrow(this.columns.at(this.rows.sortColumn).get('element')[0], this.rows.sortDescending);
                 }
+                /* If a callback was passed to render(), invoke it after nulling out the reference. Otherwise we may
+                 wind up in an infinite loop if the callback causes a render. */
                 if (typeof this.renderCallback === 'function') {
-                    this.renderCallback();
+                    var cb = this.renderCallback;
+                    this.renderCallback = null;
+                    cb();
                 }
             }
             else {
@@ -380,11 +384,12 @@ var ATable = (function () {
         },
 
         /**
-         * Resize a column
+         * Resize a column. Causes the table to re-render.
          * @param {int} columnIndex index of the column to resize
          * @param {number} newWidth new column size in pixels
+         * @param {function} [callback] optional callback to invoke once the table is rendered
          */
-        resizeColumn : function (columnIndex, newWidth) {
+        resizeColumn : function (columnIndex, newWidth, callback) {
             var col = this.columns.at(columnIndex);
             if (!col) {
                 throw "Invalid column index: " + columnIndex;
@@ -392,7 +397,7 @@ var ATable = (function () {
             col.get('element')[0].style.width = newWidth + "px";
             col.set('width', newWidth);
             this.reRenderTable = true;
-            this.render();
+            this.render(callback);
         },
 
         mouseMoveColumn : function (event) {
@@ -432,7 +437,7 @@ var ATable = (function () {
             for (var i = 0; i < cols.length; i++) {
                 newWidth += $(cols[i])[0].offsetWidth;
             }
-            if ($.browser.mozilla) { // TODO - figure out a less hacky way size the table elements correctly
+            if ($.browser.mozilla) { // TODO - figure out a less hacky way to size the table elements correctly
                 newWidth--;
             }
             this.tableElt.width(newWidth);
@@ -516,7 +521,7 @@ var ATable = (function () {
             }
             else {
                 document.removeEventListener('dragover', this.resizeGrayout, false);
-                var width = parseInt(e.originalEvent.clientX - gray.position().left - 10);
+                var width = parseInt(e.originalEvent.clientX - gray.position().left - 20);
                 var grayWidth = gray.width();
                 var colIndex = Number(gray.attr('title'));
                 var col = this.columns.at(colIndex);
@@ -598,7 +603,7 @@ var ATable = (function () {
             for (var i = 0; i < params.columns.length; i++) {
                 var widthStr = '';
                 if (params.columns[i].width) {
-                    widthStr = 'style="width: ' + (params.columns[i].width + SORT_ARROW_WIDTH) + 'px;"';
+                    widthStr = 'style="width: ' + (params.columns[i].width) + 'px;"';
                 }
                 headerRow += '<th draggable="true" ' + widthStr + '><div>' + params.columns[i].name + '</div></th>';
             }
@@ -652,7 +657,7 @@ var ATable = (function () {
             for (var i = this.rowRange.first; i < params.rows.length && i < this.rowRange.last; i++) {
                 body += '<tr>';
                 for (var j = 0; j < params.rows[i].row.length; j++) {
-                    var width = params.columns[j].width + SORT_ARROW_WIDTH;
+                    var width = params.columns[j].width;
                     if (j == params.rows[i].row.length - 1) {
                         width -= (this.scrollbarWidth - 1);
                     }
@@ -730,7 +735,7 @@ var ATable = (function () {
     function initColumns(table, columns) {
         for (var i = 0; i < columns.length; i++) {
             if (typeof columns[i].width === "undefined") {
-                columns[i].width = Util.getTextWidth(columns[i].name) + 10;
+                columns[i].width = Util.getTextWidth(columns[i].name) + 20;
             }
             columns[i].order = i;
             table.availableColumnsArray.push(columns[i].name);
