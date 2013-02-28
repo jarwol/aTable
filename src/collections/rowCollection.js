@@ -58,23 +58,25 @@ var RowCollection = Backbone.Collection.extend({
      * @param {number} dest destination index of the column
      */
     moveColumn : function (src, dest) {
-        var sortCol = null;
-        if (typeof this.sortColumn !== 'undefined') {
-            sortCol = this.columnOrder[this.sortColumn];
-        }
         if (src < dest) {
+            if (this.sortColumn > src && this.sortColumn <= dest) {
+                this.sortColumn--;
+            }
+            else if (this.sortColumn === src) {
+                this.sortColumn = dest;
+            }
             for (var i = src; i < dest; i++) {
-                if (sortCol === this.columnOrder[i]) {
-                    this.sortColumn++;
-                }
                 Util.swap(this.columnOrder, i, i + 1);
             }
         }
         else {
+            if (this.sortColumn < src && this.sortColumn >= dest) {
+                this.sortColumn++;
+            }
+            else if (this.sortColumn === src) {
+                this.sortColumn = dest;
+            }
             for (var i = src; i > dest; i--) {
-                if (sortCol === this.columnOrder[i]) {
-                    this.sortColumn--;
-                }
                 Util.swap(this.columnOrder, i, i - 1);
             }
         }

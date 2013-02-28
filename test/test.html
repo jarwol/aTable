@@ -50,8 +50,17 @@
     <script type="text/javascript" id="fetchData1Row4Cols">
         function fetchData(params) {
             var rows = [];
-            for (var i = 0; i < 4; i++) {
+            for (var i = 0; i < 4; i += 4) {
                 rows.push([i, i + 1, i + 2, i + 3]);
+            }
+            return rows;
+        }
+    </script>
+    <script type="text/javascript" id="fetchData4Rows4Cols">
+        function fetchData(params) {
+            var rows = [];
+            for (var i = 0; i < 4; i++) {
+                rows.push([Math.floor(Math.random() * 100 + 1), Math.floor(Math.random() * 100 + 1), Math.floor(Math.random() * 100 + 1), Math.floor(Math.random() * 100 + 1)]);
             }
             return rows;
         }

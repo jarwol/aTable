@@ -542,8 +542,13 @@ var ATable = (function () {
          */
         dragEnterColumn : function (e) {
             var colNum = e.originalEvent.dataTransfer.getData("text");
-            if ($("#grayout").css("display") === "none" && e.target.parentElement.cellIndex != colNum) {
-                e.target.classList.add("over");
+            if ($("#grayout").css("display") === "none") {
+                if (e.target.parentElement.tagName === "TH" && e.target.parentElement.cellIndex != colNum) {
+                    e.target.classList.add("over");
+                }
+                else if (e.target.parentElement.tagName === "DIV" && e.target.parentElement.parentElement.cellIndex != colNum) {
+                    e.target.parentElement.classList.add("over");
+                }
             }
         },
 
@@ -658,7 +663,7 @@ var ATable = (function () {
                 body += '<tr>';
                 for (var j = 0; j < params.rows[i].row.length; j++) {
                     var width = params.columns[j].width;
-                    if (j == params.rows[i].row.length - 1) {
+                    if (j === params.rows[i].row.length - 1) {
                         width -= (this.scrollbarWidth - 1);
                     }
                     body += '<td><div style="width: ' + width + 'px;">' + params.rows[i].row[j] + '</div></td>';
@@ -690,8 +695,8 @@ var ATable = (function () {
             for (var i = 0; i < data.length; i++) {
                 this.rows.add({row : data[i]}, {silent : true});
             }
-            this.rows.trigger("reset");
             this.rows.__proto__.comparator = comp;
+            this.rows.trigger("reset");
         },
 
         close : function () {
