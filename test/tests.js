@@ -100,7 +100,7 @@ asyncTest("Random scroll stress test", 4000, function () {
         var scrollHeight = table.tbodyElt[0].scrollHeight;
         for (var i = 1; i <= 1000; i++) {
             var scrollTop = Math.floor(Math.random() * (scrollHeight + 1));
-            table.scrollTable({target : {scrollTop : scrollTop}});
+            table.onTableScrolled({target : {scrollTop : scrollTop}});
             scrollAndTestContents(table, scrollTop);
         }
     });
@@ -113,7 +113,7 @@ asyncTest("Random scroll stress test - big table", 4000, function () {
         var scrollHeight = table.tbodyElt[0].scrollHeight;
         for (var i = 1; i <= 1000; i++) {
             var scrollTop = Math.floor(Math.random() * (scrollHeight + 1));
-            table.scrollTable({target : {scrollTop : scrollTop}});
+            table.onTableScrolled({target : {scrollTop : scrollTop}});
             scrollAndTestContents(table, scrollTop);
         }
     });
@@ -280,7 +280,7 @@ function resizeColumnAndTest(table, colIdx, change) {
 function scrollAndTestContents(table, scrollTop) {
     var cols = table.columns.length;
     table.tbodyElt[0].scrollTop = scrollTop;
-    table.scrollTable({target : {scrollTop : scrollTop}});
+    table.onTableScrolled({target : {scrollTop : scrollTop}});
     var rows = table.tbodyElt.find("tr");
     var expectedFirstRow = parseInt(scrollTop / table.rowHeight) - BUFFER_ROWS;
     if (expectedFirstRow < 0) expectedFirstRow = 0;
