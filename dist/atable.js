@@ -1,3 +1,282 @@
+/*! aTable v0.1.0
+ * Date: 2013-03-05
+ * Author: Jared Wolinsky 
+ */
+
+/**
+ * Backbone Model representation of a table column
+ * @type {Column}
+ */
+var Column = Backbone.Model.extend({});
+
+/**
+ * Backbone model representation of a table row
+ * @type {Row}
+ */
+var Row = Backbone.Model.extend({
+    defaults : {
+        row : []
+    }
+});
+
+/**
+ * Backbone Collection of Column models
+ * @type {ColumnCollection}
+ */
+var ColumnCollection = Backbone.Collection.extend({
+    initialize : function () {
+        this.modelsByName = {};
+    },
+
+    model : Column,
+
+    /**
+     * Comparator function to force sorting of the columns by their 'order' attribute
+     * @param {int} col Column model to be sorted
+     * @return {int} order of the column in the table
+     */
+    comparator : function (col) {
+        return col.get("order");
+    },
+
+    getByName : function getByName(name) {
+        return this.modelsByName[name];
+    },
+
+    renameColumn : function renameColumn(field, newName) {
+        if (!newName) {
+            throw "Invalid column name";
+        }
+        var col = this.modelsByName[field];
+        if (col) {
+            col.set({
+                name : newName
+            });
+        }
+    },
+
+    /**
+     * Move a column to a new spot in the collection
+     * @param {number} src the column's original index in the collection
+     * @param {number} dest the destination index
+     */
+    moveColumn : function moveColumn(src, dest) {
+        var col1 = this.at(src);
+        var col2 = this.at(dest);
+
+        if (!col1) {
+            throw "Invalid column index: " + src;
+        }
+        if (!col2) {
+            throw "Invalid column index: " + dest;
+        }
+        var order1 = col1.get("order");
+        var order2 = col2.get("order");
+        var col;
+        if (order1 < order2) {
+            for (var i = order1 + 1; i <= order2; i++) {
+                col = this.at(i);
+                col.set({order : col.get("order") - 1});
+            }
+        }
+        else {
+            for (var j = order1 - 1; j >= order2; j--) {
+                col = this.at(j);
+                col.set({order : col.get("order") + 1});
+            }
+        }
+        col1.set({order : order2});
+        this.sort();
+    },
+
+    add : function add(models, options) {
+        var that = this;
+        models = _.isArray(models) ? models.slice() : [ models ];
+        var newModels = [];
+        _.forEach(models, function (col) {
+            if (!(col instanceof Backbone.Model)) {
+                col = new Column(col);
+            }
+            if (!that.modelsByName[col.get('name')]) {
+                that.modelsByName[col.get('name')] = col;
+            }
+            newModels.push(col);
+        });
+        Backbone.Collection.prototype.add.call(this, newModels, options);
+    },
+
+    remove : function remove(models, options) {
+        var that = this;
+        models = _.isArray(models) ? models.slice() : [ models ];
+        _.forEach(models, function (col) {
+            if (that.modelsByName[col.get('name')]) {
+                delete that.modelsByName[col.get('name')];
+            }
+        });
+        Backbone.Collection.prototype.remove.call(this, models, options);
+    },
+
+    reset : function reset(models, options) {
+        this.modelsByName = {};
+        Backbone.Collection.prototype.reset.call(this, models, options);
+    }
+});
+
+/**
+ * Backbone Collection of Row models, representing the dataset of the table
+ * @type {RowCollection}
+ */
+var RowCollection = (function () {
+    return Backbone.Collection.extend({
+        initialize : function (models, options) {
+            this.columnOrder = [];
+            if (options) {
+                this.sortColumn = options.sortColumn;
+                this.sortDescending = options.sortDescending !== null ? options.sortDescending : false;
+            }
+            else {
+                this.sortColumn = null;
+                this.sortDescending = false;
+            }
+            for (var i = 0; i < options.numColumns; i++) {
+                this.columnOrder.push(i);
+            }
+        },
+
+        model : Row,
+
+        /**
+         * Get the table value from a (row, col) index, taking into account possible re-ordering of the columns
+         * @param {number} rowIdx the row index of the cell
+         * @param {number} colIdx the column index of the cell in the rendered table
+         * @return {*} the value of the table cell at index (row, col)
+         */
+        getValue : function (rowIdx, colIdx) {
+            var row = this.at(rowIdx).get('row');
+            var actualCol = this.columnOrder[colIdx];
+            return row[actualCol];
+        },
+
+        /**
+         * Get the row values at a given index, taking into account possible re-ordering of the columns
+         * @param {number} idx the row index
+         * @return {Array} correctly-ordered array of row values
+         */
+        getRow : function (idx) {
+            var row = this.at(idx).get('row');
+            var ret = [];
+            for (var i = 0; i < row.length; i++) {
+                var col = this.columnOrder[i];
+                ret.push(row[col]);
+            }
+            return ret;
+        },
+
+        /**
+         * Get the actual column index in the column collection based on the index in the rendered table
+         * @param {number} col the index of the column in the rendered table
+         * @return {number} the column index in the collection
+         */
+        getColumnIndex : function (col) {
+            return this.columnOrder[col];
+        },
+
+        /**
+         * Re-order the columns after a column move operation
+         * @param {number} src source index of the column
+         * @param {number} dest destination index of the column
+         */
+        moveColumn : function (src, dest) {
+            if (src < dest) {
+                if (this.sortColumn > src && this.sortColumn <= dest) {
+                    this.sortColumn--;
+                }
+                else if (this.sortColumn === src) {
+                    this.sortColumn = dest;
+                }
+                for (var i = src; i < dest; i++) {
+                    swap(this.columnOrder, i, i + 1);
+                }
+            }
+            else {
+                if (this.sortColumn < src && this.sortColumn >= dest) {
+                    this.sortColumn++;
+                }
+                else if (this.sortColumn === src) {
+                    this.sortColumn = dest;
+                }
+                for (var j = src; j > dest; j--) {
+                    swap(this.columnOrder, j, j - 1);
+                }
+            }
+        },
+
+        /**
+         * Set the sort column of the row matrix
+         * @param {number} col index of the sort column in the rendered table
+         */
+        setSortColumn : function (col) {
+            if (this.sortColumn === col) {
+                this.sortDescending = !this.sortDescending;
+            }
+            else {
+                this.sortColumn = col;
+            }
+        },
+
+        /**
+         * Comparator function to sort rows according to the sort column its datatype
+         * @param {Row} row row model to sort
+         * @return {number} value to be compared against other rows to determine sorting
+         */
+        comparator : function (row) {
+            var val = row.get('row')[this.columnOrder[this.sortColumn]];
+            var ret = null;
+
+            if (typeof val === "number") {
+                ret = val;
+            }
+            else if (typeof val === "object") {
+                if (val instanceof Date) {
+                    ret = val.getTime();
+                }
+                else {
+                    ret = 0;
+                }
+            }
+            else if (typeof val === "string") {
+                if (!this.sortDescending) {
+                    return val;
+                }
+                else {
+                    val = val.toLowerCase();
+                    val = val.split("");
+                    val = _.map(val, function (letter) {
+                        return String.fromCharCode(-(letter.charCodeAt(0)));
+                    });
+                    return val.join('');
+                }
+            }
+            if (!this.sortDescending) {
+                return ret;
+            }
+            return -ret;
+        }
+    });
+
+    /**
+     * Swap two elements in an array
+     * @param {Array} arr the array
+     * @param {number} i first element's index
+     * @param {number} j second element's index
+     */
+    function swap(arr, i, j) {
+        var tmp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = tmp;
+    }
+})();
+
 /**
  * This is the master Backbone View that should be instantiated. The constructor accepts a hash of paramters.
  * Required parameters:

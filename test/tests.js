@@ -61,12 +61,12 @@ asyncTest("Remove rows", 5, function () {
         table.removeRows(2, true);
         rows = table.tbodyElt.find("tr");
         equal(rows.length, table.visibleRows + BUFFER_ROWS, "DOM table should have " + (table.visibleRows + BUFFER_ROWS) + " rows");
-        equal(parseInt(rows[1].cells[0].firstChild.innerHTML), 2, "first cell rendered should contain 2");
+        equal(parseInt(rows[1].cells[0].firstChild.innerHTML, 10), 2, "first cell rendered should contain 2");
         table.removeRows(2, false);
         rows = table.tbodyElt.find("tr");
         equal(rows.length, table.visibleRows + BUFFER_ROWS - 2, "DOM table should have " + (table.visibleRows + BUFFER_ROWS - 2) + " rows");
         var expectedLastVal = rows.length - 1;
-        equal(parseInt(rows[table.visibleRows + BUFFER_ROWS - 4].cells[0].firstChild.innerHTML), expectedLastVal, "last cell rendered should contain " + expectedLastVal);
+        equal(parseInt(rows[table.visibleRows + BUFFER_ROWS - 4].cells[0].firstChild.innerHTML, 10), expectedLastVal, "last cell rendered should contain " + expectedLastVal);
     });
 });
 
@@ -158,7 +158,7 @@ asyncTest("Resize columns", 22, function () {
         resizeColumnAndTest(table, 3, -5);
         resizeColumnAndTest(table, 2, 0);
         resizeColumnAndTest(table, 0, -100);
-        throws(function () {
+        raises(function () {
             table.resizeColumn(5, 0);
         }, "resizing an invalid column index should throw an exception");
     });
@@ -236,18 +236,19 @@ function isSorted(table) {
     if (typeof table.rows.sortColumn !== "number") {
         return false;
     }
+    var val1, val2;
     // Check that the rows collection is sorted
     for (var i = 0; i < table.rows.length - 1; i++) {
-        var val1 = table.rows.getValue(i, table.rows.sortColumn);
-        var val2 = table.rows.getValue(i + 1, table.rows.sortColumn);
+        val1 = table.rows.getValue(i, table.rows.sortColumn);
+        val2 = table.rows.getValue(i + 1, table.rows.sortColumn);
         if (table.rows.sortDescending && val1 < val2) return false;
         else if (!table.rows.sortDescending && val1 > val2) return false;
     }
     // Check that the DOM table is sorted
     var rows = table.tbodyElt.find("tr");
-    for (var i = 1; i < rows.length - 2; i++) {
-        var val1 = parseInt(rows[i].cells[table.rows.sortColumn].firstChild.innerHTML);
-        var val1 = parseInt(rows[i + 1].cells[table.rows.sortColumn].firstChild.innerHTML);
+    for (var j = 1; j < rows.length - 2; j++) {
+        val1 = parseInt(rows[j].cells[table.rows.sortColumn].firstChild.innerHTML, 10);
+        val2 = parseInt(rows[j + 1].cells[table.rows.sortColumn].firstChild.innerHTML, 10);
         if (table.rows.sortDescending && val1 < val2) return false;
         else if (!table.rows.sortDescending && val1 > val2) return false;
     }
@@ -259,7 +260,7 @@ function resizeColumnAndTest(table, colIdx, change) {
     var col = table.columns.at(colIdx);
     var actualWidth = col.get('element').width();
     var attrWidth = col.get('width');
-    var minWidth = Util.getTextWidth(col.get('name')) + 20;
+    var minWidth = getTextWidth(col.get('name')) + 20;
     var expectedWidth = actualWidth + change;
     if (expectedWidth < minWidth) expectedWidth = minWidth;
     stop();
@@ -282,7 +283,7 @@ function scrollAndTestContents(table, scrollTop) {
     table.tbodyElt[0].scrollTop = scrollTop;
     table.onTableScrolled({target : {scrollTop : scrollTop}});
     var rows = table.tbodyElt.find("tr");
-    var expectedFirstRow = parseInt(scrollTop / table.rowHeight) - BUFFER_ROWS;
+    var expectedFirstRow = parseInt(scrollTop / table.rowHeight, 10) - BUFFER_ROWS;
     if (expectedFirstRow < 0) expectedFirstRow = 0;
     var expectedLastRow = expectedFirstRow + table.visibleRows + BUFFER_ROWS;
     if (expectedLastRow > table.rows.length) {
@@ -290,8 +291,20 @@ function scrollAndTestContents(table, scrollTop) {
         expectedFirstRow = expectedLastRow - table.visibleRows - BUFFER_ROWS;
         if (expectedFirstRow < 0) expectedFirstRow = 0;
     }
-    equal(parseInt(rows[1].cells[0].firstChild.innerHTML), expectedFirstRow * cols, "scrollTop = " + scrollTop + ": first cell rendered should contain " + expectedFirstRow * cols);
-    equal(parseInt(rows[rows.length - 2].cells[0].firstChild.innerHTML), (expectedLastRow - 1) * cols, "last row's first cell should contain " + (expectedLastRow - 1) * cols);
+    equal(parseInt(rows[1].cells[0].firstChild.innerHTML, 10), expectedFirstRow * cols, "scrollTop = " + scrollTop + ": first cell rendered should contain " + expectedFirstRow * cols);
+    equal(parseInt(rows[rows.length - 2].cells[0].firstChild.innerHTML, 10), (expectedLastRow - 1) * cols, "last row's first cell should contain " + (expectedLastRow - 1) * cols);
     equal(table.rowRange.first * table.rowHeight, rows[0].clientHeight, "height of top buffer row should equal " + table.rowRange.first * table.rowHeight);
     equal((table.rows.length - table.rowRange.last) * table.rowHeight, rows[rows.length - 1].clientHeight, "height of bottom buffer row should equal " + (table.rows.length - table.rowRange.last) * table.rowHeight);
+}
+
+function getTextWidth(text) {
+    var o = $('<th>' + text + '</th>').css({
+        'position' : 'absolute',
+        'float' : 'left',
+        'white-space' : 'nowrap',
+        'visibility' : 'hidden'
+    }).appendTo($('body'));
+    var width = o.width();
+    o.remove();
+    return width;
 }

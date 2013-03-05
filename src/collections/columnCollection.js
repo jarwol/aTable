@@ -1,3 +1,7 @@
+/**
+ * Backbone Collection of Column models
+ * @type {ColumnCollection}
+ */
 var ColumnCollection = Backbone.Collection.extend({
     initialize : function () {
         this.modelsByName = {};
@@ -5,6 +9,11 @@ var ColumnCollection = Backbone.Collection.extend({
 
     model : Column,
 
+    /**
+     * Comparator function to force sorting of the columns by their 'order' attribute
+     * @param {int} col Column model to be sorted
+     * @return {int} order of the column in the table
+     */
     comparator : function (col) {
         return col.get("order");
     },
@@ -42,15 +51,16 @@ var ColumnCollection = Backbone.Collection.extend({
         }
         var order1 = col1.get("order");
         var order2 = col2.get("order");
+        var col;
         if (order1 < order2) {
             for (var i = order1 + 1; i <= order2; i++) {
-                var col = this.at(i);
+                col = this.at(i);
                 col.set({order : col.get("order") - 1});
             }
         }
         else {
-            for (var i = order1 - 1; i >= order2; i--) {
-                var col = this.at(i);
+            for (var j = order1 - 1; j >= order2; j--) {
+                col = this.at(j);
                 col.set({order : col.get("order") + 1});
             }
         }
