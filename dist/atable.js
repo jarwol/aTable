@@ -1,5 +1,5 @@
 /*! aTable v0.1.0
- * Date: 2013-03-05
+ * Date: 2013-03-08
  * Author: Jared Wolinsky 
  */
 
@@ -291,22 +291,22 @@ var ATable = (function () {
     // Private constants
     var SORT_ARROW_WIDTH = 15;
     var BUFFER_ROWS = 5;
+    var RESIZE_PIXELS = 7;
 
     return Backbone.View.extend({
         initialize : function (options) {
             _.bindAll(this);
             this.reRenderTable = true;
             var err = validateTableArgs(options);
-            if (err) {
-                console.error(err);
-                return;
-            }
+            if (err) throw err;
+            setDefaultParameters(options);
 
             this.availableColumnsArray = [];
             this.availableColumnsHash = {};
-            this.columns = initColumns(this, options.columns);
+            this.columns = initColumns(this, options);
             this.columns.bind("reset", this.render, this);
             this.columns.bind("sort", this.render, this);
+            this.movableColumns = options.movableColumns;
             if (typeof options.sortColumn === "string") {
                 var i = this.columns.indexOf(options.sortColumn);
                 if (i >= 0) {
@@ -329,6 +329,7 @@ var ATable = (function () {
         events : {
             "click th" : "onClickColumnHeader",
             "mousemove th" : "onMouseMoveColumnHeader",
+            "mouseleave th" : "onMouseLeaveColumnHeader",
             "dragstart th" : "onStartDragColumnHeader",
             "dragend" : "onEndDragColumnHeader",
             "dragenter th div" : "onDragEnterColumnHeader",
@@ -508,21 +509,19 @@ var ATable = (function () {
         },
 
         /**
-         * Determine the rows that should be rendered in the DOM based on the scroll position
-         * @param {jQuery.Event} e jQuery scroll event
+         * Explicitly set the width of the table based on the sum of the column widths
          */
-        onTableScrolled : function (e) {
-            var firstRow = parseInt(e.target.scrollTop / this.rowHeight, 10) - BUFFER_ROWS;
-            this.rowRange.prevFirst = this.rowRange.first;
-            this.rowRange.prevLast = this.rowRange.last;
-            if (firstRow < 0) firstRow = 0;
-            this.rowRange.first = firstRow;
-            this.rowRange.last = firstRow + this.visibleRows + BUFFER_ROWS;
-            if (this.rowRange.last > this.rows.length) {
-                this.rowRange.last = this.rows.length;
-                this.rowRange.first = this.rowRange.last - this.visibleRows - BUFFER_ROWS;
+        sizeTable : function () {
+            var cols = this.tableElt.find("th");
+            var newWidth = 1;
+            for (var i = 0; i < cols.length; i++) {
+                newWidth += $(cols[i])[0].offsetWidth;
             }
-            this.renderRows(this.prevScrollTop, e.target.scrollTop);
+            if ($.browser.mozilla) { // TODO - figure out a less hacky way to size the table elements correctly
+                newWidth--;
+            }
+            this.tableElt.width(newWidth);
+            this.parentElt.width(newWidth);
         },
 
         /**
@@ -550,44 +549,6 @@ var ATable = (function () {
             }
             else if (action === "renameColumn") {
                 this.showRenameColumnDialog(this.columnTarget, el.text(), pos);
-            }
-        },
-
-        /**
-         * Sort the table rows by the specified column and order
-         * @param {int} columnIndex index of the column to sort on
-         * @param {boolean} [descending] sort in descending order
-         */
-        sort : function (columnIndex, descending) {
-            if (columnIndex < 0 || columnIndex > this.columns.length) {
-                throw "Invalid column index: " + columnIndex;
-            }
-            this.tableElt.find(".sortArrow").remove();
-            this.rows.setSortColumn(columnIndex);
-            if (typeof descending === "boolean") {
-                this.rows.sortDescending = descending;
-            }
-            displaySortArrow(this.columns.at(columnIndex).get('element')[0], this.rows.sortDescending);
-            this.rows.sort();
-        },
-
-        /**
-         * Sort the row collection when a column header is clicked
-         * @param {jQuery.Event} e jQuery click event object
-         */
-        onClickColumnHeader : function (e) {
-            if (!this.mouseInResizePosition(e)) {
-                if (e.target.tagName === "DIV") {
-                    if (e.target.className === "sortArrow") {
-                        this.sort(e.target.parentElement.parentElement.cellIndex);
-                    }
-                    else {
-                        this.sort(e.target.parentElement.cellIndex);
-                    }
-                }
-                else {
-                    this.sort(e.target.cellIndex);
-                }
             }
         },
 
@@ -651,6 +612,10 @@ var ATable = (function () {
             this.columns.renameColumn(field, newName);
         },
 
+        filter : function (columnIdx, filterStr) {
+            // TODO - implement table filtering
+        },
+
         /**
          * Move a column to a different position, shifting all columns in between
          * @param {int} srcColumnIdx index of the column to be moved
@@ -680,63 +645,93 @@ var ATable = (function () {
         },
 
         /**
+         * Sort the table rows by the specified column and order
+         * @param {int} columnIndex index of the column to sort on
+         * @param {boolean} [descending] sort in descending order
+         */
+        sort : function (columnIndex, descending) {
+            if (columnIndex < 0 || columnIndex > this.columns.length) {
+                throw "Invalid column index: " + columnIndex;
+            }
+            this.tableElt.find(".sortArrow").remove();
+            this.rows.setSortColumn(columnIndex);
+            if (typeof descending === "boolean") {
+                this.rows.sortDescending = descending;
+            }
+            displaySortArrow(this.columns.at(columnIndex).get('element')[0], this.rows.sortDescending);
+            this.rows.sort();
+        },
+
+        /**
+         * Determine the rows that should be rendered in the DOM based on the scroll position
+         * @param {jQuery.Event} e jQuery scroll event
+         */
+        onTableScrolled : function (e) {
+            var firstRow = parseInt(e.target.scrollTop / this.rowHeight, 10) - BUFFER_ROWS;
+            this.rowRange.prevFirst = this.rowRange.first;
+            this.rowRange.prevLast = this.rowRange.last;
+            if (firstRow < 0) firstRow = 0;
+            this.rowRange.first = firstRow;
+            this.rowRange.last = firstRow + this.visibleRows + BUFFER_ROWS;
+            if (this.rowRange.last > this.rows.length) {
+                this.rowRange.last = this.rows.length;
+                this.rowRange.first = this.rowRange.last - this.visibleRows - BUFFER_ROWS;
+            }
+            this.renderRows(this.prevScrollTop, e.target.scrollTop);
+        },
+
+        /**
          * Set the cursor to e-resize if mouse is in between column headers
          * @param {jQuery.Event} e jQuery mouse event
          */
         onMouseMoveColumnHeader : function (e) {
-            if (this.mouseInResizePosition(e)) {
-                if ($(e.target).css("cursor") !== "e-resize") {
-                    $(e.target).css("cursor", "e-resize");
-                }
+            var col = getResizeColumn(e);
+            var th = $(e.target).closest("th")[0];
+            if (col < 0 || !this.columns.at(col).get('resizable')) {
+                th.style.cursor = null;
             }
             else {
-                $(e.target).css("cursor", "pointer");
+                th.style.cursor = "e-resize";
             }
-        },
-
-        mouseInResizePosition : function (event) {
-            var mouseX = this.getMouseColumnOffset(event);
-            var firstCol = !event.target.previousElementSibling;
-            return (!firstCol && mouseX <= 6) || event.target.offsetWidth - mouseX <= 5;
-        },
-
-        getMouseColumnOffset : function (event) {
-            var mouseX = event.offsetX;
-            if (typeof mouseX === "undefined") {
-                mouseX = event.originalEvent.pageX - $(event.target).offset().left;
-            }
-            return mouseX;
         },
 
         /**
-         * Explicitly set the width of the table based on the sum of the column widths
+         * Ensure the resize cursor style is removed when the cursor leaves a column header
+         * @param {jQuery.Event} e jQuery mouseleave event
          */
-        sizeTable : function () {
-            var cols = this.tableElt.find("th");
-            var newWidth = 1;
-            for (var i = 0; i < cols.length; i++) {
-                newWidth += $(cols[i])[0].offsetWidth;
+        onMouseLeaveColumnHeader : function (e) {
+            var th = $(e.target).closest("th")[0];
+            th.style.cursor = null;
+        },
+
+        /**
+         * Sort the row collection when a column header is clicked
+         * @param {jQuery.Event} e jQuery click event object
+         */
+        onClickColumnHeader : function (e) {
+            if (getResizeColumn(e) < 0) {
+                var th = $(e.target).closest("th")[0];
+                if (this.columns.at(th.cellIndex).get('sortable')) {
+                    this.sort(th.cellIndex);
+                }
             }
-            if ($.browser.mozilla) { // TODO - figure out a less hacky way to size the table elements correctly
-                newWidth--;
-            }
-            this.tableElt.width(newWidth);
-            this.parentElt.width(newWidth);
         },
 
         /**
          * Event handler for the start of a column drag (move or resize)
-         * @param {Event} e jQuery dragstart event
+         * @param {jQuery.Event} e jQuery dragstart event
          */
         onStartDragColumnHeader : function (e) {
             var target = $(e.target);
-            // User is resizing the column
-            if (this.mouseInResizePosition(e)) {
-                if (this.getMouseColumnOffset(e) <= 4) {
-                    target = $(e.target.previousSibling);
-                }
-                else {
-                    target = $(e.target);
+            var col = getResizeColumn(e);
+            // Mouse is in resize position
+            if (col > -1) {
+                target = this.columns.at(col).get('element');
+                if (!this.columns.at(col).get('resizable')) {
+                    if (e.preventDefault) {
+                        e.preventDefault();
+                    }
+                    return false;
                 }
                 var posCol = target.offset();
                 var posTable = this.tableElt.parent().offset();
@@ -763,12 +758,17 @@ var ATable = (function () {
                 document.addEventListener('dragover', this.onResizeGrayout);
                 // Disable the default drag image by replacing it with an empty div
                 e.originalEvent.dataTransfer.setDragImage(document.createElement("div"), 0, 0);
+                e.originalEvent.dataTransfer.setData("text", target[0].cellIndex);
             }
             // User is moving the column
-            else {
+            else if (this.movableColumns) {
                 e.target.style.opacity = 0.35;
+                e.originalEvent.dataTransfer.setData("text", target[0].cellIndex);
             }
-            e.originalEvent.dataTransfer.setData("text", target[0].cellIndex);
+            else {
+                e.preventDefault();
+            }
+
         },
 
         /**
@@ -797,7 +797,7 @@ var ATable = (function () {
         onEndDragColumnHeader : function (e) {
             var gray = $("#grayout");
             if (gray.css("display") === "none") {
-                e.target.style.opacity = 1;
+                e.target.style.opacity = null;
             }
             else {
                 document.removeEventListener('dragover', this.onResizeGrayout, false);
@@ -822,12 +822,10 @@ var ATable = (function () {
          */
         onDragEnterColumnHeader : function (e) {
             var colNum = e.originalEvent.dataTransfer.getData("text");
-            if ($("#grayout").css("display") === "none") {
-                if (e.target.parentElement.tagName === "TH" && e.target.parentElement.cellIndex != colNum) {
-                    e.target.classList.add("over");
-                }
-                else if (e.target.parentElement.tagName === "DIV" && e.target.parentElement.parentElement.cellIndex != colNum) {
-                    e.target.parentElement.classList.add("over");
+            if (this.movableColumns && $("#grayout").css("display") === "none") {
+                var th = $(e.target).closest("th")[0];
+                if (th.cellIndex != colNum) {
+                    th.firstChild.classList.add("over");
                 }
             }
         },
@@ -855,7 +853,7 @@ var ATable = (function () {
                 e.preventDefault();
             }
 
-            if ($("#grayout").css("display") === "none") {
+            if (this.movableColumns && $("#grayout").css("display") === "none") {
                 var srcCol = Number(e.originalEvent.dataTransfer.getData("text"));
                 var destCol = e.target.parentElement.cellIndex;
                 if (e.target.tagName === "TH") {
@@ -892,10 +890,14 @@ var ATable = (function () {
             var headerRow = '<tr>';
             for (var i = 0; i < params.columns.length; i++) {
                 var widthStr = '';
+                var classStr = '';
                 if (params.columns[i].width) {
                     widthStr = 'style="width: ' + (params.columns[i].width) + 'px;"';
                 }
-                headerRow += '<th draggable="true" ' + widthStr + '><div>' + params.columns[i].name + '</div></th>';
+                if (params.columns[i].sortable) {
+                    classStr = ' className="sortable"';
+                }
+                headerRow += '<th draggable="true" ' + widthStr + classStr + '><div>' + params.columns[i].name + '</div></th>';
             }
             headerRow += '</tr>';
 
@@ -975,7 +977,6 @@ var ATable = (function () {
             }
             var comp = this.rows.comparator;
             this.rows.__proto__.comparator = null;
-            var rows = [];
             for (var i = 0; i < data.length; i++) {
                 this.rows.add({row : data[i]}, {silent : true});
             }
@@ -989,12 +990,34 @@ var ATable = (function () {
         }
     });
 
+    /**
+     * Gets thet index of the column which is in resize position
+     * @param {jQuery.Event} e jQuery mouse event
+     * @returns {int} cellIndex of the column which the mouse is over, or -1 if the mouse is not in resize position
+     */
+    function getResizeColumn(e) {
+        var mouseX = e.offsetX;
+        var firstCol = !e.target.previousElementSibling;
+        var th = $(e.target).closest("th")[0];
+
+        if (typeof mouseX === "undefined") {
+            mouseX = e.originalEvent.pageX - $(e.target).offset().left;
+        }
+        if (!firstCol && mouseX <= RESIZE_PIXELS + 1) {
+            return th.previousElementSibling.cellIndex;
+        }
+        else if (e.target.offsetWidth - mouseX <= RESIZE_PIXELS) {
+            return th.cellIndex;
+        }
+        return -1;
+    }
+
     function validateTableArgs(options) {
         if (options.columns !== null && options.columns.length === 0) {
-            return "Cannot specify empty 'columns' array";
+            return "Columns array missing or empty";
         }
         if (!options.fetchData) {
-            return "Missing fetchData arg: script tag id containing function to fetch the table data.";
+            return "Missing fetchData arg: script tag id with fetchData function.";
         }
         return null;
     }
@@ -1023,13 +1046,20 @@ var ATable = (function () {
     /**
      * Initialize the collection of table columns
      * @param {ATable} table The Table which is being initialized
-     * @param {Array} columns Array of objects representing table columns
-     * @return {ColumnCollection} collection of the table's Column models
+     * @param {object} options parameter hash passed into the ATable constructor
+     * @return {ColumnCollection} Backbone collection of Column models
      */
-    function initColumns(table, columns) {
+    function initColumns(table, options) {
+        var columns = options.columns;
         for (var i = 0; i < columns.length; i++) {
             if (typeof columns[i].width === "undefined") {
                 columns[i].width = getTextWidth(columns[i].name) + 20;
+            }
+            if (typeof columns[i].resizable === "undefined") {
+                columns[i].resizable = options.resizableColumns;
+            }
+            if (typeof columns[i].sortable === "undefined") {
+                columns[i].sortable = options.sortable;
             }
             columns[i].order = i;
             table.availableColumnsArray.push(columns[i].name);
@@ -1096,5 +1126,17 @@ var ATable = (function () {
         var width = o.width();
         o.remove();
         return width;
+    }
+
+    function setDefaultParameters(options) {
+        if (typeof options.resizableColumns === "undefined") {
+            options.resizableColumns = true;
+        }
+        if (typeof options.movableColumns === "undefined") {
+            options.movableColumns = true;
+        }
+        if (typeof options.sortable === "undefined") {
+            options.sortable = true;
+        }
     }
 })();
