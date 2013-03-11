@@ -48,7 +48,7 @@
 }
 
 .atable td:last-child {
-    border-right: none;
+    //border-right: none;
 }
 
 .atable tr:last-child td {

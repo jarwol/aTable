@@ -1,9 +1,13 @@
 /**
  * This is the master Backbone View that should be instantiated. The constructor accepts a hash of paramters.
  * Required parameters:
- *      columns - array of column objects consisting of a `name` and optional `width`
- *      fetchData - string id of the script tag that contains a function called `fetchData`, responsible for returning the table's dataset (2d array)
- *      el - string selector of the DOM element in which to insert the rendered table
+ *      columns {array of column objects consisting of a `name` and optional `width`
+ *      dataFunction {string} id of the script tag that contains a function called `fetchData`, responsible for generating the table's dataset
+ *      el {string} selector of the DOM element in which to insert the rendered table
+ * Optional parameters:
+ *      resizableColumns {boolean} - 
+ *      movableColumns {boolean}
+ *      sortableColumns {boolean}
  * @constructor
  * @param {object} options hash of options
  * @type {ATable}
@@ -41,7 +45,12 @@ var ATable = (function () {
             this.rows = new RowCollection([], options);
             this.rows.init = false;
             this.columnTarget = null;
-            this.dataWorker = createDataWorker(options.fetchData, this.receivedData);
+            if (typeof options.fetchData === "string") {
+                this.dataWorker = createDataWorker(options.fetchData, this.receivedData);
+            }
+            else if (typeof options.fetchData === "function") {
+                // TODO - implement callback functionality
+            }
             this.height = options.height;
             this.prevScrollTop = 0;
             this.scrollbarWidth = getScrollbarWidth();
@@ -672,7 +681,7 @@ var ATable = (function () {
                 for (var k = 0; k < params.rows[j].row.length; k++) {
                     var width = params.columns[k].width;
                     if (j === params.rows[j].row.length - 1) {
-                        width -= (this.scrollbarWidth - 1);
+                        width -= (this.scrollbarWidth + 2);
                     }
                     body += '<td><div style="width: ' + width + 'px;">' + params.rows[j].row[k] + '</div></td>';
                 }
@@ -686,8 +695,9 @@ var ATable = (function () {
         /**
          * Update the row collection with new data from the data worker
          * @param {Array[]} data Row data returned by the data worker
+         * @param {boolean} append if true, append new rows to the dataset, otherwise replace the dataset
          */
-        receivedData : function (data) {
+        receivedData : function (data, append) {
             // Skip data refresh if we're in the middle of a column resize or possibly moving the scrollbar
             /*  if (this.isMouseDown || $("#grayout").css("display") !== "none") {
              return;
@@ -696,13 +706,21 @@ var ATable = (function () {
             if (!this.rows.init) {
                 this.rows.init = true;
             }
-            var comp = this.rows.comparator;
-            this.rows.__proto__.comparator = null;
+            //var comp = this.rows.comparator;
+            //this.rows.__proto__.comparator = null;
+            var rows = [];
             for (var i = 0; i < data.length; i++) {
-                this.rows.add({row : data[i]}, {silent : true});
+                rows.push(new Row({row : data[i]}));
+                //this.rows.add({row : data[i]}, {silent : true});
             }
-            this.rows.__proto__.comparator = comp;
-            this.rows.trigger("reset");
+            //this.rows.__proto__.comparator = comp;
+            if (append) {
+                this.rows.add(rows);
+                this.rows.trigger("reset");
+            }
+            else {
+                this.rows.reset(rows);
+            }
         },
 
         close : function () {
@@ -750,17 +768,17 @@ var ATable = (function () {
      * @return {Worker} Web worker that fetches table data on a separate thread
      */
     function createDataWorker(dataFunctionTagId, callback) {
-        if (window.Blob) {
-            var blob = new Blob([document.querySelector('#' + dataFunctionTagId).textContent, " self.onmessage=function(p){self.postMessage(fetchData(p));};"]);
+        if (window.Blob && window.Worker) {
+            var blob = new Blob([document.querySelector('#' + dataFunctionTagId).textContent, " self.onmessage=function(){fetchData();};"]);
             var url = window.URL || window.webkitURL;
             var worker = new Worker(url.createObjectURL(blob));
             worker.onmessage = function (e) {
-                callback(e.data);
+                callback(e.data.data, e.data.append);
             };
             return worker;
         }
         else {
-            throw "Support for Blob constructor required";
+            throw "Blob and Worker support required to use the web worker interface.";
         }
     }
 
