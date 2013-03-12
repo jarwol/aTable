@@ -1,5 +1,5 @@
 /*! aTable v0.1.0
- * Date: 2013-03-10
+ * Date: 2013-03-11
  * Author: Jared Wolinsky 
  */
 
@@ -332,7 +332,6 @@ var ATable = (function () {
             }
             this.height = options.height;
             this.prevScrollTop = 0;
-            this.scrollbarWidth = getScrollbarWidth();
         },
 
         events : {
@@ -444,7 +443,7 @@ var ATable = (function () {
                     var width = this.columns.at(j).get('element')[0].style.width;
                     width = width.substr(0, width.length - 2);
                     if (j == this.columns.length - 1) {
-                        width -= (this.scrollbarWidth - 1);
+                        width -= this.scrollbarWidth;
                     }
                     div.style.width = width + "px";
                     var text = document.createTextNode(this.rows.getValue(i, j));
@@ -647,7 +646,7 @@ var ATable = (function () {
             if (!col) {
                 throw "Invalid column index: " + columnIndex;
             }
-            col.get('element')[0].style.width = newWidth + "px";
+            //col.get('element')[0].style.width = newWidth + "px";
             col.set('width', newWidth);
             this.reRenderTable = true;
             this.render(callback);
@@ -876,15 +875,6 @@ var ATable = (function () {
             }
         },
 
-        saveMouseState : function (event) {
-            if (event.which === 1) {
-                this.isMouseDown = true;
-            }
-            else {
-                this.isMouseDown = false;
-            }
-        },
-
         /**
          * Generate the actual table markup
          * @param {object} params Parameters needed to render the table
@@ -959,9 +949,6 @@ var ATable = (function () {
                 body += '<tr>';
                 for (var k = 0; k < params.rows[j].row.length; k++) {
                     var width = params.columns[k].width;
-                    if (j === params.rows[j].row.length - 1) {
-                        width -= (this.scrollbarWidth + 2);
-                    }
                     body += '<td><div style="width: ' + width + 'px;">' + params.rows[j].row[k] + '</div></td>';
                 }
                 body += '</tr>';
@@ -969,6 +956,11 @@ var ATable = (function () {
             body += "<tr style='height: " + (this.rowHeight * (this.rows.length - this.visibleRows - BUFFER_ROWS) - topRowHeight) + "px;'></tr>";
             thead.innerHTML = headerRow;
             tbody.innerHTML = body;
+            this.scrollbarWidth = getScrollbarWidth(tbody);
+            if (this.scrollbarWidth > 0) {
+                var lastColWidth = this.columns.at(this.columns.length - 1).get('width');
+                $(tbody).find('td:last-child>div').width(lastColWidth - this.scrollbarWidth);
+            }
         },
 
         /**
@@ -977,10 +969,6 @@ var ATable = (function () {
          * @param {boolean} append if true, append new rows to the dataset, otherwise replace the dataset
          */
         receivedData : function (data, append) {
-            // Skip data refresh if we're in the middle of a column resize or possibly moving the scrollbar
-            /*  if (this.isMouseDown || $("#grayout").css("display") !== "none") {
-             return;
-             }*/
             this.scrollTop = this.$el.find(".table").scrollTop();
             if (!this.rows.init) {
                 this.rows.init = true;
@@ -1030,6 +1018,11 @@ var ATable = (function () {
         return -1;
     }
 
+    /**
+     * Ensure that required parameters are passed into the constructor correctly
+     * @param {object} options hash of parameters
+     * @returns {string} if parameters are valid, return null. if invalid, return message describing the invalid parameter
+     */
     function validateTableArgs(options) {
         if (options.columns !== null && options.columns.length === 0) {
             return "Columns array missing or empty";
@@ -1100,16 +1093,12 @@ var ATable = (function () {
     }
 
     /**
-     * Get the width of the scrollbar
-     * @return {Number} width in pixels
+     * Get the width of the scrollbar, if it's present
+     * @param {HTMLElement} elt element to check the scrollbar width
+     * @return {int} width in pixels
      */
-    function getScrollbarWidth() {
-        var scrollDiv = document.createElement("div");
-        scrollDiv.className = "atable-scrollbar-measure";
-        document.body.appendChild(scrollDiv);
-        var scrollbarWidth = scrollDiv.offsetWidth - scrollDiv.clientWidth;
-        document.body.removeChild(scrollDiv);
-        return scrollbarWidth;
+    function getScrollbarWidth(elt) {
+        return elt ? elt.offsetWidth - elt.clientWidth : 0;
     }
 
     /**
