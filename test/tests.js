@@ -52,6 +52,19 @@ asyncTest("Initial render 0 rows", 4, function () {
     });
 });
 
+asyncTest("Dynamic data source", 2, function () {
+    var table = createTable('fetchDataMultiple', 4);
+    table.render(function () {
+        setTimeout(function () {
+            start();
+            equal(table.rows.length, 50, "table.rows should have 50 rows");
+            var rows = table.tbodyElt.find("tr");
+            var expectedRows = table.visibleRows + BUFFER_ROWS + 2;
+            equal(rows.length, expectedRows, "DOM table should have " + expectedRows + " rows");
+        }, 100);
+    });
+});
+
 asyncTest("Remove rows", 5, function () {
     var table = createTable('fetchData100Rows1Col', 1);
     table.render(function () {
@@ -90,6 +103,31 @@ asyncTest("Scroll table", 32, function () {
         scrollAndTestContents(table, table.rows.length * table.rowHeight);
         // Scroll up a lot
         scrollAndTestContents(table, 100);
+    });
+});
+
+asyncTest("Scroll table - dynamic data source", 32, function () {
+    var table = createTable('fetchDataMultiple', 4);
+    table.render(function () {
+        setTimeout(function () {
+            start();
+            // Scroll down, but not enough to render any new rows in the table
+            scrollAndTestContents(table, 4);
+            // Scroll down enough to render new rows
+            scrollAndTestContents(table, 300);
+            // Scroll back up some
+            scrollAndTestContents(table, 200);
+            // Scroll up more
+            scrollAndTestContents(table, 100);
+            // Scroll up to the top
+            scrollAndTestContents(table, 0);
+            // Scroll down past the visibleRows + BUFFER_ROWS mark
+            scrollAndTestContents(table, table.rowHeight * (table.visibleRows + BUFFER_ROWS) + 50);
+            // Scroll to the bottom
+            scrollAndTestContents(table, table.rows.length * table.rowHeight);
+            // Scroll up a lot
+            scrollAndTestContents(table, 100);
+        }, 100);
     });
 });
 

@@ -35,7 +35,7 @@
 
 .atable th {
     background: #e2e2e2;
-    font-size: 12;
+    font-size: 12pt;
     cursor: default;
 }
 
@@ -45,10 +45,6 @@
 
 .atable td:first-child, .atable th:first-child {
     border-left: none;
-}
-
-.atable td:last-child {
-    //border-right: none;
 }
 
 .atable tr:last-child td {
@@ -71,12 +67,4 @@
     position: absolute;
     background: gray;
     opacity: .5;
-}
-
-.atable-scrollbar-measure {
-    width: 100px;
-    height: 100px;
-    overflow: scroll;
-    position: absolute;
-    top: -9999px;
 }

@@ -64,14 +64,13 @@
         function fetchData() {
             var count = 0;
             var interval = setInterval(function () {
-                if (count >= 5) clearInterval(interval);
-                count++;
+                if (count >= 40) clearInterval(interval);
                 var rows = [];
-                for (var i = 0; i < 10; i++) {
-                    rows.push([i * count, (i * count) + 1, (i * count) + 2, (i * count) + 3]);
+                for (var i = 1; i <= 10; i++, count += 4) {
+                    rows.push([count, count + 1, count + 2, count + 3]);
                 }
                 self.postMessage({data : rows, append : true});
-            }, 500);
+            }, 1);
         }
     </script>
 </head>

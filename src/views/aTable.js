@@ -22,6 +22,7 @@ var ATable = (function () {
         initialize : function (options) {
             _.bindAll(this);
             this.reRenderTable = true;
+            this.dataAppended = false;
             var err = validateTableArgs(options);
             if (err) throw err;
             setDefaultParameters(options);
@@ -87,6 +88,9 @@ var ATable = (function () {
                 this.reRenderTable = false;
                 params.columns = this.columns.toJSON();
                 params.rows = getRowData(this.rows);
+                if (this.tbodyElt) {
+                    this.prevScrollTop = this.tbodyElt[0].scrollTop;
+                }
                 this.generateTableHtml(params);
                 var cols = this.tableElt.find("th");
                 for (var i = 0; i < cols.length; i++) {
@@ -114,11 +118,12 @@ var ATable = (function () {
 
         /**
          * Add/remove rows from the DOM, or replace data in the current rows
-         * @param {number} prevScrollTop previous scrollTop value in pixels
-         * @param {number} scrollTop current scrollTop value in pixels
+         * @param {int} prevScrollTop previous scrollTop value in pixels
+         * @param {int} scrollTop current scrollTop value in pixels
          */
         renderRows : function (prevScrollTop, scrollTop) {
             var first, last;
+            var max = this.visibleRows + BUFFER_ROWS;
             if (scrollTop < prevScrollTop) {
                 first = this.rowRange.first;
                 last = this.rowRange.prevFirst;
@@ -128,6 +133,7 @@ var ATable = (function () {
                 }
                 this.removeRows(last - first, false);
                 this.addRows(first, last, true);
+                adjustBufferRowHeights(this.tbodyElt[0], this.rows, this.rowHeight, this.rowRange.first);
             }
             else if (scrollTop > prevScrollTop) {
                 first = this.rowRange.prevLast;
@@ -139,62 +145,63 @@ var ATable = (function () {
                 }
                 this.removeRows(last - first, true);
                 this.addRows(first, last, false);
+                adjustBufferRowHeights(this.tbodyElt[0], this.rows, this.rowHeight, this.rowRange.first);
+            }
+            else if (this.dataAppended) {
+                this.dataAppended = false;
+                if (this.rowRange.last < this.rows.length && this.rowRange.last < max) {
+                    first = this.rowRange.last;
+                    last = this.rows.length;
+                    if (last > max) last = max;
+                    this.addRows(first, last, false);
+                    this.rowRange.last = last;
+                }
+                adjustBufferRowHeights(this.tbodyElt[0], this.rows, this.rowHeight, this.rowRange.first);
             }
             else {
                 this.refreshRows(this.rowRange.first);
+                return;
+            }
+            this.scrollbarWidth = getScrollbarWidth(this.tbodyElt[0]);
+            if (this.scrollbarWidth > 0) {
+                var lastColWidth = this.columns.at(this.columns.length - 1).get('width');
+                this.tbodyElt.find('td:last-child>div').width(lastColWidth - this.scrollbarWidth);
             }
             this.prevScrollTop = this.tbodyElt[0].scrollTop;
         },
 
         /**
          * Append or prepend table rows to the DOM
-         * @param {number} start index in the row data collection of the first row to add
-         * @param {number} end index in the row data collection of the last row to add
+         * @param {int} start index in the row data collection of the first row to add
+         * @param {int} end index in the row data collection of the last row to add
          * @param {boolean} prepend add rows to the beginning of the table
          */
         addRows : function (start, end, prepend) {
             var firstRow = this.tbodyElt[0].firstChild;
             var lastRow = this.tbodyElt[0].lastChild;
-            var rowToInsertBefore = firstRow.nextSibling;
-            var sizeChange = Math.abs(this.rowRange.first - this.rowRange.prevFirst) * this.rowHeight;
+            var rowToInsertBefore = prepend ? firstRow.nextElementSibling : lastRow;
             for (var i = start; i < end; i++) {
-                var tr = document.createElement("tr");
-                for (var j = 0; j < this.columns.length; j++) {
-                    var div = document.createElement("div");
-                    var width = this.columns.at(j).get('element')[0].style.width;
-                    width = width.substr(0, width.length - 2);
-                    if (j == this.columns.length - 1) {
-                        width -= this.scrollbarWidth;
-                    }
-                    div.style.width = width + "px";
-                    var text = document.createTextNode(this.rows.getValue(i, j));
-                    var td = document.createElement("td");
-                    div.appendChild(text);
-                    td.appendChild(div);
-                    tr.appendChild(td);
-                }
-                if (prepend) {
-                    this.tbodyElt[0].insertBefore(tr, rowToInsertBefore);
-                }
-                else {
-                    this.tbodyElt[0].insertBefore(tr, lastRow);
-                }
+                this.addRow(i, rowToInsertBefore);
             }
-            if (sizeChange > 0) {
-                var topHeight, bottomHeight;
-                if (prepend) {
-                    bottomHeight = lastRow.style.height;
-                    lastRow.style.height = Number(bottomHeight.substr(0, bottomHeight.length - 2)) + sizeChange + "px";
-                    topHeight = firstRow.style.height;
-                    firstRow.style.height = Number(topHeight.substr(0, topHeight.length - 2)) - sizeChange + "px";
-                }
-                else {
-                    bottomHeight = lastRow.style.height;
-                    lastRow.style.height = Number(bottomHeight.substr(0, bottomHeight.length - 2)) - sizeChange + "px";
-                    topHeight = firstRow.style.height;
-                    firstRow.style.height = Number(topHeight.substr(0, topHeight.length - 2)) + sizeChange + "px";
-                }
+        },
+
+        /**
+         * Add a new row to the DOM
+         * @param {int} index which row in the RowCollection to add to the DOM
+         * @param {Node} rowToInsertBefore DOM row that the new row will precede
+         */
+        addRow : function (index, rowToInsertBefore) {
+            var tr = document.createElement("tr");
+            for (var i = 0; i < this.columns.length; i++) {
+                var div = document.createElement("div");
+                var width = this.columns.at(i).get('width');
+                div.style.width = width + "px";
+                div.innerHTML = this.rows.getValue(index, i);
+                var td = document.createElement("td");
+                td.appendChild(div);
+                tr.appendChild(td);
             }
+            this.tbodyElt[0].insertBefore(tr, rowToInsertBefore);
         },
 
         /**
@@ -227,6 +234,11 @@ var ATable = (function () {
          */
         refreshRows : function (firstRow) {
             var rows = this.tbodyElt[0].getElementsByTagName("tr");
+            var domRowsCount = rows.length - 2;
+            if (domRowsCount < this.visibleRows + BUFFER_ROWS * 2 && domRowsCount < this.rows.length) {
+                this.addRows(this.rowRange.prevFirst, this.rowRange.last, true);
+            }
+            rows = this.tbodyElt[0].getElementsByTagName("tr");
             for (var i = 1; i < rows.length - 1; i++) {
                 var tr = rows[i];
                 var tdList = tr.getElementsByTagName("div");
@@ -367,7 +379,6 @@ var ATable = (function () {
             if (!col) {
                 throw "Invalid column index: " + columnIndex;
             }
-            //col.get('element')[0].style.width = newWidth + "px";
             col.set('width', newWidth);
             this.reRenderTable = true;
             this.render(callback);
@@ -396,17 +407,19 @@ var ATable = (function () {
          * @param {jQuery.Event} e jQuery scroll event
          */
         onTableScrolled : function (e) {
-            var firstRow = parseInt(e.target.scrollTop / this.rowHeight, 10) - BUFFER_ROWS;
-            this.rowRange.prevFirst = this.rowRange.first;
-            this.rowRange.prevLast = this.rowRange.last;
-            if (firstRow < 0) firstRow = 0;
-            this.rowRange.first = firstRow;
-            this.rowRange.last = firstRow + this.visibleRows + BUFFER_ROWS;
-            if (this.rowRange.last > this.rows.length) {
-                this.rowRange.last = this.rows.length;
-                this.rowRange.first = this.rowRange.last - this.visibleRows - BUFFER_ROWS;
+            if (this.prevScrollTop !== e.target.scrollTop) {
+                var firstRow = parseInt(e.target.scrollTop / this.rowHeight, 10) - BUFFER_ROWS;
+                if (firstRow < 0) firstRow = 0;
+                this.rowRange.prevFirst = this.rowRange.first;
+                this.rowRange.prevLast = this.rowRange.last;
+                this.rowRange.first = firstRow;
+                this.rowRange.last = firstRow + this.visibleRows + BUFFER_ROWS;
+                if (this.rowRange.last > this.rows.length) {
+                    this.rowRange.last = this.rows.length;
+                    this.rowRange.first = this.rowRange.last - this.visibleRows - BUFFER_ROWS;
+                }
+                this.renderRows(this.prevScrollTop, e.target.scrollTop);
             }
-            this.renderRows(this.prevScrollTop, e.target.scrollTop);
         },
 
         /**
@@ -657,11 +670,15 @@ var ATable = (function () {
                 this.visibleRows = parseInt(this.height / this.rowHeight, 10);
             }
             if (!this.rowRange) {
+                var last = this.visibleRows + BUFFER_ROWS;
+                if (last > params.rows.length) {
+                    last = params.rows.length;
+                }
                 this.rowRange = {
                     first : 0,
-                    last : this.visibleRows + BUFFER_ROWS,
+                    last : last,
                     prevFirst : 0,
-                    prevLast : this.visibleRows + BUFFER_ROWS
+                    prevLast : last
                 };
             }
 
@@ -674,12 +691,12 @@ var ATable = (function () {
                 }
                 body += '</tr>';
             }
-            body += "<tr style='height: " + (this.rowHeight * (this.rows.length - this.visibleRows - BUFFER_ROWS) - topRowHeight) + "px;'></tr>";
+            body += "<tr style='height: " + (this.rowHeight * (params.rows.length - this.visibleRows - BUFFER_ROWS) - topRowHeight) + "px;'></tr>";
             thead.innerHTML = headerRow;
             tbody.innerHTML = body;
             this.scrollbarWidth = getScrollbarWidth(tbody);
             if (this.scrollbarWidth > 0) {
-                var lastColWidth = this.columns.at(this.columns.length - 1).get('width');
+                var lastColWidth = params.columns[params.columns.length - 1].width;
                 $(tbody).find('td:last-child>div').width(lastColWidth - this.scrollbarWidth);
             }
         },
@@ -694,28 +711,51 @@ var ATable = (function () {
             if (!this.rows.init) {
                 this.rows.init = true;
             }
-            //var comp = this.rows.comparator;
-            //this.rows.__proto__.comparator = null;
             var rows = [];
             for (var i = 0; i < data.length; i++) {
                 rows.push(new Row({row : data[i]}));
-                //this.rows.add({row : data[i]}, {silent : true});
             }
-            //this.rows.__proto__.comparator = comp;
             if (append) {
+                this.dataAppended = true;
                 this.rows.add(rows);
                 this.rows.trigger("reset");
             }
             else {
+                this.reRenderTable = true;
                 this.rows.reset(rows);
             }
         },
 
+        /**
+         * Remove this aTable from the DOM, and unbind all events
+         */
         close : function () {
             this.remove();
             this.unbind();
         }
     });
+
+    /**
+     * Set the heights of the top and bottom buffer row in order to keep the scrollbar size/position correct
+     * @param {HTMLElement} tbody the table's tbody element
+     * @param {RowCollection} rows the collection of Row models
+     * @param {int} rowHeight height of a row in pixels
+     * @param {int} firstRowIdx index in the row collection of the first rendered row
+     */
+    function adjustBufferRowHeights(tbody, rows, rowHeight, firstRowIdx) {
+        var domRowCount = tbody.childElementCount - 2;
+        var bufferHeight = (rows.length - domRowCount) * rowHeight;
+        if (bufferHeight < 0) {
+            tbody.firstChild.style.height = 0;
+            tbody.lastChild.style.height = 0;
+        }
+        else {
+            var topHeight = firstRowIdx * rowHeight;
+            var bottomHeight = bufferHeight - topHeight;
+            tbody.firstChild.style.height = topHeight + "px";
+            tbody.lastChild.style.height = bottomHeight + "px";
+        }
+    }
 
     /**
      * Gets thet index of the column which is in resize position
