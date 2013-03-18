@@ -4,7 +4,7 @@ function createTable(dataFunc, cols) {
         columns.push({name : "Column " + i});
     }
     return new ATable({
-        fetchData : dataFunc,
+        dataFunction : dataFunc,
         columns : columns,
         el : "#qunit-fixture",
         height : 300
@@ -54,6 +54,30 @@ asyncTest("Initial render 0 rows", 4, function () {
 
 asyncTest("Dynamic data source", 2, function () {
     var table = createTable('fetchDataMultiple', 4);
+    table.render(function () {
+        setTimeout(function () {
+            start();
+            equal(table.rows.length, 50, "table.rows should have 50 rows");
+            var rows = table.tbodyElt.find("tr");
+            var expectedRows = table.visibleRows + BUFFER_ROWS + 2;
+            equal(rows.length, expectedRows, "DOM table should have " + expectedRows + " rows");
+        }, 100);
+    });
+});
+
+asyncTest("Dynamic data source - callback function", 2, function () {
+    var table = createTable(function (atable) {
+        var count = 0;
+        var interval = setInterval(function () {
+            if (count >= 40) clearInterval(interval);
+            var rows = [];
+            for (var i = 1; i <= 10; i++, count += 4) {
+                rows.push([count, count + 1, count + 2, count + 3]);
+            }
+            atable.receivedData(rows, true);
+        }, 1);
+    }, 4);
+    
     table.render(function () {
         setTimeout(function () {
             start();

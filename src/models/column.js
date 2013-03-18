@@ -1,5 +1,13 @@
-/**
- * Backbone Model representation of a table column
- * @type {Column}
- */
-var Column = Backbone.Model.extend({});
+var Column = Backbone.Model.extend(
+    /** @lends Column.prototype */
+    {
+        /**
+         * @class Backbone Model representation of a table column
+         * @augments Backbone.Model
+         * @constructs
+         */
+        initialize : function () {
+
+        }
+    }
+);

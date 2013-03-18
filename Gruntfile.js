@@ -4,8 +4,7 @@ module.exports = function (grunt) {
         "src/models/row.js",
         "src/collections/columnCollection.js",
         "src/collections/rowCollection.js",
-        "src/views/aTable.js",
-        "src/util.js"];
+        "src/views/aTable.js"];
 
     grunt.initConfig({
         pkg : grunt.file.readJSON('package.json'),
@@ -40,6 +39,15 @@ module.exports = function (grunt) {
                     'dist/atable.min.js' : 'dist/atable.js'
                 }
             }
+        },
+        jsdoc : {
+            dist : {
+                src : ['src/**/*.js', '!src/lib/*'],
+                options : {
+                    destination : 'doc',
+                    private : false
+                }
+            }
         }
     });
 
@@ -47,8 +55,10 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-qunit');
+    grunt.loadNpmTasks('grunt-jsdoc');
 
     // Default task(s).
-    grunt.registerTask('default', ['jshint', 'concat', 'uglify']);
+    grunt.registerTask('default', ['jshint', 'concat', 'uglify', 'jsdoc']);
+    grunt.registerTask('docs', ['concat', 'jsdoc']);
 
 };

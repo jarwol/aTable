@@ -1,9 +1,16 @@
-/**
- * Backbone Collection of Row models, representing the dataset of the table
- * @type {RowCollection}
- */
 var RowCollection = (function () {
-    return Backbone.Collection.extend({
+    return Backbone.Collection.extend(
+        /** @lends RowCollection.prototype */
+        {
+            /**
+             * @class Backbone Collection of {@link Row} models representing the dataset of the table
+             * @augments Backbone.Collection
+             * @constructs
+             * @param models initial set of {@link Row} models to add to the collection 
+             * @param {Object} options hash of parameters
+             * @param {int} [options.sortColumn] index of the column by which to sort the table
+             * @param {boolean} [options.sortDescending=false] if true, sort the rows in descending order
+             */
         initialize : function (models, options) {
             this.columnOrder = [];
             if (options) {
@@ -22,9 +29,9 @@ var RowCollection = (function () {
         model : Row,
 
         /**
-         * Get the table value from a (row, col) index, taking into account possible re-ordering of the columns
-         * @param {number} rowIdx the row index of the cell
-         * @param {number} colIdx the column index of the cell in the rendered table
+         * Get the table value at position (rowIdx, colIdx)
+         * @param {int} rowIdx the row index of the cell
+         * @param {int} colIdx the column index of the cell in the DOM table
          * @return {*} the value of the table cell at index (row, col)
          */
         getValue : function (rowIdx, colIdx) {
@@ -34,9 +41,9 @@ var RowCollection = (function () {
         },
 
         /**
-         * Get the row values at a given index, taking into account possible re-ordering of the columns
-         * @param {number} idx the row index
-         * @return {Array} correctly-ordered array of row values
+         * Get the row values at a given index
+         * @param {int} idx the row index
+         * @return {Array} array of values in the row
          */
         getRow : function (idx) {
             var row = this.at(idx).get('row');
@@ -49,9 +56,9 @@ var RowCollection = (function () {
         },
 
         /**
-         * Get the actual column index in the column collection based on the index in the rendered table
-         * @param {number} col the index of the column in the rendered table
-         * @return {number} the column index in the collection
+         * Get the actual column index in the column collection from the index in the DOM table
+         * @param {int} col the index of the column in the DOM table
+         * @return {int} the column index in the collection
          */
         getColumnIndex : function (col) {
             return this.columnOrder[col];
@@ -59,8 +66,9 @@ var RowCollection = (function () {
 
         /**
          * Re-order the columns after a column move operation
-         * @param {number} src source index of the column
-         * @param {number} dest destination index of the column
+         * @private
+         * @param {int} src source index of the column
+         * @param {int} dest destination index of the column
          */
         moveColumn : function (src, dest) {
             if (src < dest) {
@@ -89,7 +97,8 @@ var RowCollection = (function () {
 
         /**
          * Set the sort column of the row matrix
-         * @param {number} col index of the sort column in the rendered table
+         * @private
+         * @param {int} col index of the sort column in the rendered table
          */
         setSortColumn : function (col) {
             if (this.sortColumn === col) {
@@ -102,8 +111,9 @@ var RowCollection = (function () {
 
         /**
          * Comparator function to sort rows according to the sort column its datatype
+         * @private
          * @param {Row} row row model to sort
-         * @return {number} value to be compared against other rows to determine sorting
+         * @return {int} value to be compared against other rows to determine sorting
          */
         comparator : function (row) {
             var val = row.get('row')[this.columnOrder[this.sortColumn]];
@@ -142,9 +152,10 @@ var RowCollection = (function () {
 
     /**
      * Swap two elements in an array
+     * @private
      * @param {Array} arr the array
-     * @param {number} i first element's index
-     * @param {number} j second element's index
+     * @param {int} i first element's index
+     * @param {int} j second element's index
      */
     function swap(arr, i, j) {
         var tmp = arr[i];

@@ -1,9 +1,15 @@
-/**
- * Backbone model representation of a table row
- * @type {Row}
- */
-var Row = Backbone.Model.extend({
-    defaults : {
-        row : []
-    }
-});
+var Row = Backbone.Model.extend(
+    /** @lends Row.prototype */
+    {
+        /**
+         * @class Backbone Model representation of a table row
+         * @augments Backbone.Model
+         * @constructs
+         */
+        initialize : function () {
+        },
+        
+        defaults : {
+            row : []
+        }
+    });
