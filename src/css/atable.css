@@ -1,6 +1,7 @@
 .atableParent {
     border: solid thin silver;
     border-right: none;
+    border-bottom: none;
 }
 
 .atable {
@@ -15,6 +16,7 @@
 .atable tbody {
     overflow-y: auto;
     overflow-x: hidden;
+    border-bottom: solid thin silver;
 }
 
 .atable thead>tr, tbody {

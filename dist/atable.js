@@ -1,5 +1,5 @@
 /*! aTable v0.1.0
- * Date: 2013-03-17
+ * Date: 2013-03-18
  * Author: Jared Wolinsky 
  */
 
@@ -567,9 +567,6 @@ var ATable = (function () {
             refreshRows : function (firstRow) {
                 var rows = this.tbodyElt[0].getElementsByTagName("tr");
                 var domRowsCount = rows.length - 2;
-                if (domRowsCount < this.visibleRows + BUFFER_ROWS * 2 && domRowsCount < this.rows.length) {
-                    this.addRows(this.rowRange.prevFirst, this.rowRange.last, true);
-                }
                 rows = this.tbodyElt[0].getElementsByTagName("tr");
                 for (var i = 1; i < rows.length - 1; i++) {
                     var tr = rows[i];
@@ -989,7 +986,7 @@ var ATable = (function () {
                 var thead = document.createElement("thead");
                 table.appendChild(thead);
                 var tbody = document.createElement("tbody");
-                tbody.style.height = this.height + "px";
+                tbody.style.maxHeight = this.height + "px";
                 table.appendChild(tbody);
                 var grayout = document.createElement("div");
                 grayout.id = "grayout";
