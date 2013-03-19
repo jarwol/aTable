@@ -7,7 +7,7 @@ var ATable = (function () {
         /** @lends ATable.prototype */
         {
             /**
-             * @class The master Backbone View that instantiates the table. The constructor accepts a hash of parameters.
+             * @class ATable The master Backbone View that instantiates the table. The constructor accepts a hash of parameters.
              * @augments Backbone.View
              * @constructs
              * @param {Object} options hash of parameters
@@ -22,7 +22,7 @@ var ATable = (function () {
              * <li>{String} the id of a <strong>&lt;script&gt;</strong> element containing a function called <strong>fetchData</strong> which is responsible for generating the table's dataset.
              * The function should call <strong>self.postMessage(rows, append);</strong> where <i>rows</i> is a 2-dimensional array of table values. If <i>append</i> is true, rows will be added to the table.
              * If false, the rows will completely replace the existing table.</li>
-             * <li>{Function} a function responsible for generating the table's dataset. It should call <strong>this.receivedData(rows, append);</strong></li><br/>
+             * <li>{Function} a function responsible for generating the table's dataset. It should have one parameter, <strong>atable</strong>, and call <strong>atable.receivedData(rows, append);</strong> to deliver data to the table</li><br/>
              * *Note that both methods of returning table data may do so many times (e.g. a loop that continuously uses ajax polling to get new data from the server).
              * @param {String} options.el CSS selector of the DOM element in which to insert the rendered table
              * @param {int} options.height max height of the table in pixels
@@ -38,7 +38,6 @@ var ATable = (function () {
                 }
                 else if (typeof options.dataFunction === "function") {
                     this.dataFunction = options.dataFunction;
-                    //_.bind(this.dataFunction, this);
                 }
                 this.reRenderTable = true;
                 this.dataAppended = false;
@@ -46,7 +45,6 @@ var ATable = (function () {
                 if (err) throw err;
                 setDefaultParameters(options);
                 this.availableColumnsArray = [];
-
                 this.availableColumnsHash = {};
                 this.columns = initColumns(this, options);
                 this.columns.bind("reset", this.render, this);
@@ -83,7 +81,7 @@ var ATable = (function () {
 
             /**
              * Generates the ATable and adds it to the DOM
-             * @param {function} callback function to call when the ATable is rendered
+             * @param {function} [callback] function to call when the ATable is rendered
              * @return {ATable} a reference to this ATable
              */
             render : function (callback) {
@@ -515,9 +513,7 @@ var ATable = (function () {
                     // subtract 5 from width because if the grayout div overlaps the cursor, dragend is immediately invoked
                     var width = target.width() - diff + Number(leftPad.substring(0, leftPad.length - 2))
                         + Number(rightPad.substring(0, rightPad.length - 2)) - 5;
-                    var gray = $("#grayout");
-                    gray.css("display", "block").css("left", left).css("top", posCol.top - 1).css("height", height)
-                        .css("width", width).attr('title', target[0].cellIndex);
+                    var gray = createResizeIndicator();
                     // Firefox doesn't provide mouse coordinates in the 'drag' event, so we must use a document-level
                     // 'dragover' as a workaround
                     document.addEventListener('dragover', this.onResizeGrayout);
@@ -656,15 +652,17 @@ var ATable = (function () {
                 }
                 var headerRow = '<tr>';
                 for (var i = 0; i < params.columns.length; i++) {
-                    var widthStr = '';
-                    var classStr = '';
-                    if (params.columns[i].width) {
-                        widthStr = 'style="width: ' + (params.columns[i].width) + 'px;"';
+                    if (params.columns[i].visible) {
+                        var widthStr = '';
+                        var classStr = '';
+                        if (params.columns[i].width) {
+                            widthStr = 'style="width: ' + (params.columns[i].width) + 'px;"';
+                        }
+                        if (params.columns[i].sortable) {
+                            classStr = ' className="sortable"';
+                        }
+                        headerRow += '<th draggable="true" ' + widthStr + classStr + '><div>' + params.columns[i].label + '</div></th>';
                     }
-                    if (params.columns[i].sortable) {
-                        classStr = ' className="sortable"';
-                    }
-                    headerRow += '<th draggable="true" ' + widthStr + classStr + '><div>' + params.columns[i].name + '</div></th>';
                 }
                 headerRow += '</tr>';
 
@@ -736,8 +734,8 @@ var ATable = (function () {
             },
 
             /**
-             * Update the row collection with new data from the data worker
-             * @param {Array[]} data matrix of row data returned by the data worker
+             * Update the row collection with new data from the data function
+             * @param {Array[]} data matrix of row data returned by the data function
              * @param {boolean} append if true, append new rows to the dataset, otherwise replace the dataset
              */
             receivedData : function (data, append) {
@@ -864,13 +862,19 @@ var ATable = (function () {
         var columns = options.columns;
         for (var i = 0; i < columns.length; i++) {
             if (typeof columns[i].width === "undefined") {
-                columns[i].width = getTextWidth(columns[i].name) + 20;
+                columns[i].width = getTextWidth(columns[i].label) + 20;
             }
             if (typeof columns[i].resizable === "undefined") {
                 columns[i].resizable = options.resizableColumns;
             }
             if (typeof columns[i].sortable === "undefined") {
                 columns[i].sortable = options.sortable;
+            }
+            if (typeof columns[i].label === "undefined") {
+                columns[i].label = columns[i].name;
+            }
+            if (typeof columns[i].visible === "undefined") {
+                columns[i].visible = true;
             }
             columns[i].order = i;
             table.availableColumnsArray.push(columns[i].name);

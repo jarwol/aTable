@@ -11,8 +11,13 @@
     <script type="text/javascript" src="lib/backbone.js"></script>
     <script type="text/javascript" src="../dist/atable.js"></script>
     <script type="text/javascript" src="demo.js"></script>
-    <script type="text/javascript" id="fetchData">
+    <script type="text/javascript" id="worker10Rows">
         function fetchData() {
+            var ajax = new XMLHttpRequest();
+            ajax.open("GET", "/randomdata.csv", false);
+            ajax.send();
+            var resp = ajax.responseText;
+
             var rows = [];
             for (var i = 0; i < 10000; i += 4) {
                 rows.push([i, i + 1, i + 2, i + 3]);
@@ -35,7 +40,9 @@
     </script>
 </head>
 <body>
-<div id="content">
+<div id="staticData10Rows">
+</div>
+<div id="staticData100000Rows">
 </div>
 </body>
 </html>

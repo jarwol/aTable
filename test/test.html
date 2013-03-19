@@ -66,8 +66,8 @@
             var interval = setInterval(function () {
                 if (count >= 40) clearInterval(interval);
                 var rows = [];
-                for (var i = 1; i <= 10; i++, count += 4) {
-                    rows.push([count, count + 1, count + 2, count + 3]);
+                for (var i = 1; i <= 10; i++, count++) {
+                    rows.push([count]);
                 }
                 self.postMessage({data : rows, append : true});
             }, 1);

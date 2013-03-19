@@ -53,7 +53,7 @@ asyncTest("Initial render 0 rows", 4, function () {
 });
 
 asyncTest("Dynamic data source", 2, function () {
-    var table = createTable('fetchDataMultiple', 4);
+    var table = createTable('fetchDataMultiple', 1);
     table.render(function () {
         setTimeout(function () {
             start();
@@ -71,13 +71,13 @@ asyncTest("Dynamic data source - callback function", 2, function () {
         var interval = setInterval(function () {
             if (count >= 40) clearInterval(interval);
             var rows = [];
-            for (var i = 1; i <= 10; i++, count += 4) {
-                rows.push([count, count + 1, count + 2, count + 3]);
+            for (var i = 1; i <= 10; i++, count++) {
+                rows.push([count]);
             }
             atable.receivedData(rows, true);
         }, 1);
-    }, 4);
-    
+    }, 1);
+
     table.render(function () {
         setTimeout(function () {
             start();
@@ -131,7 +131,7 @@ asyncTest("Scroll table", 32, function () {
 });
 
 asyncTest("Scroll table - dynamic data source", 32, function () {
-    var table = createTable('fetchDataMultiple', 4);
+    var table = createTable('fetchDataMultiple', 1);
     table.render(function () {
         setTimeout(function () {
             start();
@@ -226,7 +226,7 @@ asyncTest("Resize columns", 22, function () {
     });
 });
 
-asyncTest("Sort columns", 38, function () {
+asyncTest("Sort table", 38, function () {
     var table = createTable('fetchData4Rows4Cols', 4);
     table.render(function () {
         start();

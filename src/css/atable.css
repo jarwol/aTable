@@ -64,7 +64,7 @@
     padding: 20px 20px 10px 20px;
 }
 
-#grayout {
+.grayout {
     display: none;
     position: absolute;
     background: gray;
