@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <title>Table Demo</title>
+    <link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css"
+          rel="stylesheet">
+    <link rel="stylesheet" href="css/atable.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/backbone.js/0.9.10/backbone-min.js"></script>
+    <script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
+    <script src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+    <script src="js/atable.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var table = new ATable({
+                dataFunction : "fetchStockData",
+                columns : [
+                    {name : "symbol", label : "Symbol"},
+                    {name : "company", label : "Company Name"},
+                    {name : "close", label: "Prev. Close"},
+                    {name : "open", label : "Open"},
+                    {name : "bid", label : "Bid"},
+                    {name : "ask", label : "Ask"},
+                    {name : "notes", label : "Notes"}
+                ],
+                el : "#dynamicAjax",
+                height : 600
+            });
+            table.render();
+        });
+    </script>
+    <script type="text/javascript" id="fetchStockData">
+        function fetchStockData() {
+            var url = "http://download.finance.yahoo.com/d/quotes.csv?s=AAPL,MSFT,FB,GOOG,SIRI&f=snpoban4&e=.csv";
+            sendRequest(url);
+            var interval = setInterval(function () {
+                sendRequest(url);
+            }, 3000);
+        }
+
+        function sendRequest(url) {
+            var ajax = new XMLHttpRequest();
+            ajax.onload = function () {
+                var rows = [];
+                var resp = ajax.responseText;
+                var result = resp.split('\n');
+                for (var i = 0; i < result.length; i++) {
+                    var fields = result[i].split(',');
+                    rows.push(fields);
+                }
+                self.postMessage({data : rows});
+            };
+            ajax.open("GET", url, true);
+            ajax.responseType = "text";
+            ajax.send();
+        }
+    </script>
+</head>
+<body>
+<div class="row-fluid">
+    <div class="span4 offset4" id="dynamicAjax"></div>
+</div>
+</body>
+</html>
