@@ -7,7 +7,9 @@
 
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
@@ -17,10 +19,7 @@
       <header>
         <h1>ATable</h1>
         <p>Fast, flexible Javascript table component built on Backbone.js</p>
-
         <p class="view"><a href="https://github.com/jwoah12/aTable">View the Project on GitHub <small>jwoah12/aTable</small></a></p>
-
-
         <ul>
           <li><a href="https://github.com/jwoah12/aTable/zipball/master">Download <strong>ZIP File</strong></a></li>
           <li><a href="https://github.com/jwoah12/aTable/tarball/master">Download <strong>TAR Ball</strong></a></li>
@@ -46,14 +45,40 @@ grunt
 </li>
 <li>The styles - <code>css/atable.css</code>
 </li>
-</ul>
+</ul><p>Take advantage of the concurrency of <a href="https://developer.mozilla.org/en-US/docs/DOM/Using_web_workers">Web Workers</a> by including a function called <code>fetchData()</code> inside its own script tag.</p>
+
+<div class="highlight"><pre><span class="nt">&lt;script </span><span class="na">id=</span><span class="s">"loadMyData"</span><span class="nt">&gt;</span>
+  <span class="kd">function</span> <span class="nx">fetchData</span><span class="p">(){</span>
+    <span class="k">return</span> 
+      <span class="p">[</span>
+        <span class="p">[</span><span class="s2">"Jared"</span><span class="p">,</span> <span class="s2">"Wolinsky"</span><span class="p">,</span> <span class="mi">27</span><span class="p">,</span> <span class="s2">"867-5309"</span><span class="p">],</span>
+        <span class="p">[</span><span class="s2">"Alec"</span><span class="p">,</span> <span class="s2">"Baldwin"</span><span class="p">,</span> <span class="mi">54</span><span class="p">,</span> <span class="s2">"1-800-BALDWIN"</span><span class="p">]</span>
+      <span class="p">];</span>
+  <span class="p">}</span>
+<span class="nt">&lt;/script&gt;</span>
+</pre></div>
+
+<p>In your javascript, provide the id of your fetchData function's script tag along with column definitions and a parent element:</p>
+
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">atable</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ATable</span><span class="p">({</span>
+  <span class="nx">fetchData</span> <span class="o">:</span> <span class="s2">"loadMydata"</span><span class="p">,</span>
+  <span class="nx">columns</span> <span class="o">:</span> <span class="p">[</span>
+    <span class="p">{</span> <span class="nx">name</span> <span class="o">:</span> <span class="s2">"First Name"</span> <span class="p">},</span>
+    <span class="p">{</span> <span class="nx">name</span> <span class="o">:</span> <span class="s2">"Last Name"</span> <span class="p">},</span>
+    <span class="p">{</span> <span class="nx">name</span> <span class="o">:</span> <span class="s2">"Age"</span> <span class="p">},</span>
+    <span class="p">{</span> <span class="nx">name</span> <span class="o">:</span> <span class="s2">"Phone #"</span> <span class="p">}</span>
+  <span class="p">],</span>
+  <span class="nx">el</span> <span class="o">:</span> <span class="s2">"body"</span><span class="p">,</span>
+  <span class="nx">height</span> <span class="o">:</span> <span class="mi">400</span>
+<span class="p">}).</span><span class="nx">render</span><span class="p">();</span>
+</pre></div>
       </section>
-      <footer>
-        <p>This project is maintained by <a href="https://github.com/jwoah12">jwoah12</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
-      </footer>
     </div>
-    <script src="javascripts/scale.fix.js"></script>
+    <footer>
+      <p>Project maintained by <a href="https://github.com/jwoah12">jwoah12</a></p>
+      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
+    </footer>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
               <script type="text/javascript">
             var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
             document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
