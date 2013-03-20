@@ -6,43 +6,45 @@
     <title>Table Demo</title>
     <link rel="stylesheet" type="text/css" href="css/atable.css">
     <link rel="stylesheet" type="text/css" href="css/demo.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
     <script type="text/javascript" src="lib/jquery.js"></script>
     <script type="text/javascript" src="lib/underscore.js"></script>
     <script type="text/javascript" src="lib/backbone.js"></script>
     <script type="text/javascript" src="../dist/atable.js"></script>
     <script type="text/javascript" src="demo.js"></script>
-    <script type="text/javascript" id="worker10Rows">
-        function fetchData() {
-            var ajax = new XMLHttpRequest();
-            ajax.open("GET", "/randomdata.csv", false);
-            ajax.send();
-            var resp = ajax.responseText;
-
-            var rows = [];
-            for (var i = 0; i < 10000; i += 4) {
-                rows.push([i, i + 1, i + 2, i + 3]);
-            }
-            self.postMessage({data : rows});
-        }
-    </script>
-    <script type="text/javascript" id="fetchDataMultiple">
-        function fetchData() {
-            var count = 0;
+    <script type="text/javascript" id="fetchStockData">
+        function fetchStockData() {
+            var url = "http://download.finance.yahoo.com/d/quotes.csv?s=AAPL,MSFT,FB,GOOG,SIRI&f=snpoban4&e=.csv";
+            sendRequest(url);
             var interval = setInterval(function () {
-                if (count >= 60) clearInterval(interval);
+                sendRequest(url);
+            }, 3000);
+        }
+
+        function sendRequest(url) {
+            var ajax = new XMLHttpRequest();
+            ajax.onload = function () {
                 var rows = [];
-                for (var i = 1; i <= 10; i++, count += 4) {
-                    rows.push([count, count + 1, count + 2, count + 3]);
+                var resp = ajax.responseText;
+                var result = resp.split('\n');
+                for (var i = 0; i < result.length; i++) {
+                    var fields = result[i].split(',');
+                    rows.push(fields);
                 }
-                self.postMessage({data : rows, append : true});
-            }, 500);
+                self.postMessage({data : rows});
+            };
+            ajax.open("GET", url, true);
+            ajax.responseType = "text";
+            ajax.send();
         }
     </script>
 </head>
 <body>
-<div id="staticData10Rows">
+<div class="row">
+    <div class="span4 offset4" id="staticData10Rows"></div>
 </div>
-<div id="staticData100000Rows">
+<div class="row">
+    <div class="span4 offset4" id="dynamicAjax"></div>
 </div>
 </body>
 </html>

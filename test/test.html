@@ -11,7 +11,7 @@
     <script type="text/javascript" src="../dist/atable.js"></script>
     <script type="text/javascript" src="tests.js"></script>
     <script type="text/javascript" id="fetchData100000Rows1Col">
-        function fetchData() {
+        function fetchData100000Rows1Col() {
             var rows = [];
             for (var i = 0; i < 100000; i++) {
                 rows.push([i]);
@@ -20,7 +20,7 @@
         }
     </script>
     <script type="text/javascript" id="fetchData10Rows1Col">
-        function fetchData() {
+        function fetchData10Rows1Col() {
             var rows = [];
             for (var i = 0; i < 10; i++) {
                 rows.push([i]);
@@ -29,12 +29,12 @@
         }
     </script>
     <script type="text/javascript" id="fetchData0Rows">
-        function fetchData() {
+        function fetchData0Rows() {
             self.postMessage({data : []});
         }
     </script>
     <script type="text/javascript" id="fetchData100Rows1Col">
-        function fetchData() {
+        function fetchData100Rows1Col() {
             var rows = [];
             for (var i = 0; i < 100; i++) {
                 rows.push([i]);
@@ -43,7 +43,7 @@
         }
     </script>
     <script type="text/javascript" id="fetchData1Row4Cols">
-        function fetchData() {
+        function fetchData1Row4Cols() {
             var rows = [];
             for (var i = 0; i < 4; i += 4) {
                 rows.push([i, i + 1, i + 2, i + 3]);
@@ -52,7 +52,7 @@
         }
     </script>
     <script type="text/javascript" id="fetchData4Rows4Cols">
-        function fetchData() {
+        function fetchData4Rows4Cols() {
             var rows = [];
             for (var i = 0; i < 4; i++) {
                 rows.push([Math.floor(Math.random() * 100 + 1), Math.floor(Math.random() * 100 + 1), Math.floor(Math.random() * 100 + 1), Math.floor(Math.random() * 100 + 1)]);
@@ -61,7 +61,7 @@
         }
     </script>
     <script type="text/javascript" id="fetchDataMultiple">
-        function fetchData() {
+        function fetchDataMultiple() {
             var count = 0;
             var interval = setInterval(function () {
                 if (count >= 40) clearInterval(interval);

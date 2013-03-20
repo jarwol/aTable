@@ -7,7 +7,7 @@ var Column = Backbone.Model.extend(
          * @constructs
          */
         initialize : function () {
-
-        }
+        },
+        idAttribute : "name"
     }
 );

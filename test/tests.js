@@ -1,16 +1,3 @@
-function createTable(dataFunc, cols) {
-    var columns = [];
-    for (var i = 0; i < cols; i++) {
-        columns.push({name : "Column " + i});
-    }
-    return new ATable({
-        dataFunction : dataFunc,
-        columns : columns,
-        el : "#qunit-fixture",
-        height : 300
-    });
-}
-
 var BUFFER_ROWS = 5;
 
 module("Row rendering");
@@ -49,6 +36,28 @@ asyncTest("Initial render 0 rows", 4, function () {
         equal(table.rows.length, 0, "table.rows should have 0 rows");
         var rows = table.tbodyElt.find("tr");
         equal(rows.length, 2, "DOM table should have 2 rows");
+    });
+});
+
+asyncTest("Render with invisible column", 2, function () {
+    var table = new ATable({
+        dataFunction : function (atable) {
+            atable.receivedData([
+                [0, 1, 2]
+            ]);
+        },
+        columns : [
+            {name : "Column 1", visible : true},
+            {name : "Column 2", visible : false},
+            {name : "Column 3"}
+        ],
+        height : 300
+    });
+    table.render(function () {
+        start();
+        equal(table.columns.length, 3, "column collection should have 3 models");
+        var cols = table.tableElt.find("th");
+        equal(cols.length, 2, "there should be 2 rendered columns");
     });
 });
 
@@ -152,19 +161,6 @@ asyncTest("Scroll table - dynamic data source", 32, function () {
             // Scroll up a lot
             scrollAndTestContents(table, 100);
         }, 100);
-    });
-});
-
-asyncTest("Random scroll stress test", 4000, function () {
-    var table = createTable('fetchData100Rows1Col', 1);
-    table.render(function () {
-        start();
-        var scrollHeight = table.tbodyElt[0].scrollHeight;
-        for (var i = 1; i <= 1000; i++) {
-            var scrollTop = Math.floor(Math.random() * (scrollHeight + 1));
-            table.onTableScrolled({target : {scrollTop : scrollTop}});
-            scrollAndTestContents(table, scrollTop);
-        }
     });
 });
 
@@ -277,6 +273,23 @@ asyncTest("Move sorted columns", 25, function () {
         testSort(table, 2, true);
     });
 });
+
+/****************************************************************************************
+ * Utility functions
+ ****************************************************************************************/
+
+function createTable(dataFunc, cols) {
+    var columns = [];
+    for (var i = 0; i < cols; i++) {
+        columns.push({name : "Column " + i});
+    }
+    return new ATable({
+        dataFunction : dataFunc,
+        columns : columns,
+        el : "#qunit-fixture",
+        height : 300
+    });
+}
 
 function testSort(table, colIdx, expectDescending) {
     ok(isSorted(table), "table should be sorted");

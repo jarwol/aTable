@@ -7,7 +7,6 @@ var ColumnCollection = Backbone.Collection.extend(
          * @constructs
          */
         initialize : function () {
-            this.modelsByName = {};
         },
 
         model : Column,
@@ -22,25 +21,23 @@ var ColumnCollection = Backbone.Collection.extend(
             return col.get("order");
         },
 
-        getByName : function getByName(name) {
-            return this.modelsByName[name];
-        },
-
-        renameColumn : function renameColumn(field, newName) {
-            if (!newName) {
+        /**
+         * Change the label (display name) of a column
+         * @param {String} name unique column name
+         * @param {String} newLabel new label for the column
+         */
+        renameColumn : function renameColumn(name, newLabel) {
+            if (!newLabel) {
                 throw "Invalid column name";
             }
-            var col = this.modelsByName[field];
+            var col = this.get(name);
             if (col) {
-                col.set({
-                    name : newName
-                });
+                col.set({name : newLabel});
             }
         },
 
         /**
          * Move a column to a new spot in the collection
-         * @private
          * @param {int} src the column's current index in the collection
          * @param {int} dest the destination index
          */
@@ -71,37 +68,5 @@ var ColumnCollection = Backbone.Collection.extend(
             }
             col1.set({order : order2});
             this.sort();
-        },
-
-        add : function add(models, options) {
-            var that = this;
-            models = _.isArray(models) ? models.slice() : [ models ];
-            var newModels = [];
-            _.forEach(models, function (col) {
-                if (!(col instanceof Backbone.Model)) {
-                    col = new Column(col);
-                }
-                if (!that.modelsByName[col.get('name')]) {
-                    that.modelsByName[col.get('name')] = col;
-                }
-                newModels.push(col);
-            });
-            Backbone.Collection.prototype.add.call(this, newModels, options);
-        },
-
-        remove : function remove(models, options) {
-            var that = this;
-            models = _.isArray(models) ? models.slice() : [ models ];
-            _.forEach(models, function (col) {
-                if (that.modelsByName[col.get('name')]) {
-                    delete that.modelsByName[col.get('name')];
-                }
-            });
-            Backbone.Collection.prototype.remove.call(this, models, options);
-        },
-
-        reset : function reset(models, options) {
-            this.modelsByName = {};
-            Backbone.Collection.prototype.reset.call(this, models, options);
         }
     });

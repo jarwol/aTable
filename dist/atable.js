@@ -1,5 +1,5 @@
 /*! aTable v0.1.0
- * Date: 2013-03-18
+ * Date: 2013-03-20
  * Author: Jared Wolinsky 
  */
 
@@ -12,8 +12,8 @@ var Column = Backbone.Model.extend(
          * @constructs
          */
         initialize : function () {
-
-        }
+        },
+        idAttribute : "name"
     }
 );
 
@@ -42,7 +42,6 @@ var ColumnCollection = Backbone.Collection.extend(
          * @constructs
          */
         initialize : function () {
-            this.modelsByName = {};
         },
 
         model : Column,
@@ -57,25 +56,23 @@ var ColumnCollection = Backbone.Collection.extend(
             return col.get("order");
         },
 
-        getByName : function getByName(name) {
-            return this.modelsByName[name];
-        },
-
-        renameColumn : function renameColumn(field, newName) {
-            if (!newName) {
+        /**
+         * Change the label (display name) of a column
+         * @param {String} name unique column name
+         * @param {String} newLabel new label for the column
+         */
+        renameColumn : function renameColumn(name, newLabel) {
+            if (!newLabel) {
                 throw "Invalid column name";
             }
-            var col = this.modelsByName[field];
+            var col = this.get(name);
             if (col) {
-                col.set({
-                    name : newName
-                });
+                col.set({name : newLabel});
             }
         },
 
         /**
          * Move a column to a new spot in the collection
-         * @private
          * @param {int} src the column's current index in the collection
          * @param {int} dest the destination index
          */
@@ -106,38 +103,6 @@ var ColumnCollection = Backbone.Collection.extend(
             }
             col1.set({order : order2});
             this.sort();
-        },
-
-        add : function add(models, options) {
-            var that = this;
-            models = _.isArray(models) ? models.slice() : [ models ];
-            var newModels = [];
-            _.forEach(models, function (col) {
-                if (!(col instanceof Backbone.Model)) {
-                    col = new Column(col);
-                }
-                if (!that.modelsByName[col.get('name')]) {
-                    that.modelsByName[col.get('name')] = col;
-                }
-                newModels.push(col);
-            });
-            Backbone.Collection.prototype.add.call(this, newModels, options);
-        },
-
-        remove : function remove(models, options) {
-            var that = this;
-            models = _.isArray(models) ? models.slice() : [ models ];
-            _.forEach(models, function (col) {
-                if (that.modelsByName[col.get('name')]) {
-                    delete that.modelsByName[col.get('name')];
-                }
-            });
-            Backbone.Collection.prototype.remove.call(this, models, options);
-        },
-
-        reset : function reset(models, options) {
-            this.modelsByName = {};
-            Backbone.Collection.prototype.reset.call(this, models, options);
         }
     });
 
@@ -316,7 +281,7 @@ var ATable = (function () {
         /** @lends ATable.prototype */
         {
             /**
-             * @class The master Backbone View that instantiates the table. The constructor accepts a hash of parameters.
+             * @class ATable The master Backbone View that instantiates the table. The constructor accepts a hash of parameters.
              * @augments Backbone.View
              * @constructs
              * @param {Object} options hash of parameters
@@ -328,10 +293,10 @@ var ATable = (function () {
              * @param {boolean} [options.columns.sortable=true] set whether the table can be sorted on this column. This value takes precedence over <strong>options.sortableColumns</strong>.
              * @param {boolean} [options.columns.visible=true] set whether the column is visible
              * @param {String|Function} options.dataFunction The dataFunction parameter can be one of two values:
-             * <li>{String} the id of a <strong>&lt;script&gt;</strong> element containing a function called <strong>fetchData</strong> which is responsible for generating the table's dataset.
+             * <li>{String} the id of a <strong>&lt;script&gt;</strong> element containing a function which has the same name as the script id.
              * The function should call <strong>self.postMessage(rows, append);</strong> where <i>rows</i> is a 2-dimensional array of table values. If <i>append</i> is true, rows will be added to the table.
              * If false, the rows will completely replace the existing table.</li>
-             * <li>{Function} a function responsible for generating the table's dataset. It should call <strong>this.receivedData(rows, append);</strong></li><br/>
+             * <li>{Function} a function responsible for generating the table's dataset. It should have one parameter, <strong>atable</strong>, and call <strong>atable.receivedData(rows, append);</strong> to deliver data to the table</li><br/>
              * *Note that both methods of returning table data may do so many times (e.g. a loop that continuously uses ajax polling to get new data from the server).
              * @param {String} options.el CSS selector of the DOM element in which to insert the rendered table
              * @param {int} options.height max height of the table in pixels
@@ -347,23 +312,29 @@ var ATable = (function () {
                 }
                 else if (typeof options.dataFunction === "function") {
                     this.dataFunction = options.dataFunction;
-                    //_.bind(this.dataFunction, this);
                 }
                 this.reRenderTable = true;
                 this.dataAppended = false;
                 var err = validateTableArgs(options);
                 if (err) throw err;
                 setDefaultParameters(options);
-                this.availableColumnsArray = [];
 
-                this.availableColumnsHash = {};
+                /**
+                 * The collection of {@link Column} models representing the table columns
+                 * @type {ColumnCollection}
+                 */
                 this.columns = initColumns(this, options);
                 this.columns.bind("reset", this.render, this);
                 this.columns.bind("sort", this.render, this);
+
+                /**
+                 * Whether the table columns can be re-ordered
+                 * @type {boolean}
+                 */
                 this.movableColumns = options.movableColumns;
                 if (typeof options.sortColumn === "string") {
                     var i = this.columns.indexOf(options.sortColumn);
-                    if (i >= 0) {
+                    if (i > 0) {
                         options.sortColumn = i;
                     }
                     else {
@@ -371,6 +342,10 @@ var ATable = (function () {
                     }
                 }
                 options.numColumns = this.columns.length;
+                /**
+                 * The collection of {@link Row} models containing the table's data
+                 * @type {RowCollection}
+                 */
                 this.rows = new RowCollection([], options);
                 this.rows.init = false;
                 this.columnTarget = null;
@@ -392,7 +367,7 @@ var ATable = (function () {
 
             /**
              * Generates the ATable and adds it to the DOM
-             * @param {function} callback function to call when the ATable is rendered
+             * @param {function} [callback] function to call when the ATable is rendered
              * @return {ATable} a reference to this ATable
              */
             render : function (callback) {
@@ -640,8 +615,8 @@ var ATable = (function () {
             },
 
             addColumn : function (col) {
-                var column = this.columns.getByName(this.columnTarget);
-                if (!this.columns.getByName(col) && this.availableColumnsHash[col]) {
+                var column = this.columns.get(this.columnTarget);
+                if (!this.columns.get(col) && this.availableColumnsHash[col]) {
                     // Increase the ordering of columns after insert
                     var order = column.get("order");
                     for (var i = order; i < this.columns.length; i++) {
@@ -665,7 +640,7 @@ var ATable = (function () {
             },
 
             removeColumn : function (name) {
-                var col = this.columns.getByName(name);
+                var col = this.columns.get(name);
                 col.destroy();
                 // Decrease the ordering of columns after delete
                 for (var i = col.get('order'); i < this.columns.length; i++) {
@@ -686,26 +661,29 @@ var ATable = (function () {
 
             /**
              * Move a column to a different position, shifting all columns in between
-             * @param {int} srcColumnIdx index of the column to be moved
-             * @param {int} destColumnIdx destination index of the column
+             * @param {int|String} column index or name of the column to be moved
+             * @param {int} position destination of the column
              */
-            moveColumn : function (srcColumnIdx, destColumnIdx) {
+            moveColumn : function (column, position) {
+                var idx = this.getColumnIndex(column);
+                if (idx === -1) throw "Invalid column name: " + column;
+                if (idx === position) return;
                 this.reRenderTable = true;
-                this.rows.moveColumn(srcColumnIdx, destColumnIdx);
-                this.columns.moveColumn(srcColumnIdx, destColumnIdx);
+                this.rows.moveColumn(idx, position);
+                this.columns.moveColumn(idx, position);
             },
 
             /**
              * Resize a column. Causes the table to re-render.
-             * @param {int} columnIndex index of the column to resize
-             * @param {int} newWidth new column size in pixels
+             * @param {int|String} column index or name of the column to resize
+             * @param {int} newWidth new column width in pixels
              * @param {Function} [callback] optional callback to invoke once the table is rendered
              */
-            resizeColumn : function (columnIndex, newWidth, callback) {
-                var col = this.columns.at(columnIndex);
-                if (!col) {
-                    throw "Invalid column index: " + columnIndex;
-                }
+            resizeColumn : function (column, newWidth, callback) {
+                var idx = this.getColumnIndex(column);
+                if (idx === -1) throw "Invalid column name: " + column;
+                var col = this.columns.at(idx);
+                if (!col) throw "Invalid column index: " + idx;
                 col.set('width', newWidth);
                 this.reRenderTable = true;
                 this.render(callback);
@@ -713,20 +691,39 @@ var ATable = (function () {
 
             /**
              * Sort the table rows by the specified column and order
-             * @param {int} columnIndex index of the column to sort on
-             * @param {boolean} [descending] sort in descending order
+             * @param {int|String} column index or name of the column to sort on
+             * @param {boolean} [descending=false] sort in descending order
              */
-            sort : function (columnIndex, descending) {
-                if (columnIndex < 0 || columnIndex > this.columns.length) {
-                    throw "Invalid column index: " + columnIndex;
-                }
+            sort : function (column, descending) {
+                var idx = this.getColumnIndex(column);
+                if (idx === -1) throw "Invalid column name: " + column;
+                var col = this.columns.at(idx);
+                if (!col) throw "Invalid column index: " + idx;
                 this.tableElt.find(".sortArrow").remove();
-                this.rows.setSortColumn(columnIndex);
+                this.rows.setSortColumn(idx);
                 if (typeof descending === "boolean") {
                     this.rows.sortDescending = descending;
                 }
-                displaySortArrow(this.columns.at(columnIndex).get('element')[0], this.rows.sortDescending);
+                displaySortArrow(col.get('element')[0], this.rows.sortDescending);
                 this.rows.sort();
+            },
+
+            /**
+             * Returns the position of a column given its name
+             * @param {int|String} column index or name of the column
+             * @returns {int} position of the column in the table, or -1 if the column name is not in the table
+             */
+            getColumnIndex : function (column) {
+                var idx;
+                if (typeof column === "number") {
+                    idx = column;
+                }
+                else if (typeof column === "string") {
+                    var col = this.columns.get(column);
+                    if (!col) return -1;
+                    idx = col.get('order');
+                }
+                return idx;
             },
 
             /**
@@ -824,12 +821,11 @@ var ATable = (function () {
                     // subtract 5 from width because if the grayout div overlaps the cursor, dragend is immediately invoked
                     var width = target.width() - diff + Number(leftPad.substring(0, leftPad.length - 2))
                         + Number(rightPad.substring(0, rightPad.length - 2)) - 5;
-                    var gray = $("#grayout");
-                    gray.css("display", "block").css("left", left).css("top", posCol.top - 1).css("height", height)
+                    $(this.resizeIndicator).css("display", "block").css("left", left).css("top", posCol.top - 1).css("height", height)
                         .css("width", width).attr('title', target[0].cellIndex);
                     // Firefox doesn't provide mouse coordinates in the 'drag' event, so we must use a document-level
                     // 'dragover' as a workaround
-                    document.addEventListener('dragover', this.onResizeGrayout);
+                    document.addEventListener('dragover', this.onDragResizeIndicator);
                     // Disable the default drag image by replacing it with an empty div
                     e.originalEvent.dataTransfer.setDragImage(document.createElement("div"), 0, 0);
                     e.originalEvent.dataTransfer.setData("text", target[0].cellIndex);
@@ -846,22 +842,21 @@ var ATable = (function () {
             },
 
             /**
-             * Grow or shrink the grayout resize indicator as the mouse moves
+             * Grow or shrink the resize indicator as the mouse moves
              * @private
              * @param {MouseEvent} e dragover event
              */
-            onResizeGrayout : function (e) {
-                var gray = $("#grayout");
-                var pos = gray.offset();
+            onDragResizeIndicator : function (e) {
+                var pos = $(this.resizeIndicator).offset();
                 var colIdx = this.rows.getColumnIndex(Number(e.dataTransfer.getData("text")));
                 var col = this.columns.at(colIdx).get('element');
                 var width = e.pageX - pos.left;
                 var textWidth = getTextWidth(col.text()) + SORT_ARROW_WIDTH;
                 if (width >= textWidth) {
-                    gray.css("width", width);
+                    $(this.resizeIndicator).css("width", width);
                 }
                 else {
-                    gray.css("width", textWidth);
+                    $(this.resizeIndicator).css("width", textWidth);
                 }
             },
 
@@ -871,12 +866,12 @@ var ATable = (function () {
              * @param {Event} e jQuery dragend event
              */
             onEndDragColumnHeader : function (e) {
-                var gray = $("#grayout");
-                if (gray.css("display") === "none") {
+                if ($(this.resizeIndicator).css("display") === "none") {
                     e.target.style.opacity = null;
                 }
                 else {
-                    document.removeEventListener('dragover', this.onResizeGrayout, false);
+                    document.removeEventListener('dragover', this.onDragResizeIndicator, false);
+                    var gray = $(this.resizeIndicator);
                     var width = parseInt(e.originalEvent.clientX - gray.position().left - SORT_ARROW_WIDTH, 10);
                     var grayWidth = gray.width();
                     var colIndex = Number(gray.attr('title'));
@@ -899,7 +894,7 @@ var ATable = (function () {
              */
             onDragEnterColumnHeader : function (e) {
                 var colNum = e.originalEvent.dataTransfer.getData("text");
-                if (this.movableColumns && $("#grayout").css("display") === "none") {
+                if (this.movableColumns && $(this.resizeIndicator).css("display") === "none") {
                     var th = $(e.target).closest("th")[0];
                     if (th.cellIndex != colNum) {
                         th.firstChild.classList.add("over");
@@ -937,7 +932,7 @@ var ATable = (function () {
                     e.preventDefault();
                 }
 
-                if (this.movableColumns && $("#grayout").css("display") === "none") {
+                if (this.movableColumns && $(this.resizeIndicator).css("display") === "none") {
                     var srcCol = Number(e.originalEvent.dataTransfer.getData("text"));
                     var destCol = e.target.parentElement.cellIndex;
                     if (e.target.tagName === "TH") {
@@ -965,15 +960,17 @@ var ATable = (function () {
                 }
                 var headerRow = '<tr>';
                 for (var i = 0; i < params.columns.length; i++) {
-                    var widthStr = '';
-                    var classStr = '';
-                    if (params.columns[i].width) {
-                        widthStr = 'style="width: ' + (params.columns[i].width) + 'px;"';
+                    if (params.columns[i].visible) {
+                        var widthStr = '';
+                        var classStr = '';
+                        if (params.columns[i].width) {
+                            widthStr = 'style="width: ' + (params.columns[i].width) + 'px;"';
+                        }
+                        if (params.columns[i].sortable) {
+                            classStr = ' className="sortable"';
+                        }
+                        headerRow += '<th draggable="true" ' + widthStr + classStr + '><div>' + params.columns[i].label + '</div></th>';
                     }
-                    if (params.columns[i].sortable) {
-                        classStr = ' className="sortable"';
-                    }
-                    headerRow += '<th draggable="true" ' + widthStr + classStr + '><div>' + params.columns[i].name + '</div></th>';
                 }
                 headerRow += '</tr>';
 
@@ -988,13 +985,13 @@ var ATable = (function () {
                 var tbody = document.createElement("tbody");
                 tbody.style.maxHeight = this.height + "px";
                 table.appendChild(tbody);
-                var grayout = document.createElement("div");
-                grayout.id = "grayout";
                 frag.appendChild(parent);
-                frag.appendChild(grayout);
+                if (!this.resizeIndicator) {
+                    this.resizeIndicator = createResizeIndicator();
+                    frag.appendChild(this.resizeIndicator);
+                }
                 if (this.parentElt) {
                     this.el.removeChild(this.parentElt[0]);
-                    this.el.removeChild(document.getElementById("grayout"));
                 }
                 this.el.appendChild(frag);
 
@@ -1045,8 +1042,8 @@ var ATable = (function () {
             },
 
             /**
-             * Update the row collection with new data from the data worker
-             * @param {Array[]} data matrix of row data returned by the data worker
+             * Update the row collection with new data from the data function
+             * @param {Array[]} data matrix of row data returned by the data function
              * @param {boolean} append if true, append new rows to the dataset, otherwise replace the dataset
              */
             receivedData : function (data, append) {
@@ -1073,6 +1070,9 @@ var ATable = (function () {
              * Remove this aTable from the DOM, and unbind all events
              */
             close : function () {
+                if (this.resizeIndicator) {
+                    document.removeChild(this.resizeIndicator);
+                }
                 this.remove();
                 this.unbind();
             }
@@ -1099,6 +1099,21 @@ var ATable = (function () {
             tbody.firstChild.style.height = topHeight + "px";
             tbody.lastChild.style.height = bottomHeight + "px";
         }
+    }
+
+    /**
+     * Create a semi-transparent gray div that will indicate a resize operation is occurring
+     * @returns {HTMLElement} div that will become visible as the user resizes a column
+     */
+    function createResizeIndicator() {
+        var nextId = 0;
+        $('.resizeIndicator').each(function () {
+            nextId = parseInt(this.id.split("resize")[1], 10) + 1;
+        });
+        var gray = document.createElement("div");
+        gray.className = "resizeIndicator";
+        gray.id = "resize" + nextId;
+        return gray;
     }
 
     /**
@@ -1149,7 +1164,7 @@ var ATable = (function () {
      */
     function createDataWorker(dataFunctionTagId, callback) {
         if (window.Blob && window.Worker) {
-            var blob = new Blob([document.querySelector('#' + dataFunctionTagId).textContent, " self.onmessage=function(){fetchData();};"]);
+            var blob = new Blob([document.querySelector('#' + dataFunctionTagId).textContent, " self.onmessage=function(){" + dataFunctionTagId + "();};"]);
             var url = window.URL || window.webkitURL;
             var worker = new Worker(url.createObjectURL(blob));
             worker.onmessage = function (e) {
@@ -1173,7 +1188,7 @@ var ATable = (function () {
         var columns = options.columns;
         for (var i = 0; i < columns.length; i++) {
             if (typeof columns[i].width === "undefined") {
-                columns[i].width = getTextWidth(columns[i].name) + 20;
+                columns[i].width = getTextWidth(columns[i].label) + 20;
             }
             if (typeof columns[i].resizable === "undefined") {
                 columns[i].resizable = options.resizableColumns;
@@ -1181,9 +1196,13 @@ var ATable = (function () {
             if (typeof columns[i].sortable === "undefined") {
                 columns[i].sortable = options.sortable;
             }
+            if (typeof columns[i].label === "undefined") {
+                columns[i].label = columns[i].name;
+            }
+            if (typeof columns[i].visible === "undefined") {
+                columns[i].visible = true;
+            }
             columns[i].order = i;
-            table.availableColumnsArray.push(columns[i].name);
-            table.availableColumnsHash[columns[i].name] = true;
         }
         return new ColumnCollection(columns);
     }
