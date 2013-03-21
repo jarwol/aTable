@@ -39,7 +39,7 @@ var ATable = (function () {
                 else if (typeof options.dataFunction === "function") {
                     this.dataFunction = options.dataFunction;
                 }
-                this.reRenderTable = true;
+                this.renderTable = true;
                 this.dataAppended = false;
                 var err = validateTableArgs(options);
                 if (err) throw err;
@@ -52,6 +52,8 @@ var ATable = (function () {
                 this.columns = initColumns(this, options);
                 this.columns.bind("reset", this.render, this);
                 this.columns.bind("sort", this.render, this);
+                this.columns.bind("change:width", this.render, this);
+                this.columns.bind("change:visible", this.render, this);
 
                 /**
                  * Whether the table columns can be re-ordered
@@ -112,8 +114,8 @@ var ATable = (function () {
                     }
                     return this;
                 }
-                else if (this.reRenderTable) {
-                    this.reRenderTable = false;
+                else if (this.renderTable) {
+                    this.renderTable = false;
                     params.columns = this.columns.toJSON();
                     params.rows = getRowData(this.rows);
                     if (this.tbodyElt) {
@@ -296,93 +298,56 @@ var ATable = (function () {
                 this.parentElt.width(newWidth);
             },
 
-            doPostRender : function () {
-                $("th").contextMenu({
-                    menu : menu
-                }, this.initColumnMenu);
-                if (this.columns.length < 2) {
-                    $("#columnMenu").disableContextMenuItems("#removeColumn");
-                }
-                else {
-                    $("#columnMenu").enableContextMenuItems("#removeColumn");
-                }
-            },
+            /* TODO - implement add/remove
+             addColumn : function (col) {
+             var column = this.columns.get(this.columnTarget);
+             if (!this.columns.get(col) && this.availableColumnsHash[col]) {
+             // Increase the ordering of columns after insert
+             var order = column.get("order");
+             for (var i = order; i < this.columns.length; i++) {
+             var val = this.columns.at(i);
+             val.set({
+             order : val.get("order") + 1
+             }, {
+             silent : true
+             });
+             }
+             var textWidth = getTextWidth(col) + 15;
+             this.columns.add({
+             columnName : col,
+             entityField : col,
+             blotterName : this.blotterType,
+             order : order,
+             width : textWidth
+             });
+             this.columns.save(this.admin);
+             }
+             },
 
-            initColumnMenu : function (action, el, pos) {
-                this.columnTarget = el.attr('id').split("_")[1];
-                if (action === "addColumn") {
-                    this.showAddColumnDialog(pos);
-                }
-                else if (action === "removeColumn") {
-                    this.removeColumn(this.columnTarget);
-                }
-                else if (action === "renameColumn") {
-                    this.showRenameColumnDialog(this.columnTarget, el.text(), pos);
-                }
-            },
-
-            showAddColumnDialog : function (pos) {
-                new EditColumnDialog({
-                    editType : "add",
-                    blotterType : this.blotterType,
-                    callBack : this.addColumn,
-                    columns : this.availableColumnsArray
-                }).show(pos);
-                return false; // Prevent default context menu from popping up
-            },
-
-            showRenameColumnDialog : function (col, colName, pos) {
-                new EditColumnDialog({
-                    editType : "rename",
-                    blotterType : this.blotterType,
-                    callBack : this.renameColumn
-                }).show(pos, col, colName);
-                return false; // Prevent default context menu from popping up
-            },
-
-            addColumn : function (col) {
-                var column = this.columns.get(this.columnTarget);
-                if (!this.columns.get(col) && this.availableColumnsHash[col]) {
-                    // Increase the ordering of columns after insert
-                    var order = column.get("order");
-                    for (var i = order; i < this.columns.length; i++) {
-                        var val = this.columns.at(i);
-                        val.set({
-                            order : val.get("order") + 1
-                        }, {
-                            silent : true
-                        });
-                    }
-                    var textWidth = getTextWidth(col) + 15;
-                    this.columns.add({
-                        columnName : col,
-                        entityField : col,
-                        blotterName : this.blotterType,
-                        order : order,
-                        width : textWidth
-                    });
-                    this.columns.save(this.admin);
-                }
-            },
-
-            removeColumn : function (name) {
-                var col = this.columns.get(name);
-                col.destroy();
-                // Decrease the ordering of columns after delete
-                for (var i = col.get('order'); i < this.columns.length; i++) {
-                    var val = this.columns.at(i);
-                    val.set({
-                        order : val.get("order") - 1
-                    });
-                }
-            },
-
-            renameColumn : function (newName, field) {
-                this.columns.renameColumn(field, newName);
-            },
+             removeColumn : function (name) {
+             var col = this.columns.get(name);
+             col.destroy();
+             // Decrease the ordering of columns after delete
+             for (var i = col.get('order'); i < this.columns.length; i++) {
+             var val = this.columns.at(i);
+             val.set({
+             order : val.get("order") - 1
+             });
+             }
+             },
+             */
 
             filter : function (columnIdx, filterStr) {
                 // TODO - implement table filtering
+            },
+
+            /**
+             * Change the label (display name) of a column
+             * @param {String} name unique name of the column
+             * @param {String} newLabel new label for the column
+             */
+            renameColumn : function (name, newLabel) {
+                this.columns.renameColumn(name, newLabel);
             },
 
             /**
@@ -394,7 +359,7 @@ var ATable = (function () {
                 var idx = this.getColumnIndex(column);
                 if (idx === -1) throw "Invalid column name: " + column;
                 if (idx === position) return;
-                this.reRenderTable = true;
+                this.renderTable = true;
                 this.rows.moveColumn(idx, position);
                 this.columns.moveColumn(idx, position);
             },
@@ -403,16 +368,15 @@ var ATable = (function () {
              * Resize a column. Causes the table to re-render.
              * @param {int|String} column index or name of the column to resize
              * @param {int} newWidth new column width in pixels
-             * @param {Function} [callback] optional callback to invoke once the table is rendered
              */
-            resizeColumn : function (column, newWidth, callback) {
+            resizeColumn : function (column, newWidth) {
                 var idx = this.getColumnIndex(column);
                 if (idx === -1) throw "Invalid column name: " + column;
                 var col = this.columns.at(idx);
                 if (!col) throw "Invalid column index: " + idx;
+                this.renderTable = true;
                 col.set('width', newWidth);
-                this.reRenderTable = true;
-                this.render(callback);
+                this.renderTable = false;
             },
 
             /**
@@ -432,6 +396,38 @@ var ATable = (function () {
                 }
                 displaySortArrow(col.get('element')[0], this.rows.sortDescending);
                 this.rows.sort();
+            },
+
+            /**
+             * Make a column visible, causing it to render
+             * @param {String} name unique column name
+             */
+            showColumn : function (name) {
+                var column = this.columns.get(name);
+                if (column) {
+                    this.renderTable = true;
+                    column.set({visible : true});
+                    this.renderTable = false;
+                }
+                else {
+                    throw "Invalid column name: " + name;
+                }
+            },
+
+            /**
+             * Make a column invisible, causing it to not render
+             * @param {String} name unique column name
+             */
+            hideColumn : function (name) {
+                var column = this.columns.get(name);
+                if (column) {
+                    this.renderTable = true;
+                    column.set({visible : false});
+                    this.renderTable = false;
+                }
+                else {
+                    throw "Invalid column name: " + name;
+                }
             },
 
             /**
@@ -752,8 +748,10 @@ var ATable = (function () {
                 for (var j = this.rowRange.first; j < params.rows.length && j < this.rowRange.last; j++) {
                     body += '<tr>';
                     for (var k = 0; k < params.rows[j].row.length; k++) {
-                        var width = params.columns[k].width;
-                        body += '<td><div style="width: ' + width + 'px;">' + params.rows[j].row[k] + '</div></td>';
+                        if (params.columns[k].visible) {
+                            var width = params.columns[k].width;
+                            body += '<td><div style="width: ' + width + 'px;">' + params.rows[j].row[k] + '</div></td>';
+                        }
                     }
                     body += '</tr>';
                 }
@@ -787,7 +785,7 @@ var ATable = (function () {
                     this.rows.trigger("reset");
                 }
                 else {
-                    this.reRenderTable = true;
+                    this.renderTable = true;
                     this.rows.reset(rows);
                 }
             },

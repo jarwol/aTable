@@ -274,6 +274,41 @@ asyncTest("Move sorted columns", 25, function () {
     });
 });
 
+asyncTest("Show/hide columns", 6, function () {
+    var table = new ATable({
+        dataFunction : function (atable) {
+            atable.receivedData([
+                [0, 1, 2]
+            ]);
+        },
+        columns : [
+            {name : "col1", label : "Column 1", visible : true},
+            {name : "col2", label : "Column 2", visible : false},
+            {name : "col3", label : "Column 3"}
+        ],
+        height : 300
+    });
+    table.render(function () {
+        start();
+        table.showColumn("col2");
+        equal(table.columns.length, 3, "column collection should have 3 models");
+        var cols = table.tableElt.find("th");
+        equal(cols.length, 3, "there should be 3 rendered columns");
+        table.hideColumn("col2");
+        cols = table.tableElt.find("th");
+        equal(cols.length, 2, "there should be 2 rendered columns");
+        table.hideColumn("col1");
+        cols = table.tableElt.find("th");
+        equal(cols.length, 1, "there should be 1 rendered column");
+        table.hideColumn("col1");
+        cols = table.tableElt.find("th");
+        equal(cols.length, 1, "there should be 1 rendered column");
+        table.hideColumn("col3");
+        cols = table.tableElt.find("th");
+        equal(cols.length, 0, "there should be 0 rendered columns");
+    });
+});
+
 /****************************************************************************************
  * Utility functions
  ****************************************************************************************/
@@ -338,19 +373,16 @@ function resizeColumnAndTest(table, colIdx, change) {
     var minWidth = getTextWidth(col.get('name')) + 20;
     var expectedWidth = actualWidth + change;
     if (expectedWidth < minWidth) expectedWidth = minWidth;
-    stop();
-    table.resizeColumn(colIdx, attrWidth + change, function () {
-        start();
-        row = table.tbodyElt.find("tr")[1];
-        equal(col.get('element').width(), expectedWidth, "TH width should change by " + change + "px");
-        equal(col.get('width'), attrWidth + change, "width attribute should change by " + change + "px");
-        if (colIdx === table.columns.length - 1) {
-            equal($(row.cells[colIdx]).width(), expectedWidth - table.scrollbarWidth + 2, "TD width should equal TH width - scrollbar width");
-        }
-        else {
-            equal($(row.cells[colIdx]).width(), expectedWidth, "TD width should match TH width");
-        }
-    });
+    table.resizeColumn(colIdx, attrWidth + change);
+    row = table.tbodyElt.find("tr")[1];
+    equal(col.get('element').width(), expectedWidth, "TH width should change by " + change + "px");
+    equal(col.get('width'), attrWidth + change, "width attribute should change by " + change + "px");
+    if (colIdx === table.columns.length - 1) {
+        equal($(row.cells[colIdx]).width(), expectedWidth - table.scrollbarWidth + 2, "TD width should equal TH width - scrollbar width");
+    }
+    else {
+        equal($(row.cells[colIdx]).width(), expectedWidth, "TD width should match TH width");
+    }
 }
 
 function scrollAndTestContents(table, scrollTop) {
