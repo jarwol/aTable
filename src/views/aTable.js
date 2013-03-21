@@ -44,7 +44,6 @@ var ATable = (function () {
                 var err = validateTableArgs(options);
                 if (err) throw err;
                 setDefaultParameters(options);
-
                 /**
                  * The collection of {@link Column} models representing the table columns
                  * @type {ColumnCollection}
@@ -352,28 +351,28 @@ var ATable = (function () {
 
             /**
              * Move a column to a different position, shifting all columns in between
-             * @param {int|String} column index or name of the column to be moved
-             * @param {int} position destination of the column
+             * @param {String} column name of the column to be moved
+             * @param {String} dest column that has the desired position
              */
-            moveColumn : function (column, position) {
-                var idx = this.getColumnIndex(column);
-                if (idx === -1) throw "Invalid column name: " + column;
-                if (idx === position) return;
+            moveColumn : function (column, dest) {
+                var col = this.columns.get(column);
+                var destCol = this.columns.get(dest);
+                if (!col) throw "Invalid source column name: " + column;
+                if (!destCol) throw "Invalid dest column name: " + dest;
+                if (column === dest) return;
                 this.renderTable = true;
-                this.rows.moveColumn(idx, position);
-                this.columns.moveColumn(idx, position);
+                this.rows.moveColumn(col.get('order'), destCol.get('order'));
+                this.columns.moveColumn(col.get('order'), destCol.get('order'));
             },
 
             /**
              * Resize a column. Causes the table to re-render.
-             * @param {int|String} column index or name of the column to resize
+             * @param {String} column name of the column to resize
              * @param {int} newWidth new column width in pixels
              */
             resizeColumn : function (column, newWidth) {
-                var idx = this.getColumnIndex(column);
-                if (idx === -1) throw "Invalid column name: " + column;
-                var col = this.columns.at(idx);
-                if (!col) throw "Invalid column index: " + idx;
+                var col = this.columns.get(column);
+                if (!col) throw "Invalid column name: " + column;
                 this.renderTable = true;
                 col.set('width', newWidth);
                 this.renderTable = false;
@@ -381,16 +380,14 @@ var ATable = (function () {
 
             /**
              * Sort the table rows by the specified column and order
-             * @param {int|String} column index or name of the column to sort on
+             * @param {String} column name of the column to sort on
              * @param {boolean} [descending=false] sort in descending order
              */
             sort : function (column, descending) {
-                var idx = this.getColumnIndex(column);
-                if (idx === -1) throw "Invalid column name: " + column;
-                var col = this.columns.at(idx);
-                if (!col) throw "Invalid column index: " + idx;
+                var col = this.columns.get(column);
+                if (!col) throw "Invalid column name: " + column;
                 this.tableElt.find(".sortArrow").remove();
-                this.rows.setSortColumn(idx);
+                this.rows.setSortColumn(col.get('order'));
                 if (typeof descending === "boolean") {
                     this.rows.sortDescending = descending;
                 }
@@ -477,7 +474,7 @@ var ATable = (function () {
             onMouseMoveColumnHeader : function (e) {
                 var col = getResizeColumn(e);
                 var th = $(e.target).closest("th")[0];
-                if (col < 0 || !this.columns.at(col).get('resizable')) {
+                if (!col || !this.columns.get(col).get('resizable')) {
                     th.style.cursor = null;
                 }
                 else {
@@ -501,10 +498,10 @@ var ATable = (function () {
              * @param {jQuery.Event} e jQuery click event object
              */
             onClickColumnHeader : function (e) {
-                if (getResizeColumn(e) < 0) {
+                if (!getResizeColumn(e)) {
                     var th = $(e.target).closest("th")[0];
-                    if (this.columns.at(th.cellIndex).get('sortable')) {
-                        this.sort(th.cellIndex);
+                    if (this.columns.get(th.getAttribute('data-column')).get('sortable')) {
+                        this.sort(th.getAttribute('data-column'));
                     }
                 }
             },
@@ -517,10 +514,11 @@ var ATable = (function () {
             onStartDragColumnHeader : function (e) {
                 var target = $(e.target);
                 var col = getResizeColumn(e);
-                // Mouse is in resize position
-                if (col > -1) {
-                    target = this.columns.at(col).get('element');
-                    if (!this.columns.at(col).get('resizable')) {
+                // Mouse in resize position
+                if (col) {
+                    var column = this.columns.get(col);
+                    target = column.get('element');
+                    if (!column.get('resizable')) {
                         if (e.preventDefault) {
                             e.preventDefault();
                         }
@@ -544,18 +542,18 @@ var ATable = (function () {
                     var width = target.width() - diff + Number(leftPad.substring(0, leftPad.length - 2))
                         + Number(rightPad.substring(0, rightPad.length - 2)) - 5;
                     $(this.resizeIndicator).css("display", "block").css("left", left).css("top", posCol.top - 1).css("height", height)
-                        .css("width", width).attr('title', target[0].cellIndex);
+                        .css("width", width).attr('data-column', target[0].getAttribute('data-column'));
                     // Firefox doesn't provide mouse coordinates in the 'drag' event, so we must use a document-level
                     // 'dragover' as a workaround
                     document.addEventListener('dragover', this.onDragResizeIndicator);
                     // Disable the default drag image by replacing it with an empty div
                     e.originalEvent.dataTransfer.setDragImage(document.createElement("div"), 0, 0);
-                    e.originalEvent.dataTransfer.setData("text", target[0].cellIndex);
+                    e.originalEvent.dataTransfer.setData("text", target[0].getAttribute('data-column'));
                 }
                 // User is moving the column
                 else if (this.movableColumns) {
                     e.target.style.opacity = 0.35;
-                    e.originalEvent.dataTransfer.setData("text", target[0].cellIndex);
+                    e.originalEvent.dataTransfer.setData("text", target[0].getAttribute('data-column'));
                 }
                 else {
                     e.preventDefault();
@@ -570,10 +568,10 @@ var ATable = (function () {
              */
             onDragResizeIndicator : function (e) {
                 var pos = $(this.resizeIndicator).offset();
-                var colIdx = this.rows.getColumnIndex(Number(e.dataTransfer.getData("text")));
-                var col = this.columns.at(colIdx).get('element');
+                var column = this.columns.get(e.dataTransfer.getData("text"));
+                var colElt = column.get('element');
                 var width = e.pageX - pos.left;
-                var textWidth = getTextWidth(col.text()) + SORT_ARROW_WIDTH;
+                var textWidth = getTextWidth(colElt.text()) + SORT_ARROW_WIDTH;
                 if (width >= textWidth) {
                     $(this.resizeIndicator).css("width", width);
                 }
@@ -596,8 +594,7 @@ var ATable = (function () {
                     var gray = $(this.resizeIndicator);
                     var width = parseInt(e.originalEvent.clientX - gray.position().left - SORT_ARROW_WIDTH, 10);
                     var grayWidth = gray.width();
-                    var colIndex = Number(gray.attr('title'));
-                    var col = this.columns.at(colIndex);
+                    var col = this.columns.get(gray.attr('data-column'));
                     var posCol = col.get('element').offset();
                     var posTable = this.tableElt.parent().offset();
                     if (posCol.left < posTable.left) {
@@ -605,7 +602,7 @@ var ATable = (function () {
                     }
                     width = width < grayWidth ? grayWidth : width;
                     gray.css("display", "none");
-                    this.resizeColumn(colIndex, width);
+                    this.resizeColumn(col.get('name'), width);
                 }
             },
 
@@ -615,10 +612,10 @@ var ATable = (function () {
              * @param {jQuery.Event} e jQuery dragenter event
              */
             onDragEnterColumnHeader : function (e) {
-                var colNum = e.originalEvent.dataTransfer.getData("text");
+                var col = e.originalEvent.dataTransfer.getData("text");
                 if (this.movableColumns && $(this.resizeIndicator).css("display") === "none") {
                     var th = $(e.target).closest("th")[0];
-                    if (th.cellIndex != colNum) {
+                    if (th.getAttribute('data-column') !== col) {
                         th.firstChild.classList.add("over");
                     }
                 }
@@ -653,12 +650,11 @@ var ATable = (function () {
                 if (e.preventDefault) {
                     e.preventDefault();
                 }
-
                 if (this.movableColumns && $(this.resizeIndicator).css("display") === "none") {
-                    var srcCol = Number(e.originalEvent.dataTransfer.getData("text"));
-                    var destCol = e.target.parentElement.cellIndex;
+                    var srcCol = e.originalEvent.dataTransfer.getData("text");
+                    var destCol = e.target.parentElement.getAttribute('data-column');
                     if (e.target.tagName === "TH") {
-                        destCol = e.target.cellIndex;
+                        destCol = e.target.getAttribute('data-column');
                         e.target.firstChild.classList.remove("over");
                     }
                     else {
@@ -691,7 +687,7 @@ var ATable = (function () {
                         if (params.columns[i].sortable) {
                             classStr = ' className="sortable"';
                         }
-                        headerRow += '<th draggable="true" ' + widthStr + classStr + '><div>' + params.columns[i].label + '</div></th>';
+                        headerRow += '<th draggable="true" ' + widthStr + classStr + ' data-column="' + params.columns[i].name + '"><div>' + params.columns[i].label + '</div></th>';
                     }
                 }
                 headerRow += '</tr>';
@@ -844,7 +840,7 @@ var ATable = (function () {
      * Gets thet index of the column which is in resize position
      * @private
      * @param {jQuery.Event} e jQuery mouse event
-     * @returns {int} cellIndex of the column which the mouse is over, or -1 if the mouse is not in resize position
+     * @returns {String} name of the column which the mouse is over, or null if the mouse is not in resize position
      */
     function getResizeColumn(e) {
         var mouseX = e.offsetX;
@@ -855,12 +851,12 @@ var ATable = (function () {
             mouseX = e.originalEvent.pageX - $(e.target).offset().left;
         }
         if (!firstCol && mouseX <= RESIZE_PIXELS + 1) {
-            return th.previousElementSibling.cellIndex;
+            return th.previousElementSibling.getAttribute('data-column');
         }
         else if (e.target.offsetWidth - mouseX <= RESIZE_PIXELS) {
-            return th.cellIndex;
+            return th.getAttribute('data-column');
         }
-        return -1;
+        return null;
     }
 
     /**
@@ -874,7 +870,7 @@ var ATable = (function () {
             return "Columns array missing or empty";
         }
         if (!options.dataFunction) {
-            return "Missing dataFunction arg: actual function or script tag id with fetchData function";
+            return "Missing dataFunction arg: actual function or script tag id with data function";
         }
         return null;
     }
