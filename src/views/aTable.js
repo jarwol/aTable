@@ -194,7 +194,9 @@ var ATable = (function () {
                 }
                 this.scrollbarWidth = getScrollbarWidth(this.tbodyElt[0]);
                 if (this.scrollbarWidth > 0) {
-                    var lastColWidth = this.columns.at(this.columns.length - 1).get('width');
+                    var cols = this.tableElt.find('th');
+                    var lastCol = cols[cols.length - 1].getAttribute("data-column");
+                    var lastColWidth = this.columns.get(lastCol).get('width');
                     this.tbodyElt.find('td:last-child>div').width(lastColWidth - this.scrollbarWidth);
                 }
                 this.prevScrollTop = this.tbodyElt[0].scrollTop;
@@ -225,13 +227,16 @@ var ATable = (function () {
             addRow : function (index, rowToInsertBefore) {
                 var tr = document.createElement("tr");
                 for (var i = 0; i < this.columns.length; i++) {
-                    var div = document.createElement("div");
-                    var width = this.columns.at(i).get('width');
-                    div.style.width = width + "px";
-                    div.innerHTML = this.rows.getValue(index, i);
-                    var td = document.createElement("td");
-                    td.appendChild(div);
-                    tr.appendChild(td);
+                    var col = this.columns.at(i);
+                    if (col.get('visible')) {
+                        var div = document.createElement("div");
+                        var width = col.get('width');
+                        div.style.width = width + "px";
+                        div.innerHTML = this.rows.getValue(index, i);
+                        var td = document.createElement("td");
+                        td.appendChild(div);
+                        tr.appendChild(td);
+                    }
                 }
                 this.tbodyElt[0].insertBefore(tr, rowToInsertBefore);
             },
@@ -351,14 +356,25 @@ var ATable = (function () {
 
             /**
              * Move a column to a different position, shifting all columns in between
-             * @param {String} column name of the column to be moved
-             * @param {String} dest column that has the desired position
+             * @param {String|int} column name or position of the column to be moved
+             * @param {String|int} dest name of the column currently in the desired position, or the position itself
              */
             moveColumn : function (column, dest) {
-                var col = this.columns.get(column);
-                var destCol = this.columns.get(dest);
-                if (!col) throw "Invalid source column name: " + column;
-                if (!destCol) throw "Invalid dest column name: " + dest;
+                var col, destCol;
+                if (typeof column === "string") {
+                    col = this.columns.get(column);
+                }
+                else if (typeof column === "number") {
+                    col = this.getColumnByPosition(column);
+                }
+                if (typeof dest === "string") {
+                    destCol = this.columns.get(dest);
+                }
+                else if (typeof dest === "number") {
+                    destCol = this.getColumnByPosition(dest);
+                }
+                if (!col) throw "Invalid source column: " + column;
+                if (!destCol) throw "Invalid dest column: " + dest;
                 if (column === dest) return;
                 this.renderTable = true;
                 this.rows.moveColumn(col.get('order'), destCol.get('order'));
@@ -428,21 +444,14 @@ var ATable = (function () {
             },
 
             /**
-             * Returns the position of a column given its name
-             * @param {int|String} column index or name of the column
-             * @returns {int} position of the column in the table, or -1 if the column name is not in the table
+             * Returns the Column based given its position in the set of <strong>visible</strong> columns
+             * @param {int} position index of the column, ignoring any invisible columns
+             * @returns {Column} the column model at <strong>position</strong>, or null if the position is invalid
              */
-            getColumnIndex : function (column) {
-                var idx;
-                if (typeof column === "number") {
-                    idx = column;
-                }
-                else if (typeof column === "string") {
-                    var col = this.columns.get(column);
-                    if (!col) return -1;
-                    idx = col.get('order');
-                }
-                return idx;
+            getColumnByPosition : function (position) {
+                var cols = this.tableElt.find('th');
+                if (position < 0 || position > cols.length) return null;
+                return this.columns.get(cols[position].getAttribute('data-column'));
             },
 
             /**
@@ -667,11 +676,12 @@ var ATable = (function () {
             /**
              * Generate the actual table markup and add it to the DOM
              * @private
-             * @param {object} params Parameters needed to render the table
+             * @param {Object} params Parameters needed to render the table
              * @return {DocumentFragment} the table DocumentFragment ready to be inserted into the DOM
              */
             generateTableHtml : function (params) {
                 var topRowHeight = 0;
+                var lastCol;
                 if (this.tbodyElt) {
                     var height = this.tbodyElt[0].firstChild.style.height;
                     topRowHeight = height.substr(0, height.length - 2);
@@ -679,11 +689,10 @@ var ATable = (function () {
                 var headerRow = '<tr>';
                 for (var i = 0; i < params.columns.length; i++) {
                     if (params.columns[i].visible) {
+                        lastCol = params.columns[i];
                         var widthStr = '';
                         var classStr = '';
-                        if (params.columns[i].width) {
-                            widthStr = 'style="width: ' + (params.columns[i].width) + 'px;"';
-                        }
+                        widthStr = 'style="width: ' + (params.columns[i].width) + 'px;"';
                         if (params.columns[i].sortable) {
                             classStr = ' className="sortable"';
                         }
@@ -756,7 +765,7 @@ var ATable = (function () {
                 tbody.innerHTML = body;
                 this.scrollbarWidth = getScrollbarWidth(tbody);
                 if (this.scrollbarWidth > 0) {
-                    var lastColWidth = params.columns[params.columns.length - 1].width;
+                    var lastColWidth = lastCol.width;
                     $(tbody).find('td:last-child>div').width(lastColWidth - this.scrollbarWidth);
                 }
             },
@@ -796,7 +805,8 @@ var ATable = (function () {
                 this.remove();
                 this.unbind();
             }
-        });
+        })
+        ;
 
     /**
      * Set the heights of the top and bottom buffer row in order to keep the scrollbar size/position correct
@@ -1003,4 +1013,5 @@ var ATable = (function () {
             options.sortable = true;
         }
     }
-})();
+})
+    ();

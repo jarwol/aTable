@@ -182,26 +182,26 @@ asyncTest("Reorder columns", 12, function () {
     var table = createTable('fetchData1Row4Cols', 4);
     table.render(function () {
         start();
-        table.moveColumn(0, 1);
+        table.moveColumn("col1", "col2");
         var row = table.tbodyElt.find("tr")[1];
         equal(row.cells[0].firstChild.innerHTML, 1, "first cell should contain 1");
         equal(row.cells[1].firstChild.innerHTML, 0, "second cell should contain 0");
-        table.moveColumn(1, 0);
+        table.moveColumn(1, 0);             // Test
         row = table.tbodyElt.find("tr")[1];
         equal(row.cells[0].firstChild.innerHTML, 0, "first cell should contain 0");
         equal(row.cells[1].firstChild.innerHTML, 1, "second cell should contain 1");
-        table.moveColumn(0, 3);
+        table.moveColumn("col1", "col4");
         row = table.tbodyElt.find("tr")[1];
         equal(row.cells[0].firstChild.innerHTML, 1, "first cell should contain 1");
         equal(row.cells[1].firstChild.innerHTML, 2, "second cell should contain 2");
         equal(row.cells[2].firstChild.innerHTML, 3, "first cell should contain 3");
         equal(row.cells[3].firstChild.innerHTML, 0, "second cell should contain 0");
-        table.moveColumn(2, 0);
+        table.moveColumn("col3", "col1");
         row = table.tbodyElt.find("tr")[1];
-        equal(row.cells[0].firstChild.innerHTML, 3, "first cell should contain 3");
-        equal(row.cells[1].firstChild.innerHTML, 1, "second cell should contain 1");
-        equal(row.cells[2].firstChild.innerHTML, 2, "first cell should contain 2");
-        equal(row.cells[3].firstChild.innerHTML, 0, "second cell should contain 0");
+        equal(row.cells[0].firstChild.innerHTML, 1, "first cell should contain 1");
+        equal(row.cells[1].firstChild.innerHTML, 3, "second cell should contain 3");
+        equal(row.cells[2].firstChild.innerHTML, 0, "first cell should contain 0");
+        equal(row.cells[3].firstChild.innerHTML, 2, "second cell should contain 2");
     });
 });
 
@@ -209,13 +209,13 @@ asyncTest("Resize columns", 22, function () {
     var table = createTable('fetchData1Row4Cols', 4);
     table.render(function () {
         start();
-        resizeColumnAndTest(table, 0, 5);
-        resizeColumnAndTest(table, 0, -3);
-        resizeColumnAndTest(table, 1, 5);
-        resizeColumnAndTest(table, 3, 5);
-        resizeColumnAndTest(table, 3, -5);
-        resizeColumnAndTest(table, 2, 0);
-        resizeColumnAndTest(table, 0, -100);
+        resizeColumnAndTest(table, "col1", 5);
+        resizeColumnAndTest(table, "col1", -3);
+        resizeColumnAndTest(table, "col2", 5);
+        resizeColumnAndTest(table, "col4", 5);
+        resizeColumnAndTest(table, "col4", -5);
+        resizeColumnAndTest(table, "col3", 0);
+        resizeColumnAndTest(table, "col1", -100);
         raises(function () {
             table.resizeColumn(5, 0);
         }, "resizing an invalid column index should throw an exception");
@@ -231,22 +231,22 @@ asyncTest("Sort table", 38, function () {
         ok(table.tableElt.find(".sortArrow").length === 0, "there should be no sort arrow");
 
         // Simulate sorting from the UI (no sortDescending parameter)
-        table.sort(0);
-        testSort(table, 0, false);
-        table.sort(0);
-        testSort(table, 0, true);
-        table.sort(0);
-        testSort(table, 0, false);
-        table.sort(3);
-        testSort(table, 3, false);
+        table.sort("col1");
+        testSort(table, "col1", false);
+        table.sort("col1");
+        testSort(table, "col1", true);
+        table.sort("col1");
+        testSort(table, "col1", false);
+        table.sort("col4");
+        testSort(table, "col4", false);
 
         // Sort via the API
-        table.sort(2, true);
-        testSort(table, 2, true);
-        table.sort(2, true);
-        testSort(table, 2, true);
-        table.sort(2, false);
-        testSort(table, 2, false);
+        table.sort("col3", true);
+        testSort(table, "col3", true);
+        table.sort("col3", true);
+        testSort(table, "col3", true);
+        table.sort("col3", false);
+        testSort(table, "col3", false);
     });
 });
 
@@ -256,21 +256,21 @@ asyncTest("Move sorted columns", 25, function () {
         start();
 
         // Move sorted column
-        table.sort(1);
-        table.moveColumn(1, 0);
-        testSort(table, 0, false);
+        table.sort("col2");
+        table.moveColumn("col2", "col1");
+        testSort(table, "col2", false);
         // Re-sort a moved sorted column
-        table.sort(0);
-        testSort(table, 0, true);
+        table.sort("col2");
+        testSort(table, "col2", true);
         // Move sorted column to the end
-        table.moveColumn(0, 3);
-        testSort(table, 3, true);
+        table.moveColumn("col2", "col4");
+        testSort(table, "col2", true);
         // Move unsorted column to another unsorted column
-        table.moveColumn(1, 2);
-        testSort(table, 3, true);
+        table.moveColumn("col1", "col3");
+        testSort(table, "col2", true);
         // Move unsorted column to a sorted column
-        table.moveColumn(0, 3);
-        testSort(table, 2, true);
+        table.moveColumn("col1", "col4");
+        testSort(table, "col2", true);
     });
 });
 
@@ -316,7 +316,7 @@ asyncTest("Show/hide columns", 6, function () {
 function createTable(dataFunc, cols) {
     var columns = [];
     for (var i = 0; i < cols; i++) {
-        columns.push({name : "Column " + i});
+        columns.push({name : "col" + (i + 1)});
     }
     return new ATable({
         dataFunction : dataFunc,
@@ -326,11 +326,12 @@ function createTable(dataFunc, cols) {
     });
 }
 
-function testSort(table, colIdx, expectDescending) {
+function testSort(table, column, expectDescending) {
+    var col = table.columns.get(column);
     ok(isSorted(table), "table should be sorted");
     var arrow = table.tableElt.find(".sortArrow");
     equal(arrow.length, 1, "there should only be one sort arrow");
-    equal(arrow[0].parentElement.parentElement.cellIndex, colIdx, "sort arrow should be in column " + colIdx);
+    equal(arrow[0].parentElement.parentElement.cellIndex, col.get('order'), "sort arrow should be in column " + col.get('order'));
 
     if (expectDescending) {
         equal(arrow.text().charCodeAt(0), 8595, "sort arrow direction should be down");
@@ -365,23 +366,23 @@ function isSorted(table) {
     return true;
 }
 
-function resizeColumnAndTest(table, colIdx, change) {
+function resizeColumnAndTest(table, column, change) {
     var row = table.tbodyElt.find("tr")[1];
-    var col = table.columns.at(colIdx);
+    var col = table.columns.get(column);
     var actualWidth = col.get('element').width();
     var attrWidth = col.get('width');
     var minWidth = getTextWidth(col.get('name')) + 20;
     var expectedWidth = actualWidth + change;
     if (expectedWidth < minWidth) expectedWidth = minWidth;
-    table.resizeColumn(colIdx, attrWidth + change);
+    table.resizeColumn(column, attrWidth + change);
     row = table.tbodyElt.find("tr")[1];
     equal(col.get('element').width(), expectedWidth, "TH width should change by " + change + "px");
     equal(col.get('width'), attrWidth + change, "width attribute should change by " + change + "px");
-    if (colIdx === table.columns.length - 1) {
-        equal($(row.cells[colIdx]).width(), expectedWidth - table.scrollbarWidth + 2, "TD width should equal TH width - scrollbar width");
+    if (col.get('order') === table.columns.length - 1) {
+        equal($(row.cells[col.get('order')]).width(), expectedWidth - table.scrollbarWidth + 2, "TD width should equal TH width - scrollbar width");
     }
     else {
-        equal($(row.cells[colIdx]).width(), expectedWidth, "TD width should match TH width");
+        equal($(row.cells[col.get('order')]).width(), expectedWidth, "TD width should match TH width");
     }
 }
 
