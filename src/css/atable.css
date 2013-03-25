@@ -9,8 +9,12 @@
     border-collapse: collapse;
 }
 
+.atable th>div {
+    border: 1px dashed #e2e2e2;
+}
+
 .atable th>div.over {
-    border: 1px dashed black;
+    border-color: black;
 }
 
 .atable tbody {
@@ -19,7 +23,7 @@
     border-bottom: solid thin silver;
 }
 
-.atable thead>tr, tbody {
+.atable thead, tbody {
     display: block;
 }
 
@@ -39,6 +43,7 @@
     background: #e2e2e2;
     font-size: 12pt;
     cursor: default;
+    padding: 2px;
 }
 
 .atable th.sortable {
@@ -56,12 +61,6 @@
 .atable .sortArrow {
     float: right;
     margin-left: 5px;
-}
-
-.editColumnDialog {
-    position: absolute;
-    display: none;
-    padding: 20px 20px 10px 20px;
 }
 
 .resizeIndicator {

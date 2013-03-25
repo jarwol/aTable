@@ -30,6 +30,20 @@ var ATable = (function () {
              * @param {boolean} [options.movableColumns=true] set whether table columns are movable
              * @param {boolean} [options.sortableColumns=true] set whether clicking on column headers sorts the table
              * @param {String} [options.sortColumn] name of the column by which to sort the table
+             * @example
+             var table = new ATable({
+                dataFunction : function (atable) {
+                    atable.receivedData(rows);
+                },
+                columns : [
+                    {name : "first", label : "First Name"},
+                    {name : "last", label : "Last Name"},
+                    {name : "city", label : "City"},
+                    {name : "phone", label : "Phone #"}
+                ],
+                el : "#staticData10Rows",
+                height : 600
+            }).render();
              */
             initialize : function (options) {
                 _.bindAll(this);
@@ -48,7 +62,7 @@ var ATable = (function () {
                  * The collection of {@link Column} models representing the table columns
                  * @type {ColumnCollection}
                  */
-                this.columns = initColumns(this, options);
+                this.columns = initColumns(options);
                 this.columns.bind("reset", this.render, this);
                 this.columns.bind("sort", this.render, this);
                 this.columns.bind("change:width", this.render, this);
@@ -74,8 +88,6 @@ var ATable = (function () {
                  * @type {RowCollection}
                  */
                 this.rows = new RowCollection([], options);
-                this.rows.init = false;
-                this.columnTarget = null;
                 this.height = options.height;
                 this.prevScrollTop = 0;
             },
@@ -113,7 +125,7 @@ var ATable = (function () {
                     }
                     return this;
                 }
-                else if (this.renderTable) {
+                else if (this.renderTable === true) {
                     this.renderTable = false;
                     params.columns = this.columns.toJSON();
                     params.rows = getRowData(this.rows);
@@ -129,7 +141,7 @@ var ATable = (function () {
                     $("tbody:not(.scrollBound)").addClass("scrollBound").bind('scroll', this.onTableScrolled);
                     this.sizeTable();
                     if (typeof this.rows.sortColumn === "number") {
-                        displaySortArrow(this.columns.at(this.rows.sortColumn).get('element')[0], this.rows.sortDescending);
+                        this.displaySortArrow(this.columns.at(this.rows.sortColumn).get('element')[0], this.rows.sortDescending);
                     }
                     /* If a callback was passed to render(), invoke it after nulling out the reference. Otherwise we may
                      wind up in an infinite loop if the callback itself causes a render. */
@@ -295,9 +307,9 @@ var ATable = (function () {
                 for (var i = 0; i < cols.length; i++) {
                     newWidth += $(cols[i])[0].offsetWidth;
                 }
-                if ($.browser.mozilla) { // TODO - figure out a less hacky way to size the table elements correctly
-                    newWidth--;
-                }
+                /*if ($.browser.mozilla) { // TODO - figure out a less hacky way to size the table elements correctly
+                 newWidth--;
+                 }*/
                 this.tableElt.width(newWidth);
                 this.parentElt.width(newWidth);
             },
@@ -402,12 +414,11 @@ var ATable = (function () {
             sort : function (column, descending) {
                 var col = this.columns.get(column);
                 if (!col) throw "Invalid column name: " + column;
-                this.tableElt.find(".sortArrow").remove();
                 this.rows.setSortColumn(col.get('order'));
                 if (typeof descending === "boolean") {
                     this.rows.sortDescending = descending;
                 }
-                displaySortArrow(col.get('element')[0], this.rows.sortDescending);
+                this.displaySortArrow(col.get('element'), this.rows.sortDescending);
                 this.rows.sort();
             },
 
@@ -674,6 +685,38 @@ var ATable = (function () {
             },
 
             /**
+             * Add an arrow indicating sort direction on the sort column header
+             * @private
+             * @param {HTMLElement} column the column header to which to add the sort arrow
+             * @param {boolean} descending table is sorted descending
+             */
+            displaySortArrow : function (column, descending) {
+                var arrow = this.tableElt.find('.sortArrow');
+                var arrowWidth;
+                if (arrow.length === 0) {
+                    arrow = $(document.createElement("div"));
+                    arrow.addClass("sortArrow");
+                    arrowWidth = arrow.width();
+                }
+                else {
+                    arrowWidth = arrow.width();
+                    var arrowParent = arrow.parent();
+                    arrow.parent().width(arrowParent.width() - arrowWidth);
+                    arrow.remove();
+                }
+
+                if (descending) {
+                    arrow.html("&darr;");
+                }
+                else {
+                    arrow.html("&uarr;");
+                }
+                var width = column.width();
+                column[0].firstChild.appendChild(arrow[0]);
+                column[0].firstChild.style.width = (width + arrowWidth) + "px";
+            },
+
+            /**
              * Generate the actual table markup and add it to the DOM
              * @private
              * @param {Object} params Parameters needed to render the table
@@ -696,7 +739,7 @@ var ATable = (function () {
                         if (params.columns[i].sortable) {
                             classStr = ' className="sortable"';
                         }
-                        headerRow += '<th draggable="true" ' + widthStr + classStr + ' data-column="' + params.columns[i].name + '"><div>' + params.columns[i].label + '</div></th>';
+                        headerRow += '<th draggable="true" ' + classStr + ' data-column="' + params.columns[i].name + '"><div ' + widthStr + '>' + params.columns[i].label + '</div></th>';
                     }
                 }
                 headerRow += '</tr>';
@@ -773,7 +816,7 @@ var ATable = (function () {
             /**
              * Update the row collection with new data from the data function
              * @param {Array[]} data matrix of row data returned by the data function
-             * @param {boolean} append if true, append new rows to the dataset, otherwise replace the dataset
+             * @param {boolean} [append] if true, append new rows to the dataset, otherwise replace the dataset
              */
             receivedData : function (data, append) {
                 this.scrollTop = this.$el.find(".table").scrollTop();
@@ -790,7 +833,6 @@ var ATable = (function () {
                     this.rows.trigger("reset");
                 }
                 else {
-                    this.renderTable = true;
                     this.rows.reset(rows);
                 }
             },
@@ -910,15 +952,14 @@ var ATable = (function () {
     /**
      * Initialize the collection of table columns
      * @private
-     * @param {ATable} table The Table which is being initialized
      * @param {Object} options parameter hash passed into the ATable constructor
      * @return {ColumnCollection} Backbone collection of Column models
      */
-    function initColumns(table, options) {
+    function initColumns(options) {
         var columns = options.columns;
         for (var i = 0; i < columns.length; i++) {
             if (typeof columns[i].width === "undefined") {
-                columns[i].width = getTextWidth(columns[i].label) + 20;
+                columns[i].width = getTextWidth(columns[i].label);
             }
             if (typeof columns[i].resizable === "undefined") {
                 columns[i].resizable = options.resizableColumns;
@@ -962,24 +1003,6 @@ var ATable = (function () {
     }
 
     /**
-     * Add an arrow indicating sort direction on the sort column header
-     * @private
-     * @param {HTMLElement} column the column header to which to add the sort arrow
-     * @param {boolean} descending table is sorted descending
-     */
-    function displaySortArrow(column, descending) {
-        var arrow = document.createElement("div");
-        arrow.classList.add("sortArrow");
-        if (descending) {
-            arrow.innerHTML = "&darr;";
-        }
-        else {
-            arrow.innerHTML = "&uarr;";
-        }
-        column.firstChild.appendChild(arrow);
-    }
-
-    /**
      * Determine the width of a string when rendered on the page
      * @private
      * @param {String} text string to check the width of when rendered in a <th>
@@ -1013,5 +1036,4 @@ var ATable = (function () {
             options.sortable = true;
         }
     }
-})
-    ();
+})();

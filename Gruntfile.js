@@ -44,8 +44,7 @@ module.exports = function (grunt) {
             dist : {
                 src : ['src/**/*.js', '!src/lib/*'],
                 options : {
-                    destination : 'doc',
-                    private : false
+                    destination : 'doc'
                 }
             }
         }

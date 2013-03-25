@@ -4,46 +4,138 @@
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
     <meta content="utf-8" http-equiv="encoding">
     <title>Table Demo</title>
-    <link rel="stylesheet" type="text/css" href="css/atable.css">
-    <link rel="stylesheet" type="text/css" href="css/demo.css">
-    <script type="text/javascript" src="lib/jquery.js"></script>
-    <script type="text/javascript" src="lib/underscore.js"></script>
-    <script type="text/javascript" src="lib/backbone.js"></script>
-    <script type="text/javascript" src="../dist/atable.js"></script>
-    <script type="text/javascript" src="demo.js"></script>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/atable.css">
+    <script src="lib/jquery.js"></script>
+    <script src="lib/underscore.js"></script>
+    <script src="lib/backbone.js"></script>
+    <script src="lib/run_prettify.js"></script>
+    <script src="lib/bootstrap.min.js"></script>
+    <script src="../dist/atable.js"></script>
+    <script>
+        var rows = [
+            ["Kimberly", "Hodges", "Centennial", "887-527-3183"],
+            ["Peyton", "Sherlock", "Allentown", "880-475-3976"],
+            ["Chloe", "Gate", "Elgin", "880-411-3174"],
+            ["Eva", "Milton", "AnnArbor", "877-478-2786"],
+            ["Genesis", "Goldman", "Frisco", "806-584-3529"],
+            ["Brooke", "Carey", "Augusta", "813-467-2782"],
+            ["Emily", "Carter", "Flint", "866-551-3323"],
+            ["Paige", "Hodges", "Gresham", "883-541-2300"],
+            ["Samantha", "Hancock", "Bakersfield", "852-452-2327"],
+            ["Mariah", "Turner", "Chattanooga", "869-418-2343"],
+            ["Madeline", "Nathan", "Columbia", "883-562-3290"],
+            ["Maria", "Carrington", "CapeCoral", "851-541-2621"],
+            ["Madison", "Chandter", "Elgin", "851-488-2807"],
+            ["Audrey", "Gibbs", "Downey", "837-583-2478"],
+            ["Victoria", "Davidson", "Buffalo", "896-592-2625"],
+            ["Katelyn", "Hailey", "CedarRapids", "846-590-3667"],
+            ["Emma", "Wesley", "CoralSprings", "881-446-3318"],
+            ["Ella", "Milton", "Augusta", "830-473-3626"],
+            ["Addison", "Nash", "Erie", "808-561-3865"],
+            ["Brianna", "Murphy", "Chesapeake", "886-556-2862"],
+            ["Ella", "Thorndike", "Bakersfield", "824-423-3094"],
+            ["Riley", "Wesley", "Carrollton", "801-551-2291"],
+            ["Addison", "Thornton", "FortWayne", "825-401-3955"],
+            ["Ella", "Michaelson", "Fairfield", "801-448-3699"],
+            ["Sofia", "Mercer", "Denton", "895-435-3107"],
+            ["Madelyn", "Wayne", "Athens", "828-593-3278"],
+            ["Julia", "Daniels", "Escondido", "897-455-3432"],
+            ["Zoey", "Bush", "CorpusChristi", "866-475-2216"],
+            ["Mariah", "Oliver", "AmarilloAnaheim", "839-498-2802"],
+            ["Alexandra", "Adamson", "Athens", "811-567-2132"],
+            ["Madelyn", "Croftoon", "Daly", "841-442-2282"],
+            ["Lauren", "WifKinson", "Flint", "886-441-3285"],
+            ["Kaylee", "Cook", "Augusta", "833-437-3410"],
+            ["Anna", "Watson", "Centennial", "863-426-3530"],
+            ["Julia", "Ward", "IdahoBoston", "854-534-2168"],
+            ["Payton", "Hailey", "Chicago", "811-445-2085"],
+            ["Destiny", "Otis", "GrandPrairie", "845-406-2010"],
+            ["Lauren", "Fulton", "Denver", "850-420-2768"],
+            ["Sofia", "Campbell", "GrandRapids", "844-472-3867"],
+            ["Katherine", "Nelson", "Centennial", "846-512-3830"],
+            ["Aubrey", "Miller", "Clearwater", "879-550-2787"],
+            ["Jasmine", "Michaelson", "Charleston", "821-507-2219"],
+            ["Kaitlyn", "Thomson", "Cincinnati", "838-594-2994"],
+            ["Madison", "Conors", "Daly", "864-568-2905"],
+            ["Hannah", "Gardner", "AnnArbor", "825-463-2130"],
+            ["Jasmine", "Campbell", "Daly", "871-409-3442"],
+            ["Autumn", "Vance", "Springs", "883-539-3986"],
+            ["Olivia", "Neal", "Cincinnati", "895-566-2246"],
+            ["Sarah", "Vaughan", "AmarilloAnaheim", "885-416-2901"],
+            ["Valeria", "Oldridge", "Greensboro", "881-417-3928"]
+        ];
+
+        $(document).ready(function () {
+            var table = new ATable({
+                dataFunction : function (atable) {
+                    atable.receivedData(rows);
+                },
+                columns : [
+                    {name : "first", label : "First Name"},
+                    {name : "last", label : "Last Name"},
+                    {name : "city", label : "City"},
+                    {name : "phone", label : "Phone #"}
+                ],
+                el : "#staticDataCallback",
+                height : 600
+            }).render();
+
+            table = new ATable({
+                dataFunction : "fetchStockData",
+                columns : [
+                    {name : "symbol", label : "Symbol"},
+                    {name : "company", label : "Company Name"},
+                    {name : "close", label : "Prev. Close"},
+                    {name : "bid", label : "Bid"},
+                    {name : "ask", label : "Ask"}
+                ],
+                el : "#dynamicDataWorker",
+                height : 600
+            }).render();
+        });
+    </script>
     <script type="text/javascript" id="fetchStockData">
+        var stocks = {
+            MSFT : ["Microsoft Corporation", 27.85],
+            AAPL : ["Apple Inc.", 452.6],
+            GOOG : ["Google Inc", 811.1],
+            FB : ["Facebook Inc", 26.32],
+            C : ["Citigroup Inc.", 45],
+            JPM : ["JPMorgan Chase & Co.", 49.23],
+            VZ : ["Verizon Communications Inc.", 47.6]
+        };
+
         function fetchStockData() {
-            var url = "http://download.finance.yahoo.com/d/quotes.csv?s=AAPL,MSFT,FB,GOOG,SIRI&f=snpoban4&e=.csv";
-            sendRequest(url);
+            getDataSet();
             var interval = setInterval(function () {
-                sendRequest(url);
+                getDataSet();
             }, 3000);
         }
 
-        function sendRequest(url) {
-            var ajax = new XMLHttpRequest();
-            ajax.onload = function () {
-                var rows = [];
-                var resp = ajax.responseText;
-                var result = resp.split('\n');
-                for (var i = 0; i < result.length; i++) {
-                    var fields = result[i].split(',');
-                    rows.push(fields);
-                }
-                self.postMessage({data : rows});
-            };
-            ajax.open("GET", url, true);
-            ajax.responseType = "text";
-            ajax.send();
+        function getDataSet() {
+            var data = [];
+            var signs = [1, -1];
+            for (var sym in stocks) {
+                var sign = signs[Math.floor(Math.random() * 2)];
+                var close = Math.round(stocks[sym][1] * 100) / 100;
+                var bid = close + Math.random() * (close * .05) * sign;
+                bid = Math.round(bid * 100) / 100;
+                var ask = Math.round((bid + close * .002) * 100) / 100;
+                data.push([sym, stocks[sym][0], close, bid, ask]);
+            }
+            self.postMessage({data : data});
         }
     </script>
 </head>
 <body>
-<div class="row">
-    <div class="span4 offset4" id="staticData10Rows"></div>
+<div class="row-fluid">
+    <div class="span4 offset4">
+        <div id="staticDataCallback"></div>
+    </div>
 </div>
-<div class="row">
-    <div class="span4 offset4" id="dynamicAjax"></div>
+<div class="row-fluid">
+    <div class="span4 offset4" id="dynamicDataWorker"></div>
 </div>
 </body>
 </html>
