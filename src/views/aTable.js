@@ -65,7 +65,6 @@ var ATable = (function () {
                 this.columns = initColumns(options);
                 this.columns.bind("reset", this.render, this);
                 this.columns.bind("sort", this.render, this);
-                this.columns.bind("change:width", this.render, this);
                 this.columns.bind("change:visible", this.render, this);
 
                 /**
@@ -141,7 +140,7 @@ var ATable = (function () {
                     $("tbody:not(.scrollBound)").addClass("scrollBound").bind('scroll', this.onTableScrolled);
                     this.sizeTable();
                     if (typeof this.rows.sortColumn === "number") {
-                        this.displaySortArrow(this.columns.at(this.rows.sortColumn).get('element')[0], this.rows.sortDescending);
+                        this.displaySortArrow(this.columns.at(this.rows.sortColumn).get('name'), this.rows.sortDescending);
                     }
                     /* If a callback was passed to render(), invoke it after nulling out the reference. Otherwise we may
                      wind up in an infinite loop if the callback itself causes a render. */
@@ -401,9 +400,8 @@ var ATable = (function () {
             resizeColumn : function (column, newWidth) {
                 var col = this.columns.get(column);
                 if (!col) throw "Invalid column name: " + column;
-                this.renderTable = true;
                 col.set('width', newWidth);
-                this.renderTable = false;
+                this.resizeColumnElements(col.get('element')[0].cellIndex, newWidth);
             },
 
             /**
@@ -418,7 +416,7 @@ var ATable = (function () {
                 if (typeof descending === "boolean") {
                     this.rows.sortDescending = descending;
                 }
-                this.displaySortArrow(col.get('element'), this.rows.sortDescending);
+                this.displaySortArrow(column, this.rows.sortDescending);
                 this.rows.sort();
             },
 
@@ -687,33 +685,42 @@ var ATable = (function () {
             /**
              * Add an arrow indicating sort direction on the sort column header
              * @private
-             * @param {HTMLElement} column the column header to which to add the sort arrow
+             * @param {String} column the name of the sort column
              * @param {boolean} descending table is sorted descending
              */
             displaySortArrow : function (column, descending) {
                 var arrow = this.tableElt.find('.sortArrow');
-                var arrowWidth;
                 if (arrow.length === 0) {
-                    arrow = $(document.createElement("div"));
-                    arrow.addClass("sortArrow");
-                    arrowWidth = arrow.width();
+                    arrow = document.createElement("div");
+                    arrow.className = "sortArrow";
                 }
                 else {
-                    arrowWidth = arrow.width();
-                    var arrowParent = arrow.parent();
-                    arrow.parent().width(arrowParent.width() - arrowWidth);
-                    arrow.remove();
+                    arrow = arrow[0];
+                    var divWidth = arrow.parentElement.scrollWidth;
+                    this.resizeColumnElements(arrow.parentElement.parentElement.cellIndex, divWidth - arrow.scrollWidth);
+                    arrow.parentElement.removeChild(arrow);
                 }
-
                 if (descending) {
-                    arrow.html("&darr;");
+                    arrow.innerHTML = "&darr;";
                 }
                 else {
-                    arrow.html("&uarr;");
+                    arrow.innerHTML = "&uarr;";
                 }
-                var width = column.width();
-                column[0].firstChild.appendChild(arrow[0]);
-                column[0].firstChild.style.width = (width + arrowWidth) + "px";
+                var col = this.columns.get(column).get('element')[0];
+                col.firstChild.appendChild(arrow);
+                this.resizeColumnElements(col.cellIndex, col.firstChild.scrollWidth + arrow.scrollWidth);
+            },
+
+            resizeColumnElements : function (cellIndex, width) {
+                var headers = this.tableElt.find("th");
+                headers[cellIndex].firstChild.style.width = width + "px";
+                if (cellIndex === headers.length - 1) {
+                    width -= this.scrollbarWidth;
+                }
+                this.tbodyElt.find('td:nth-child(' + (cellIndex + 1) + ')>div').each(function () {
+                    this.style.width = width + "px";
+                });
+                this.sizeTable();
             },
 
             /**
@@ -959,7 +966,7 @@ var ATable = (function () {
         var columns = options.columns;
         for (var i = 0; i < columns.length; i++) {
             if (typeof columns[i].width === "undefined") {
-                columns[i].width = getTextWidth(columns[i].label);
+                columns[i].width = getTextWidth(columns[i].label) + 20;
             }
             if (typeof columns[i].resizable === "undefined") {
                 columns[i].resizable = options.resizableColumns;
