@@ -6,6 +6,7 @@
     <title>Table Demo</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/atable.css">
+    <link rel="stylesheet" href="css/demo.css">
     <script src="lib/jquery.js"></script>
     <script src="lib/underscore.js"></script>
     <script src="lib/backbone.js"></script>
@@ -67,7 +68,7 @@
         ];
 
         $(document).ready(function () {
-            var table = new ATable({
+            new ATable({
                 dataFunction : function (atable) {
                     atable.receivedData(rows);
                 },
@@ -78,10 +79,10 @@
                     {name : "phone", label : "Phone #"}
                 ],
                 el : "#staticDataCallback",
-                height : 600
+                height : 400
             }).render();
 
-            table = new ATable({
+            new ATable({
                 dataFunction : "fetchStockData",
                 columns : [
                     {name : "symbol", label : "Symbol"},
@@ -91,7 +92,7 @@
                     {name : "ask", label : "Ask"}
                 ],
                 el : "#dynamicDataWorker",
-                height : 600
+                height : 400
             }).render();
         });
     </script>
@@ -129,13 +130,116 @@
     </script>
 </head>
 <body>
-<div class="row-fluid">
-    <div class="span4 offset4">
-        <div id="staticDataCallback"></div>
-    </div>
+<div class="container-fluid">
+    <h4>Static data provided by a callback function</h4>
+    <div class="row-fluid">
+        <div class="span4 offset2">
+            <div class="example">
+<pre class="prettyprint">
+  <code class="language-javascript">
+    // row data
+    var rows = [["Kimberly", "Hodges", "Centennial", "887-527-3183"], ... ];
+    
+    // instantiate and render a new table
+    new ATable({
+        dataFunction: function (atable) {
+            atable.receivedData(rows);
+        },
+        columns: [
+            {name: "First"}, // With no label property, <b>name</b> is used as the label
+            {name: "last", label: "Last Name"},
+            {name: "city", label: "City"},
+            {name: "phone", label: "Phone #"}
+        ],
+        el: "#staticDataCallback",
+        height: 600
+    }).render();
+  </code>
+</pre>
 </div>
-<div class="row-fluid">
-    <div class="span4 offset4" id="dynamicDataWorker"></div>
+</div>
+<div class="span4" id="staticDataCallback"></div>
+</div>
+<hr/>
+    <h4>Dynamic data provided by a web worker created from an inline function</h4>
+    <div class="row-fluid">
+    <div class="span4 offset2">
+        <div class="example">
+<pre class="prettyprint">
+  <code class="language-javascript" style="overflow: auto;">
+    new ATable({
+        // fetchStockData references the script/function below
+        dataFunction: "fetchStockData", 
+        columns: [
+            {name: "symbol", label: "Symbol"},
+            {name: "company", label: "Company Name"},
+            {name: "close", label: "Prev. Close"},
+            {name: "bid", label: "Bid"},
+            {name: "ask", label: "Ask"}
+        ],
+        el: "#dynamicDataWorker",
+        height: 400
+    }).render();
+  </code>
+</pre>
+<pre class="prettyprint">
+    <code class="language-html">
+    &lt;script type="text/javascript" id="fetchStockData"&gt;
+        // dummy stock data
+        var stocks = {MSFT : ["Microsoft Corporation", 27.85], ... ];
+        function fetchStockData() {
+            getDataSet();
+            var interval = setInterval(function () {
+                getDataSet();
+            }, 3000);
+        }
+    
+        function getDataSet() {
+            var data = [];
+            var signs = [1, -1];
+            for (var sym in stocks) {
+                var sign = signs[Math.floor(Math.random() * 2)];
+                var close = Math.round(stocks[sym][1] * 100) / 100;
+                var bid = close + Math.random() * (close * .05) * sign;
+                bid = Math.round(bid * 100) / 100;
+                var ask = Math.round((bid + close * .002) * 100) / 100;
+                data.push([sym, stocks[sym][0], close, bid, ask]);
+            }
+            // Call self.postMessage to return data to the main thread
+            <span style="background-color: HighlightText;">self.postMessage({data : data});</span>
+        }
+    &lt;/script&gt;
+    </code>
+</pre>
+</div>
+</div>
+<div class="span4" id="dynamicDataWorker"></div>
+</div>
+    <hr/>
+    <h4>Various optional column properties</h4>
+    <div class="row-fluid">
+        <div class="span4 offset2">
+            <div class="example">
+<pre class="prettyprint">
+  <code class="language-javascript" style="overflow: auto;">
+      new ATable({
+      // fetchStockData references the script/function below
+      dataFunction: "fetchStockData",
+      columns: [
+      {name: "symbol", label: "Symbol"},
+      {name: "company", label: "Company Name"},
+      {name: "close", label: "Prev. Close"},
+      {name: "bid", label: "Bid"},
+      {name: "ask", label: "Ask"}
+      ],
+      el: "#dynamicDataWorker",
+      height: 400
+      }).render();
+  </code>
+</pre>
+    </div>
+    <div class="span4" id="staticDataColumnOptions"></div>
+    </div>
 </div>
 </body>
 </html>

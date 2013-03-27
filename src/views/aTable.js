@@ -233,15 +233,23 @@ var ATable = (function () {
              * Add a new row to the DOM
              * @private
              * @param {int} index which row in the RowCollection to add to the DOM
-             * @param {Node} rowToInsertBefore DOM row that the new row will precede
+             * @param {HTMLRowElement} rowToInsertBefore DOM row that the new row will precede
              */
             addRow : function (index, rowToInsertBefore) {
                 var tr = document.createElement("tr");
+                var arrow = this.tableElt.find('.sortArrow');
+                var arrowCol = null;
+                var arrowWidth;
+                if (arrow.length) {
+                    arrowCol = arrow[0].parentElement.parentElement.getAttribute('data-column');
+                    arrowWidth = arrow[0].scrollWidth;
+                }
                 for (var i = 0; i < this.columns.length; i++) {
                     var col = this.columns.at(i);
                     if (col.get('visible')) {
                         var div = document.createElement("div");
                         var width = col.get('width');
+                        if (col.get('name') === arrowCol) width += arrowWidth;
                         div.style.width = width + "px";
                         div.innerHTML = this.rows.getValue(index, i);
                         var td = document.createElement("td");
