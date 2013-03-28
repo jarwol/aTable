@@ -1,5 +1,4 @@
 var ATable = (function () {
-    var SORT_ARROW_WIDTH = 15;
     var BUFFER_ROWS = 5;
     var RESIZE_PIXELS = 7;
 
@@ -206,8 +205,7 @@ var ATable = (function () {
                 this.scrollbarWidth = getScrollbarWidth(this.tbodyElt[0]);
                 if (this.scrollbarWidth > 0) {
                     var cols = this.tableElt.find('th');
-                    var lastCol = cols[cols.length - 1].getAttribute("data-column");
-                    var lastColWidth = this.columns.get(lastCol).get('width');
+                    var lastColWidth = cols[cols.length - 1].scrollWidth;
                     this.tbodyElt.find('td:last-child>div').width(lastColWidth - this.scrollbarWidth);
                 }
                 this.prevScrollTop = this.tbodyElt[0].scrollTop;
@@ -248,7 +246,7 @@ var ATable = (function () {
                     var col = this.columns.at(i);
                     if (col.get('visible')) {
                         var div = document.createElement("div");
-                        var width = col.get('width');
+                        var width = col.get('element')[0].firstChild.scrollWidth;
                         if (col.get('name') === arrowCol) width += arrowWidth;
                         div.style.width = width + "px";
                         div.innerHTML = this.rows.getValue(index, i);
@@ -597,7 +595,7 @@ var ATable = (function () {
                 var column = this.columns.get(e.dataTransfer.getData("text"));
                 var colElt = column.get('element');
                 var width = e.pageX - pos.left;
-                var textWidth = getTextWidth(colElt.text()) + SORT_ARROW_WIDTH;
+                var textWidth = getTextWidth(colElt.text());
                 if (width >= textWidth) {
                     $(this.resizeIndicator).css("width", width);
                 }
@@ -617,17 +615,17 @@ var ATable = (function () {
                 }
                 else {
                     document.removeEventListener('dragover', this.onDragResizeIndicator, false);
-                    var gray = $(this.resizeIndicator);
-                    var width = parseInt(e.originalEvent.clientX - gray.position().left - SORT_ARROW_WIDTH, 10);
-                    var grayWidth = gray.width();
-                    var col = this.columns.get(gray.attr('data-column'));
+                    var gray = this.resizeIndicator;
+                    var width = parseInt(e.originalEvent.clientX - $(gray).position().left, 10);
+                    var grayWidth = gray.scrollWidth;
+                    var col = this.columns.get(gray.getAttribute('data-column'));
                     var posCol = col.get('element').offset();
                     var posTable = this.tableElt.parent().offset();
                     if (posCol.left < posTable.left) {
                         grayWidth += (posTable.left - posCol.left);
                     }
                     width = width < grayWidth ? grayWidth : width;
-                    gray.css("display", "none");
+                    gray.style.display = "none";
                     this.resizeColumn(col.get('name'), width);
                 }
             },
@@ -819,8 +817,10 @@ var ATable = (function () {
                     body += '</tr>';
                 }
                 body += "<tr style='height: " + (this.rowHeight * (params.rows.length - this.visibleRows - BUFFER_ROWS) - topRowHeight) + "px;'></tr>";
-                thead.innerHTML = headerRow;
-                tbody.innerHTML = body;
+                //thead.innerHTML = headerRow;
+                //tbody.innerHTML = body;
+                $(thead).html(headerRow);
+                $(tbody).html(body);
                 this.scrollbarWidth = getScrollbarWidth(tbody);
                 if (this.scrollbarWidth > 0) {
                     var lastColWidth = lastCol.width;

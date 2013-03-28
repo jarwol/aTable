@@ -4,7 +4,7 @@
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
     <meta content="utf-8" http-equiv="encoding">
     <title>Table Demo</title>
-    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/atable.css">
     <link rel="stylesheet" href="css/demo.css">
     <script src="lib/jquery.js"></script>
@@ -135,11 +135,10 @@
     <div class="row-fluid">
         <div class="span4 offset2">
             <div class="example">
-<pre class="prettyprint">
-  <code class="language-javascript">
+<pre class="prettyprint language-javascript">
     // row data
     var rows = [["Kimberly", "Hodges", "Centennial", "887-527-3183"], ... ];
-    
+
     // instantiate and render a new table
     new ATable({
         dataFunction: function (atable) {
@@ -154,7 +153,6 @@
         el: "#staticDataCallback",
         height: 600
     }).render();
-  </code>
 </pre>
 </div>
 </div>
@@ -165,11 +163,10 @@
     <div class="row-fluid">
     <div class="span4 offset2">
         <div class="example">
-<pre class="prettyprint">
-  <code class="language-javascript" style="overflow: auto;">
+<pre class="prettyprint language-javascript">
     new ATable({
         // fetchStockData references the script/function below
-        dataFunction: "fetchStockData", 
+        dataFunction: "fetchStockData",
         columns: [
             {name: "symbol", label: "Symbol"},
             {name: "company", label: "Company Name"},
@@ -180,10 +177,8 @@
         el: "#dynamicDataWorker",
         height: 400
     }).render();
-  </code>
 </pre>
-<pre class="prettyprint">
-    <code class="language-html">
+<pre class="prettyprint language-html">
     &lt;script type="text/javascript" id="fetchStockData"&gt;
         // dummy stock data
         var stocks = {MSFT : ["Microsoft Corporation", 27.85], ... ];
@@ -193,7 +188,7 @@
                 getDataSet();
             }, 3000);
         }
-    
+
         function getDataSet() {
             var data = [];
             var signs = [1, -1];
@@ -209,7 +204,6 @@
             <span style="background-color: HighlightText;">self.postMessage({data : data});</span>
         }
     &lt;/script&gt;
-    </code>
 </pre>
 </div>
 </div>
@@ -220,8 +214,7 @@
     <div class="row-fluid">
         <div class="span4 offset2">
             <div class="example">
-<pre class="prettyprint">
-  <code class="language-javascript" style="overflow: auto;">
+<pre class="prettyprint language-javascript">
       new ATable({
       // fetchStockData references the script/function below
       dataFunction: "fetchStockData",
@@ -235,11 +228,11 @@
       el: "#dynamicDataWorker",
       height: 400
       }).render();
-  </code>
 </pre>
     </div>
     <div class="span4" id="staticDataColumnOptions"></div>
     </div>
+</div>
 </div>
 </body>
 </html>
