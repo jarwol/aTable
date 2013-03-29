@@ -11,6 +11,8 @@
 
 .atable th>div {
     border: 1px dashed #e2e2e2;
+    white-space: nowrap;
+    overflow-x: hidden;
 }
 
 .atable th>div.over {

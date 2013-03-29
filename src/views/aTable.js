@@ -205,8 +205,8 @@ var ATable = (function () {
                 this.scrollbarWidth = getScrollbarWidth(this.tbodyElt[0]);
                 if (this.scrollbarWidth > 0) {
                     var cols = this.tableElt.find('th');
-                    var lastColWidth = cols[cols.length - 1].scrollWidth;
-                    this.tbodyElt.find('td:last-child>div').width(lastColWidth - this.scrollbarWidth);
+                    var lastColWidth = this.columns.get(cols[cols.length - 1].getAttribute('data-column')).get('width');
+                    this.resizeColumnElements(cols.length - 1, lastColWidth);
                 }
                 this.prevScrollTop = this.tbodyElt[0].scrollTop;
             },
@@ -246,8 +246,9 @@ var ATable = (function () {
                     var col = this.columns.at(i);
                     if (col.get('visible')) {
                         var div = document.createElement("div");
-                        var width = col.get('element')[0].firstChild.scrollWidth;
-                        if (col.get('name') === arrowCol) width += arrowWidth;
+                        // var width = col.get('element')[0].firstChild.scrollWidth;
+                        var width = col.get('width');
+                        //if (col.get('name') === arrowCol) width += arrowWidth;
                         div.style.width = width + "px";
                         div.innerHTML = this.rows.getValue(index, i);
                         var td = document.createElement("td");
@@ -696,7 +697,7 @@ var ATable = (function () {
              */
             displaySortArrow : function (column, descending) {
                 var arrow = this.tableElt.find('.sortArrow');
-                if (arrow.length === 0) {
+                if (!arrow.length) {
                     arrow = document.createElement("div");
                     arrow.className = "sortArrow";
                 }
@@ -717,9 +718,17 @@ var ATable = (function () {
                 this.resizeColumnElements(col.cellIndex, col.firstChild.scrollWidth + arrow.scrollWidth);
             },
 
+            /**
+             * Ensure all of the cells in a column are the correct width
+             * @private
+             * @param {int} cellIndex index of the column in the DOM
+             * @param {int} width width in pixels
+             */
             resizeColumnElements : function (cellIndex, width) {
                 var headers = this.tableElt.find("th");
                 headers[cellIndex].firstChild.style.width = width + "px";
+                var col = this.columns.get(headers[cellIndex].getAttribute('data-column'));
+                col.set({width : width});
                 if (cellIndex === headers.length - 1) {
                     width -= this.scrollbarWidth;
                 }
