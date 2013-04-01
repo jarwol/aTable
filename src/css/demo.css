@@ -20,6 +20,10 @@ pre {
     white-space: pre;
 }
 
+.highlight {
+    background-color: #FFFF30;
+}
+
 #dynamicDataWorker {
-    margin-top: 15%;
+    margin-top: 18%;
 }

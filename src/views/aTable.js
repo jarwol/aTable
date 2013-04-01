@@ -1,6 +1,7 @@
 var ATable = (function () {
     var BUFFER_ROWS = 5;
     var RESIZE_PIXELS = 7;
+    var MIN_COLUMN_WIDTH = 20;
 
     return Backbone.View.extend(
         /** @lends ATable.prototype */
@@ -477,12 +478,13 @@ var ATable = (function () {
              */
             onTableScrolled : function (e) {
                 if (this.prevScrollTop !== e.target.scrollTop) {
-                    var firstRow = parseInt(e.target.scrollTop / this.rowHeight, 10) - BUFFER_ROWS;
-                    if (firstRow < 0) firstRow = 0;
+                    var firstVisibleRow = parseInt(e.target.scrollTop / this.rowHeight, 10);
+                    var firstRenderedRow = firstVisibleRow - BUFFER_ROWS;
+                    if (firstRenderedRow < 0) firstRenderedRow = 0;
                     this.rowRange.prevFirst = this.rowRange.first;
                     this.rowRange.prevLast = this.rowRange.last;
-                    this.rowRange.first = firstRow;
-                    this.rowRange.last = firstRow + this.visibleRows + BUFFER_ROWS;
+                    this.rowRange.first = firstRenderedRow;
+                    this.rowRange.last = firstVisibleRow + this.visibleRows + BUFFER_ROWS;
                     if (this.rowRange.last > this.rows.length) {
                         this.rowRange.last = this.rows.length;
                         this.rowRange.first = this.rowRange.last - this.visibleRows - BUFFER_ROWS;
@@ -596,13 +598,10 @@ var ATable = (function () {
                 var column = this.columns.get(e.dataTransfer.getData("text"));
                 var colElt = column.get('element');
                 var width = e.pageX - pos.left;
-                var textWidth = getTextWidth(colElt.text());
-                if (width >= textWidth) {
-                    $(this.resizeIndicator).css("width", width);
+                if (width < MIN_COLUMN_WIDTH) {
+                    width = MIN_COLUMN_WIDTH;
                 }
-                else {
-                    $(this.resizeIndicator).css("width", textWidth);
-                }
+                $(this.resizeIndicator).css("width", width);
             },
 
             /**
@@ -759,7 +758,7 @@ var ATable = (function () {
                         var classStr = '';
                         widthStr = 'style="width: ' + (params.columns[i].width) + 'px;"';
                         if (params.columns[i].sortable) {
-                            classStr = ' className="sortable"';
+                            classStr = ' class="sortable"';
                         }
                         headerRow += '<th draggable="true" ' + classStr + ' data-column="' + params.columns[i].name + '"><div ' + widthStr + '>' + params.columns[i].label + '</div></th>';
                     }
