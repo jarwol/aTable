@@ -391,9 +391,10 @@ function scrollAndTestContents(table, scrollTop) {
     table.tbodyElt[0].scrollTop = scrollTop;
     table.onTableScrolled({target : {scrollTop : scrollTop}});
     var rows = table.tbodyElt.find("tr");
-    var expectedFirstRow = parseInt(scrollTop / table.rowHeight, 10) - BUFFER_ROWS;
+    var firstVisibleRow = parseInt(scrollTop / table.rowHeight, 10);
+    var expectedFirstRow = firstVisibleRow - BUFFER_ROWS;
     if (expectedFirstRow < 0) expectedFirstRow = 0;
-    var expectedLastRow = expectedFirstRow + table.visibleRows + BUFFER_ROWS;
+    var expectedLastRow = firstVisibleRow + table.visibleRows + BUFFER_ROWS;
     if (expectedLastRow > table.rows.length) {
         expectedLastRow = table.rows.length;
         expectedFirstRow = expectedLastRow - table.visibleRows - BUFFER_ROWS;
