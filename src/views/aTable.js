@@ -164,6 +164,7 @@ var ATable = (function () {
              */
             renderRows : function (prevScrollTop, scrollTop) {
                 var first, last;
+                var addedRows = (this.rowRange.last - this.rowRange.first) - (this.rowRange.prevLast - this.rowRange.prevFirst);
                 var max = this.visibleRows + BUFFER_ROWS;
                 if (scrollTop < prevScrollTop) {
                     first = this.rowRange.first;
@@ -172,7 +173,7 @@ var ATable = (function () {
                         first = this.rowRange.first;
                         last = this.rowRange.last;
                     }
-                    this.removeRows(last - first, false);
+                    this.removeRows(last - first - addedRows, false);
                     this.addRows(first, last, true);
                     adjustBufferRowHeights(this.tbodyElt[0], this.rows, this.rowHeight, this.rowRange.first);
                 }
@@ -184,7 +185,7 @@ var ATable = (function () {
                         first = this.rowRange.first;
                         last = this.rowRange.last;
                     }
-                    this.removeRows(last - first, true);
+                    this.removeRows(last - first - addedRows, true);
                     this.addRows(first, last, false);
                     adjustBufferRowHeights(this.tbodyElt[0], this.rows, this.rowHeight, this.rowRange.first);
                 }
@@ -796,7 +797,7 @@ var ATable = (function () {
                     row.style.visibility = "hidden";
                     row.style.position = "absolute";
                     tbody.appendChild(row);
-                    this.rowHeight = row.offsetHeight;
+                    this.rowHeight = $(row).outerHeight();
                     tbody.removeChild(row);
                     this.visibleRows = parseInt(this.height / this.rowHeight, 10);
                 }
