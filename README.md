@@ -1,6 +1,6 @@
 #aTable
 
-Fast, interactive Javascript table component built on Backbone.js. Simply pass in a list of columns and a function that returns the table's dataset (2D array of cell values), and you'll have a beautifully-rendered HTML table with an extensive feature set.
+Fast, interactive Javascript table component built on Backbone.js.
 
 **Check out the project page at http://jwoah12.github.com/aTable/ for full API documentation and examples to help you get started**
 
