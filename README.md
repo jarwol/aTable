@@ -27,6 +27,15 @@ grunt
 ```
 Grunt will build the development and minified versions of the library (`dist/atable.js` and `dist/atable.min.js`).  Include one of these in your project along with `css/atable.css`, and you are ready to use aTable!
 
+####Browser Compatibility
+Coming soon
+
+####Contributing
+Pull requests are welcome!  Please follow these guidelines before submitting:
+* Check out the [open issues](https://github.com/jwoah12/aTable/issues?state=open) and commit against one of those, or open your own issue first.  
+* Add unit tests to `test/tests.js` and make sure all tests pass. 
+* Try to stick to the existing code style as much as possible, and document new functions and classes with JSDoc.
+
 ####
 ####The MIT License (MIT)
 Copyright (c) 2012-2013 Jared Wolinsky
