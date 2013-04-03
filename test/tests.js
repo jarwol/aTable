@@ -165,19 +165,6 @@ asyncTest("Scroll table - dynamic data source", 32, function () {
     });
 });
 
-asyncTest("Random scroll stress test - big table", 4000, function () {
-    var table = createTable('fetchData100000Rows1Col', 1);
-    table.render(function () {
-        start();
-        var scrollHeight = table.tbodyElt[0].scrollHeight;
-        for (var i = 1; i <= 1000; i++) {
-            var scrollTop = Math.floor(Math.random() * (scrollHeight + 1));
-            table.onTableScrolled({target : {scrollTop : scrollTop}});
-            scrollAndTestContents(table, scrollTop);
-        }
-    });
-});
-
 module("Column Operations");
 asyncTest("Reorder columns", 12, function () {
     var table = createTable('fetchData1Row4Cols', 4);

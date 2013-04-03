@@ -10,7 +10,6 @@ hr {
 }
 
 h4 {
-    text-align: center;
     margin: 45px 0;
 }
 
@@ -22,8 +21,4 @@ pre {
 
 .highlight {
     background-color: #FFFF30;
-}
-
-#dynamicDataWorker {
-    margin-top: 18%;
 }

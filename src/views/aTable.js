@@ -199,6 +199,7 @@ var ATable = (function () {
                         this.rowRange.last = last;
                     }
                     adjustBufferRowHeights(this.tbodyElt[0], this.rows, this.rowHeight, this.rowRange.first);
+                    this.resizeIndicator.style.height = (this.tableElt.height() + 1) + "px";
                 }
                 else {
                     this.refreshRows(this.rowRange.first);
@@ -311,13 +312,10 @@ var ATable = (function () {
              */
             sizeTable : function () {
                 var cols = this.tableElt.find("th");
-                var newWidth = 1;
+                var newWidth = 0;
                 for (var i = 0; i < cols.length; i++) {
                     newWidth += $(cols[i])[0].offsetWidth;
                 }
-                /*if ($.browser.mozilla) { // TODO - figure out a less hacky way to size the table elements correctly
-                 newWidth--;
-                 }*/
                 this.tableElt.width(newWidth);
                 this.parentElt.width(newWidth);
             },
@@ -555,7 +553,7 @@ var ATable = (function () {
                     }
                     var posCol = target.offset();
                     var posTable = this.tableElt.parent().offset();
-                    var height = this.tableElt.height() + 2;
+                    var height = this.tableElt.height() + 1;
                     var leftPad = target.css("padding-left");
                     var rightPad = target.css("padding-right");
                     var left, diff;

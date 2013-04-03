@@ -6,6 +6,11 @@ module.exports = function (grunt) {
         "src/collections/rowCollection.js",
         "src/views/aTable.js"];
 
+    var banner = '/*!\n'
+        + ' * <%= pkg.name %> v<%= pkg.version %>\n'
+        + ' * Copyright (c) 2012-2013 Jared Wolinsky\n'
+        + ' * Licensed under the MIT License - http://opensource.org/licenses/MIT\n */\n';
+
     grunt.initConfig({
         pkg : grunt.file.readJSON('package.json'),
         jshint : {
@@ -21,9 +26,7 @@ module.exports = function (grunt) {
         concat : {
             options : {
                 separator : '\n\n',
-                banner : '/*! <%= pkg.name %> v<%= pkg.version %>\n'
-                    + ' * Date: <%= grunt.template.today("yyyy-mm-dd") %>\n'
-                    + ' * Author: <%= pkg.author %> \n */\n\n'
+                banner : banner + '\n'
             },
             dist : {
                 src : sourceFiles,
@@ -32,7 +35,7 @@ module.exports = function (grunt) {
         },
         uglify : {
             options : {
-                banner : '/*! <%= pkg.name %> v<%= pkg.version %> - <%= grunt.template.today("yyyy-mm-dd") %> */\n'
+                banner : banner
             },
             build : {
                 files : {
@@ -48,7 +51,8 @@ module.exports = function (grunt) {
                 }
             }
         }
-    });
+    })
+    ;
 
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-uglify');
@@ -56,7 +60,8 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-qunit');
     grunt.loadNpmTasks('grunt-jsdoc');
 
-    // Default task(s).
+// Default task(s).
     grunt.registerTask('default', ['jshint', 'concat', 'uglify']);
 
-};
+}
+;
