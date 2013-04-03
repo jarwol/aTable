@@ -1,4 +1,5 @@
 var BUFFER_ROWS = 5;
+var MIN_COLUMN_WIDTH = 20;
 
 module("Row rendering");
 asyncTest("Initial render 100 rows", 4, function () {
@@ -369,20 +370,24 @@ function isSorted(table) {
 function resizeColumnAndTest(table, column, change) {
     var row = table.tbodyElt.find("tr")[1];
     var col = table.columns.get(column);
-    var actualWidth = col.get('element').width();
+    var actualWidth = col.get('element').outerWidth();
     var attrWidth = col.get('width');
-    var minWidth = getTextWidth(col.get('name')) + 20;
+    var widthDiff = actualWidth - attrWidth;
+    var minWidth = MIN_COLUMN_WIDTH;
     var expectedWidth = actualWidth + change;
-    if (expectedWidth < minWidth) expectedWidth = minWidth;
+    if (expectedWidth < minWidth) expectedWidth = minWidth + widthDiff;
+    var expectedAttrWidth = attrWidth + change;
+    if (expectedAttrWidth < minWidth) expectedAttrWidth = minWidth;
     table.resizeColumn(column, attrWidth + change);
     row = table.tbodyElt.find("tr")[1];
-    equal(col.get('element').width(), expectedWidth, "TH width should change by " + change + "px");
-    equal(col.get('width'), attrWidth + change, "width attribute should change by " + change + "px");
-    if (col.get('order') === table.columns.length - 1) {
-        equal($(row.cells[col.get('order')]).width(), expectedWidth - table.scrollbarWidth + 2, "TD width should equal TH width - scrollbar width");
+    equal(col.get('element').outerWidth(), expectedWidth, "TH width should change by " + change + "px");
+    equal(col.get('width'), expectedAttrWidth, "width attribute should change by " + change + "px");
+    var cols = table.tableElt.find("th");
+    if (col.get('element').cellIndex === cols.length - 1) {
+        equal($(row.cells[col.get('element')[0].cellIndex]).outerWidth(), expectedWidth - table.scrollbarWidth, "TD width should equal TH width - scrollbar width");
     }
     else {
-        equal($(row.cells[col.get('order')]).width(), expectedWidth, "TD width should match TH width");
+        equal($(row.cells[col.get('element')[0].cellIndex]).outerWidth(), expectedWidth, "TD width should match TH width");
     }
 }
 
@@ -404,16 +409,4 @@ function scrollAndTestContents(table, scrollTop) {
     equal(parseInt(rows[rows.length - 2].cells[0].firstChild.innerHTML, 10), (expectedLastRow - 1) * cols, "last row's first cell should contain " + (expectedLastRow - 1) * cols);
     equal(table.rowRange.first * table.rowHeight, rows[0].clientHeight, "height of top buffer row should equal " + table.rowRange.first * table.rowHeight);
     equal((table.rows.length - table.rowRange.last) * table.rowHeight, rows[rows.length - 1].clientHeight, "height of bottom buffer row should equal " + (table.rows.length - table.rowRange.last) * table.rowHeight);
-}
-
-function getTextWidth(text) {
-    var o = $('<th>' + text + '</th>').css({
-        'position' : 'absolute',
-        'float' : 'left',
-        'white-space' : 'nowrap',
-        'visibility' : 'hidden'
-    }).appendTo($('body'));
-    var width = o.width();
-    o.remove();
-    return width;
 }

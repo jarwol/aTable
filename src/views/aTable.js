@@ -409,6 +409,7 @@ var ATable = (function () {
             resizeColumn : function (column, newWidth) {
                 var col = this.columns.get(column);
                 if (!col) throw "Invalid column name: " + column;
+                if (newWidth < MIN_COLUMN_WIDTH) newWidth = MIN_COLUMN_WIDTH;
                 col.set('width', newWidth);
                 this.resizeColumnElements(col.get('element')[0].cellIndex, newWidth);
             },
@@ -714,7 +715,7 @@ var ATable = (function () {
                     arrow.innerHTML = "&uarr;";
                 }
                 var col = this.columns.get(column).get('element')[0];
-                col.firstChild.appendChild(arrow);
+                col.firstChild.insertBefore(arrow, col.firstChild.firstChild);
                 this.resizeColumnElements(col.cellIndex, col.firstChild.scrollWidth + arrow.scrollWidth);
             },
 
