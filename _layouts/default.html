@@ -4,27 +4,43 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <title>ATable{% if page.title }%} - {{page.title}}{% endif %}</title>
-
-    <link href="/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/css/atable.css" rel="stylesheet">
-    <link href="/css/demo.css" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/demo.css" rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet">
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-    <script src="/js/bootstrap.min.js"></script>
-    <script src="/js/underscore.min.js"></script>
-    <script src="/js/backbone.min.js"></script>
-    <script src="/js/atable.js"></script>
+    <script src="lib/bootstrap.min.js"></script>
+    {% if page.includes %}
+    {{page.includes}}
+    {% endif %}
 </head>
 <body>
 <div class="container-fluid">
     <div class="row-fluid">
         <div class="span8 offset2">
+            <div class="navbar">
+                <div class="navbar-inner">
+                    <a href="index.html" class="brand">ATable</a>
+                    <ul class="nav">
+                        <li{% if page.title == 'Examples' }%} class="active"{% endif %}><a href="demo.html">Examples</a></li>
+                        <li><a href="api.html">Docs</a></li>
+                        <li><a href="test.html">Tests</a></li>
+                    </ul>
+                </div>
+            </div>
             {{content}}
+            <footer>
+                <p>Project maintained by <a href="https://github.com/jwoah12">Jared Wolinsky</a></p>
+            </footer>
         </div>
     </div>
 </div>
-<footer>
-    <p>Project maintained by <a href="https://github.com/jwoah12">Jared Wolinsky</a></p>
-</footer>
+<script>
+    !function ($) {
+        $(function () {
+            window.prettyPrint && prettyPrint()
+        })
+    }(window.jQuery)
+</script>
 <script type="text/javascript">
     var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
     document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
