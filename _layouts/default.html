@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>ATable{% if page.title }%} - {{page.title}}{% endif %}</title>
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/atable.css" rel="stylesheet">
+
+</head>
+<body>
+{{content}}
+<footer>
+    <p>Project maintained by <a href="https://github.com/jwoah12">Jared Wolinsky</a></p>
+</footer>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/underscore.min.js"></script>
+<script src="/js/backbone.min.js"></script>
+<script src="/js/atable.min.js"></script>
+<script type="text/javascript">
+    var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+    document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+    try {
+        var pageTracker = _gat._getTracker("UA-39412890-1");
+        pageTracker._trackPageview();
+    }
+    catch (err) {
+    }
+</script>
+</body>
+</html>
