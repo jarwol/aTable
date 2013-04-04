@@ -6,7 +6,7 @@ var RowCollection = (function () {
              * @class Backbone Collection of {@link Row} models representing the dataset of the table
              * @augments Backbone.Collection
              * @constructs
-             * @param models initial set of {@link Row} models to add to the collection
+             * @param models initial set of Row models to add to the collection
              * @param {Object} options hash of parameters
              * @param {int} [options.sortColumn] index of the column by which to sort the table
              * @param {boolean} [options.sortDescending=false] if true, sort the rows in descending order

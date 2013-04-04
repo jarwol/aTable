@@ -7,7 +7,7 @@ var ATable = (function () {
         /** @lends ATable.prototype */
         {
             /**
-             * @class ATable The master Backbone View that instantiates the table. The constructor accepts a hash of parameters.
+             * @class The master Backbone View that instantiates the table. The constructor accepts a hash of parameters.
              * @augments Backbone.View
              * @constructs
              * @param {Object} options hash of parameters
@@ -30,20 +30,7 @@ var ATable = (function () {
              * @param {boolean} [options.movableColumns=true] set whether table columns are movable
              * @param {boolean} [options.sortableColumns=true] set whether clicking on column headers sorts the table
              * @param {String} [options.sortColumn] name of the column by which to sort the table
-             * @example
-             var table = new ATable({
-                dataFunction : function (atable) {
-                    atable.receivedData(rows);
-                },
-                columns : [
-                    {name : "first", label : "First Name"},
-                    {name : "last", label : "Last Name"},
-                    {name : "city", label : "City"},
-                    {name : "phone", label : "Phone #"}
-                ],
-                el : "#staticData10Rows",
-                height : 600
-            }).render();
+             * @see http://jwoah12.github.com/aTable/demo.html
              */
             initialize : function (options) {
                 _.bindAll(this);
@@ -66,11 +53,6 @@ var ATable = (function () {
                 this.columns.bind("reset", this.render, this);
                 this.columns.bind("sort", this.render, this);
                 this.columns.bind("change:visible", this.render, this);
-
-                /**
-                 * Whether the table columns can be re-ordered
-                 * @type {boolean}
-                 */
                 this.movableColumns = options.movableColumns;
                 if (typeof options.sortColumn === "string") {
                     var i = this.columns.indexOf(options.sortColumn);
@@ -595,13 +577,12 @@ var ATable = (function () {
              */
             onDragResizeIndicator : function (e) {
                 var pos = $(this.resizeIndicator).offset();
-                var column = this.columns.get(e.dataTransfer.getData("text"));
-                var colElt = column.get('element');
+                var column = this.columns.get(this.resizeIndicator.getAttribute("data-column"));
                 var width = e.pageX - pos.left;
                 if (width < MIN_COLUMN_WIDTH) {
                     width = MIN_COLUMN_WIDTH;
                 }
-                $(this.resizeIndicator).css("width", width);
+                this.resizeIndicator.style.width = width + "px";
             },
 
             /**
