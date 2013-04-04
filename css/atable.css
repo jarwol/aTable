@@ -1,4 +1,4 @@
-atable.min.js.atableParent {
+.atableParent {
     border: solid thin silver;
     border-right: none;
     border-bottom: none;
@@ -9,8 +9,14 @@ atable.min.js.atableParent {
     border-collapse: collapse;
 }
 
+.atable th>div {
+    border: 1px dashed #e2e2e2;
+    white-space: nowrap;
+    overflow-x: hidden;
+}
+
 .atable th>div.over {
-    border: 1px dashed black;
+    border-color: black;
 }
 
 .atable tbody {
@@ -19,13 +25,12 @@ atable.min.js.atableParent {
     border-bottom: solid thin silver;
 }
 
-.atable thead>tr, tbody {
+.atable thead, tbody {
     display: block;
 }
 
 .atable td>div {
     overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
 }
 
@@ -39,6 +44,7 @@ atable.min.js.atableParent {
     background: #e2e2e2;
     font-size: 12pt;
     cursor: default;
+    padding: 2px;
 }
 
 .atable th.sortable {
@@ -56,12 +62,6 @@ atable.min.js.atableParent {
 .atable .sortArrow {
     float: right;
     margin-left: 5px;
-}
-
-.editColumnDialog {
-    position: absolute;
-    display: none;
-    padding: 20px 20px 10px 20px;
 }
 
 .resizeIndicator {

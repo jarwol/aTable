@@ -1,67 +1,367 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
-    <meta content="utf-8" http-equiv="encoding">
-    <title>Table Demo</title>
-    <link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css"
-          rel="stylesheet">
-    <link rel="stylesheet" href="css/atable.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/backbone.js/0.9.10/backbone-min.js"></script>
-    <script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
-    <script src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
-    <script src="js/atable.min.js"></script>
-    <script>
-        $(document).ready(function () {
-            var table = new ATable({
-                dataFunction : "fetchStockData",
-                columns : [
-                    {name : "symbol", label : "Symbol"},
-                    {name : "company", label : "Company Name"},
-                    {name : "close", label: "Prev. Close"},
-                    {name : "open", label : "Open"},
-                    {name : "bid", label : "Bid"},
-                    {name : "ask", label : "Ask"},
-                    {name : "notes", label : "Notes"}
-                ],
-                el : "#dynamicAjax",
-                height : 600
-            });
-            table.render();
-        });
-    </script>
-    <script type="text/javascript" id="fetchStockData">
-        function fetchStockData() {
-            var url = "http://download.finance.yahoo.com/d/quotes.csv?s=AAPL,MSFT,FB,GOOG,SIRI&f=snpoban4&e=.csv";
-            sendRequest(url);
+---
+layout: default
+title: Examples
+---
+<script>
+    var rows = [
+        ["Kimberly", "Hodges", "Centennial", "887-527-3183"],
+        ["Peyton", "Sherlock", "Allentown", "880-475-3976"],
+        ["Chloe", "Gate", "Elgin", "880-411-3174"],
+        ["Eva", "Milton", "Ann Arbor", "877-478-2786"],
+        ["Genesis", "Goldman", "Frisco", "806-584-3529"],
+        ["Brooke", "Carey", "Augusta", "813-467-2782"],
+        ["Emily", "Carter", "Flint", "866-551-3323"],
+        ["Paige", "Hodges", "Gresham", "883-541-2300"],
+        ["Samantha", "Hancock", "Bakersfield", "852-452-2327"],
+        ["Mariah", "Turner", "Chattanooga", "869-418-2343"],
+        ["Madeline", "Nathan", "Columbia", "883-562-3290"],
+        ["Maria", "Carrington", "Cape Coral", "851-541-2621"],
+        ["Madison", "Chandter", "Elgin", "851-488-2807"],
+        ["Audrey", "Gibbs", "Downey", "837-583-2478"],
+        ["Victoria", "Davidson", "Buffalo", "896-592-2625"],
+        ["Katelyn", "Hailey", "Cedar Rapids", "846-590-3667"],
+        ["Emma", "Wesley", "Coral Springs", "881-446-3318"],
+        ["Ella", "Milton", "Augusta", "830-473-3626"],
+        ["Addison", "Nash", "Erie", "808-561-3865"],
+        ["Brianna", "Murphy", "Chesapeake", "886-556-2862"],
+        ["Ella", "Thorndike", "Bakersfield", "824-423-3094"],
+        ["Riley", "Wesley", "Carrollton", "801-551-2291"],
+        ["Addison", "Thornton", "Fort Wayne", "825-401-3955"],
+        ["Ella", "Michaelson", "Fairfield", "801-448-3699"],
+        ["Sofia", "Mercer", "Denton", "895-435-3107"],
+        ["Madelyn", "Wayne", "Athens", "828-593-3278"],
+        ["Julia", "Daniels", "Escondido", "897-455-3432"],
+        ["Zoey", "Bush", "Corpus Christi", "866-475-2216"],
+        ["Mariah", "Oliver", "Anaheim", "839-498-2802"],
+        ["Alexandra", "Adamson", "Athens", "811-567-2132"],
+        ["Madelyn", "Croftoon", "Daly", "841-442-2282"],
+        ["Lauren", "WifKinson", "Flint", "886-441-3285"],
+        ["Kaylee", "Cook", "Augusta", "833-437-3410"],
+        ["Anna", "Watson", "Centennial", "863-426-3530"],
+        ["Julia", "Ward", "Boston", "854-534-2168"],
+        ["Payton", "Hailey", "Chicago", "811-445-2085"],
+        ["Destiny", "Otis", "Grand Prairie", "845-406-2010"],
+        ["Lauren", "Fulton", "Denver", "850-420-2768"],
+        ["Sofia", "Campbell", "Grand Rapids", "844-472-3867"],
+        ["Katherine", "Nelson", "Centennial", "846-512-3830"],
+        ["Aubrey", "Miller", "Clearwater", "879-550-2787"],
+        ["Jasmine", "Michaelson", "Charleston", "821-507-2219"],
+        ["Kaitlyn", "Thomson", "Cincinnati", "838-594-2994"],
+        ["Madison", "Conors", "Daly", "864-568-2905"],
+        ["Hannah", "Gardner", "Ann Arbor", "825-463-2130"],
+        ["Jasmine", "Campbell", "Daly", "871-409-3442"],
+        ["Autumn", "Vance", "Springs", "883-539-3986"],
+        ["Olivia", "Neal", "Cincinnati", "895-566-2246"],
+        ["Sarah", "Vaughan", "Amarillo", "885-416-2901"],
+        ["Valeria", "Oldridge", "Greensboro", "881-417-3928"]
+    ];
+
+    $(document).ready(function () {
+        new ATable({
+            dataFunction : function (atable) {
+                atable.receivedData(rows);
+            },
+            columns : [
+                {name : "first", label : "First Name"},
+                {name : "last", label : "Last Name"},
+                {name : "city", label : "City"},
+                {name : "phone", label : "Phone #"}
+            ],
+            el : "#staticDataCallback",
+            // height in pixels is required
+            height : 400
+        }).render();
+
+        new ATable({
+            dataFunction : function (atable) {
+                var count = 1;
+                var getDataSet = function () {
+                    var data = [];
+                    for (var i = count; i < count + 4; i += 2) {
+                        data.push([i, i + 1]);
+                    }
+                    count += 4;
+
+                    // Append rows instead of replacing them
+                    atable.receivedData(data, true);
+                }
+                getDataSet();
+                var interval = setInterval(function () {
+                    getDataSet();
+                    if (count > 10000) clearInterval(interval);
+                }, 2000);
+            },
+            columns : [
+                {name : "Column 1"},
+                {name : "Column 2"}
+            ],
+            el : "#appendRows",
+            height : 400
+        }).render();
+
+        // Demonstrate column options
+        new ATable({
+            dataFunction : function (atable) {
+                atable.receivedData(rows);
+            },
+            columns : [
+                {name : "first", label : "First Name", sortable : false}, // Disable sorting on this column
+                {name : "last", label : "Last Name", width : 200, resizable : false}, // Set an explicit width of 200px and disable resizing this column
+                {name : "City"}, // Leave out the <b>label</b> property, and the column's <b>name</b> is displayed
+                {name : "phone", label : "Phone #", visible : false} // Don't render this column in the table
+            ],
+            el : "#columnProps",
+            height : 400
+        }).render();
+
+        new ATable({
+            dataFunction : "fetchStockData",
+            columns : [
+                {name : "symbol", label : "Symbol"},
+                {name : "company", label : "Company Name"},
+                {name : "close", label : "Prev. Close"},
+                {name : "bid", label : "Bid"},
+                {name : "ask", label : "Ask"}
+            ],
+            el : "#dynamicDataWorker",
+            height : 400
+        }).render();
+
+        new ATable({
+            dataFunction : function (atable) {
+                var data = [];
+                for (var i = 1; i < 400000; i += 4) {
+                    data.push([i, i + 1, i + 2, i + 3]);
+                }
+                atable.receivedData(data);
+            },
+            columns : [
+                {name : "Column 1"},
+                {name : "Column 2"},
+                {name : "Column 3"},
+                {name : "Column 4"}
+            ],
+            el : "#bigTable",
+            height : 400
+        }).render();
+    });
+</script>
+<script type="text/javascript" id="fetchStockData">
+    var stocks = {
+        MSFT : ["Microsoft Corporation", 27.85],
+        AAPL : ["Apple Inc.", 452.6],
+        GOOG : ["Google Inc", 811.1],
+        FB : ["Facebook Inc", 26.32],
+        C : ["Citigroup Inc.", 45],
+        JPM : ["JPMorgan Chase & Co.", 49.23],
+        VZ : ["Verizon Communications Inc.", 47.6]
+    };
+
+    function fetchStockData() {
+        getDataSet();
+        setInterval(function () {
+            getDataSet();
+        }, 3000);
+    }
+
+    function getDataSet() {
+        var data = [];
+        var signs = [1, -1];
+        for (var sym in stocks) {
+            var sign = signs[Math.floor(Math.random() * 2)];
+            var close = Math.round(stocks[sym][1] * 100) / 100;
+            var bid = close + Math.random() * (close * .05) * sign;
+            bid = Math.round(bid * 100) / 100;
+            var ask = Math.round((bid + close * .002) * 100) / 100;
+            data.push([sym, stocks[sym][0], close, bid, ask]);
+        }
+        self.postMessage({data : data});
+    }
+</script>
+<h4>Static data provided by a callback function</h4>
+
+<div class="row-fluid">
+    <div class="span6">
+        <div class="example">
+<pre class="prettyprint language-javascript">
+    // row data is a simple 2-dimensional array
+    var rows = [["Kimberly", "Hodges", "Centennial", "887-527-3183"], ... ];
+
+    // instantiate and render a new table
+    new ATable({
+        // The callback is passed the atable as a parameter
+        dataFunction : function (atable) {
+            // Call the atable's <b>receivedData</b> method to update the table's dataset
+            <span class="highlight">atable.receivedData(rows);</span>
+        },
+        columns : [
+            {name : "first", label : "First Name"},
+            {name : "last", label : "Last Name"},
+            {name : "city", label : "City"},
+            {name : "phone", label : "Phone #"}
+        ],
+        el : "#staticDataCallback",
+        height : 400
+    }).render();
+</pre>
+        </div>
+    </div>
+    <div class="span6" id="staticDataCallback"></div>
+</div>
+<hr/>
+
+<h4>Dynamic data - append rows</h4>
+
+<div class="row-fluid">
+    <div class="span6">
+        <div class="example">
+<pre class="prettyprint language-javascript">
+    new ATable({
+        dataFunction : function (atable) {
+            var count = 1;
+            var getDataSet = function () {
+                var data = [];
+                for (var i = count; i < count + 4; i += 2) {
+                    data.push([i, i + 1]);
+                }
+                count += 4;
+
+                // Append rows instead of replacing them
+                atable.receivedData(data, <span class="highlight">true</span>);
+            }
+            getDataSet();
             var interval = setInterval(function () {
-                sendRequest(url);
+                getDataSet();
+                if (count > 1000) clearInterval(interval);
+            }, 2000);
+        },
+        columns : [
+            {name : "Column 1"},
+            {name : "Column 2"}
+        ],
+        el : "#appendRows",
+        height : 400
+    }).render();
+</pre>
+        </div>
+    </div>
+    <div class="span6" id="appendRows"></div>
+</div>
+<hr/>
+
+<h4>Optional column configuration</h4>
+
+<div class="row-fluid">
+    <div class="span6">
+        <div class="example">
+<pre class="prettyprint language-javascript">
+    new ATable({
+        dataFunction : function (atable) {
+            atable.receivedData(rows);
+        },
+        columns : [
+            // Disable sorting on this column
+            {name : "first", label : "First Name", sortable : false},
+    
+            // Set an explicit width of 200px and disable resizing this column
+            {name : "last", label : "Last Name", width : 200, resizable : false},
+    
+            // Leave out the <b>label</b> property, and the column's <b>name</b> is displayed
+            {name : "City"},
+    
+            // Don't render this column in the table
+            {name : "phone", label : "Phone #", visible : false} 
+        ],
+        el : "#columnProps",
+        height : 400
+    }).render();
+</pre>
+        </div>
+    </div>
+    <div class="span6" id="columnProps"></div>
+</div>
+<hr/>
+
+<h4>Dynamic data provided by a web worker</h4>
+
+<div class="row-fluid">
+    <div class="span6">
+        <div class="example">
+<pre class="prettyprint language-javascript">
+    new ATable({
+        // fetchStockData references the script/function below
+        dataFunction: "fetchStockData",
+        columns: [
+            {name: "symbol", label: "Symbol"},
+            {name: "company", label: "Company Name"},
+            {name: "close", label: "Prev. Close"},
+            {name: "bid", label: "Bid"},
+            {name: "ask", label: "Ask"}
+        ],
+        el: "#dynamicDataWorker",
+        height: 400
+    }).render();
+</pre>
+<pre class="prettyprint language-html">
+    &lt;script type="text/javascript" id="fetchStockData"&gt;
+        // dummy stock data
+        var stocks = {MSFT : ["Microsoft Corporation", 27.85], ... ];
+    
+        // id of the script tag and the name of the data function must be the same
+        function fetchStockData() {
+            getDataSet();
+            var interval = setInterval(function () {
+                getDataSet();
             }, 3000);
         }
 
-        function sendRequest(url) {
-            var ajax = new XMLHttpRequest();
-            ajax.onload = function () {
-                var rows = [];
-                var resp = ajax.responseText;
-                var result = resp.split('\n');
-                for (var i = 0; i < result.length; i++) {
-                    var fields = result[i].split(',');
-                    rows.push(fields);
-                }
-                self.postMessage({data : rows});
-            };
-            ajax.open("GET", url, true);
-            ajax.responseType = "text";
-            ajax.send();
+        function getDataSet() {
+            var data = [];
+            var signs = [1, -1];
+            for (var sym in stocks) {
+                var sign = signs[Math.floor(Math.random() * 2)];
+                var close = Math.round(stocks[sym][1] * 100) / 100;
+                var bid = close + Math.random() * (close * .05) * sign;
+                bid = Math.round(bid * 100) / 100;
+                var ask = Math.round((bid + close * .002) * 100) / 100;
+                data.push([sym, stocks[sym][0], close, bid, ask]);
+            }
+            // Call self.postMessage to return data to the main thread
+            <span class="highlight">self.postMessage({data : data});</span>
         }
-    </script>
-</head>
-<body>
-<div class="row-fluid">
-    <div class="span4 offset4" id="dynamicAjax"></div>
+    &lt;/script&gt;
+</pre>
+        </div>
+    </div>
+    <div class="span6" id="dynamicDataWorker"></div>
 </div>
-</body>
-</html>
+<hr/>
+
+<h4>Big table - 100k rows</h4>
+
+<div class="row-fluid">
+    <div class="span6">
+        <div class="example">
+<pre class="prettyprint language-javascript">
+    new ATable({
+        dataFunction : function (atable) {
+            var data = [];
+            for (var i = 1; i < 400000; i += 4) {
+                data.push([i, i + 1, i + 2, i + 3]);
+            }
+            atable.receivedData(data);
+        },
+        columns : [
+            {name : "Column 1"},
+            {name : "Column 2"},
+            {name : "Column 3"},
+            {name : "Column 4"}
+        ],
+        el : "#bigTable",
+        height : 400
+    }).render();
+</pre>
+        </div>
+    </div>
+    <div class="span6" id="bigTable"></div>
+</div>

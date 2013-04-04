@@ -7,19 +7,24 @@
 
     <link href="/css/bootstrap.min.css" rel="stylesheet">
     <link href="/css/atable.css" rel="stylesheet">
-
+    <link href="/css/demo.css" rel="stylesheet">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/underscore.min.js"></script>
+    <script src="/js/backbone.min.js"></script>
+    <script src="/js/atable.js"></script>
 </head>
 <body>
-{{content}}
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="span8 offset2">
+            {{content}}
+        </div>
+    </div>
+</div>
 <footer>
     <p>Project maintained by <a href="https://github.com/jwoah12">Jared Wolinsky</a></p>
 </footer>
-
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-<script src="/js/bootstrap.min.js"></script>
-<script src="/js/underscore.min.js"></script>
-<script src="/js/backbone.min.js"></script>
-<script src="/js/atable.min.js"></script>
 <script type="text/javascript">
     var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
     document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
