@@ -289,6 +289,36 @@ includes: |
 </div>
 <hr/>
 
+<h4>Big table - 100k rows</h4>
+
+<div class="row-fluid">
+    <div class="span6">
+        <div class="example">
+<pre class="prettyprint language-javascript">
+    new ATable({
+        dataFunction : function (atable) {
+            var data = [];
+            for (var i = 1; i < 400000; i += 4) {
+                data.push([i, i + 1, i + 2, i + 3]);
+            }
+            atable.receivedData(data);
+        },
+        columns : [
+            {name : "Column 1"},
+            {name : "Column 2"},
+            {name : "Column 3"},
+            {name : "Column 4"}
+        ],
+        el : "#bigTable",
+        height : 400
+    }).render();
+</pre>
+        </div>
+    </div>
+    <div class="span6" id="bigTable"></div>
+</div>
+<hr/>
+
 <h4>Dynamic data provided by a web worker</h4>
 
 <div class="row-fluid">
@@ -341,34 +371,4 @@ includes: |
         </div>
     </div>
     <div class="span6" id="dynamicDataWorker"></div>
-</div>
-<hr/>
-
-<h4>Big table - 100k rows</h4>
-
-<div class="row-fluid">
-    <div class="span6">
-        <div class="example">
-<pre class="prettyprint language-javascript">
-    new ATable({
-        dataFunction : function (atable) {
-            var data = [];
-            for (var i = 1; i < 400000; i += 4) {
-                data.push([i, i + 1, i + 2, i + 3]);
-            }
-            atable.receivedData(data);
-        },
-        columns : [
-            {name : "Column 1"},
-            {name : "Column 2"},
-            {name : "Column 3"},
-            {name : "Column 4"}
-        ],
-        el : "#bigTable",
-        height : 400
-    }).render();
-</pre>
-        </div>
-    </div>
-    <div class="span6" id="bigTable"></div>
 </div>
