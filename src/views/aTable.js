@@ -40,6 +40,7 @@ var ATable = (function () {
                 else if (typeof options.dataFunction === "function") {
                     this.dataFunction = options.dataFunction;
                 }
+                this.browser = detectBrowser();
                 this.renderTable = true;
                 this.dataAppended = false;
                 var err = validateTableArgs(options);
@@ -224,7 +225,7 @@ var ATable = (function () {
                 var arrowCol = null;
                 var arrowWidth;
                 if (arrow.length) {
-                    arrowCol = arrow[0].parentElement.parentElement.getAttribute('data-column');
+                    arrowCol = arrow[0].parentNode.parentNode.getAttribute('data-column');
                     arrowWidth = arrow[0].scrollWidth;
                 }
                 for (var i = 0; i < this.columns.length; i++) {
@@ -554,9 +555,11 @@ var ATable = (function () {
                         .css("width", width).attr('data-column', target[0].getAttribute('data-column'));
                     // Firefox doesn't provide mouse coordinates in the 'drag' event, so we must use a document-level
                     // 'dragover' as a workaround
-                    document.addEventListener('dragover', this.onDragResizeIndicator);
-                    // Disable the default drag image by replacing it with an empty div
-                    e.originalEvent.dataTransfer.setDragImage(document.createElement("div"), 0, 0);
+                    document.addEventListener('dragover', this.onDragResizeIndicator, false);
+                    // Disable the default drag image by replacing it with an empty div (this crashes safari)
+                    if (this.browser !== "safari") {
+                        e.originalEvent.dataTransfer.setDragImage(document.createElement("div"), 0, 0);
+                    }
                     e.originalEvent.dataTransfer.setData("text", target[0].getAttribute('data-column'));
                 }
                 // User is moving the column
@@ -567,7 +570,6 @@ var ATable = (function () {
                 else {
                     e.preventDefault();
                 }
-
             },
 
             /**
@@ -621,7 +623,7 @@ var ATable = (function () {
                 if (this.movableColumns && $(this.resizeIndicator).css("display") === "none") {
                     var th = $(e.target).closest("th")[0];
                     if (th.getAttribute('data-column') !== col) {
-                        th.firstChild.classList.add("over");
+                        $(th.firstChild).addClass("over");
                     }
                 }
             },
@@ -643,7 +645,7 @@ var ATable = (function () {
              * @param {jQuery.Event} e jQuery dragleave event
              */
             onDragLeaveColumnHeader : function (e) {
-                e.target.classList.remove("over");
+                $(e.target).removeClass("over");
             },
 
             /**
@@ -657,13 +659,13 @@ var ATable = (function () {
                 }
                 if (this.movableColumns && $(this.resizeIndicator).css("display") === "none") {
                     var srcCol = e.originalEvent.dataTransfer.getData("text");
-                    var destCol = e.target.parentElement.getAttribute('data-column');
+                    var destCol = e.target.parentNode.getAttribute('data-column');
                     if (e.target.tagName === "TH") {
                         destCol = e.target.getAttribute('data-column');
-                        e.target.firstChild.classList.remove("over");
+                        $(e.target.firstChild).removeClass("over");
                     }
                     else {
-                        e.target.classList.remove("over");
+                        $(e.target).removeClass("over");
                     }
                     this.moveColumn(srcCol, destCol);
                 }
@@ -683,9 +685,9 @@ var ATable = (function () {
                 }
                 else {
                     arrow = arrow[0];
-                    var divWidth = arrow.parentElement.scrollWidth;
-                    this.resizeColumnElements(arrow.parentElement.parentElement.cellIndex, divWidth - arrow.scrollWidth);
-                    arrow.parentElement.removeChild(arrow);
+                    var divWidth = arrow.parentNode.scrollWidth;
+                    this.resizeColumnElements(arrow.parentNode.parentNode.cellIndex, divWidth - arrow.scrollWidth);
+                    arrow.parentNode.removeChild(arrow);
                 }
                 if (descending) {
                     arrow.innerHTML = "&darr;";
@@ -1039,5 +1041,24 @@ var ATable = (function () {
         if (typeof options.sortable === "undefined") {
             options.sortable = true;
         }
+    }
+
+    /**
+     * Detect the browser in order to avoid certain browser-specific bugs
+     * @private
+     * @returns {String} name of the browser
+     */
+    function detectBrowser() {
+        var browser = null;
+        var ua = navigator.userAgent.toLowerCase();
+        if (ua.indexOf("safari") > -1) {
+            if (ua.indexOf("chrome") > -1) {
+                browser = "chrome";
+            }
+            else {
+                browser = "safari";
+            }
+        }
+        return browser;
     }
 })();
