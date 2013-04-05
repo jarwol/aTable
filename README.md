@@ -4,6 +4,8 @@ Fast, interactive Javascript table component built on Backbone.js.
 
 **Check out the project page at http://jwoah12.github.com/aTable/ for full API documentation and examples to help you get started**
 
+<hr/>
+
 ####Features
 * **Fast and efficient** - Rows are added and removed as the table is scrolled, allowing aTable to be extremely fast even for very large datasets.
 * **Sortable** - Click any column header to sort by that column.
@@ -11,10 +13,14 @@ Fast, interactive Javascript table component built on Backbone.js.
 * **Movable columns** - Click and drag column headers to move columns.
 * **Intuitive API** - interact with the table programmatically to resize, move, hide, and show columns, and filter and sort the table.
 
+<hr/>
+
 ####Dependencies
 * jQuery
 * Backbone.js
 * Underscore.js
+
+<hr/>
 
 ####Get started
 Run the following commands to get the aTable source and build the library:
@@ -26,9 +32,12 @@ npm install
 grunt
 ```
 Grunt will build the development and minified versions of the library (`dist/atable.js` and `dist/atable.min.js`).  Include one of these in your project along with `css/atable.css`, and you are ready to use aTable!
+<hr/>
 
 ####Browser Compatibility
 Coming soon
+
+<hr/>
 
 ####Contributing
 Pull requests are welcome!  Please follow these guidelines before submitting:
@@ -36,8 +45,8 @@ Pull requests are welcome!  Please follow these guidelines before submitting:
 * Add unit tests to `test/tests.js` and make sure all tests pass. 
 * Try to stick to the existing code style as much as possible, and document new functions and classes with JSDoc.
 
-####
-####The MIT License (MIT)
+<hr/>
+####The MIT License
 Copyright (c) 2012-2013 Jared Wolinsky
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
