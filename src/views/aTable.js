@@ -553,14 +553,11 @@ var ATable = (function () {
                         + Number(rightPad.substring(0, rightPad.length - 2)) - 5;
                     $(this.resizeIndicator).css("display", "block").css("left", left).css("top", posCol.top - 1).css("height", height)
                         .css("width", width).attr('data-column', target[0].getAttribute('data-column'));
-                    // Firefox doesn't provide mouse coordinates in the 'drag' event, so we must use a document-level
-                    // 'dragover' as a workaround
-                    document.addEventListener('dragover', this.onDragResizeIndicator, false);
-                    // Disable the default drag image by replacing it with an empty div (this crashes safari)
-                    if (this.browser !== "safari") {
-                        e.originalEvent.dataTransfer.setDragImage(document.createElement("div"), 0, 0);
-                    }
-                    e.originalEvent.dataTransfer.setData("text", target[0].getAttribute('data-column'));
+                    // Some browsers implement drag-and-drop differently, making it a poor choice for resize functionality
+                    //  use mousemove/mouseup events instead
+                    document.addEventListener('mousemove', this.onDragResizeIndicator, false);
+                    document.addEventListener('mouseup', this.onEndDragColumnHeader, false);
+                    e.preventDefault();
                 }
                 // User is moving the column
                 else if (this.movableColumns) {
@@ -597,9 +594,10 @@ var ATable = (function () {
                     e.target.style.opacity = null;
                 }
                 else {
-                    document.removeEventListener('dragover', this.onDragResizeIndicator, false);
+                    document.removeEventListener('mousemove', this.onDragResizeIndicator, false);
+                    document.removeEventListener('mouseup', this.onDragResizeIndicator, false);
                     var gray = this.resizeIndicator;
-                    var width = parseInt(e.originalEvent.clientX - $(gray).position().left, 10);
+                    var width = parseInt(e.clientX - $(gray).position().left, 10);
                     var grayWidth = gray.scrollWidth;
                     var col = this.columns.get(gray.getAttribute('data-column'));
                     var posCol = col.get('element').offset();
@@ -620,11 +618,9 @@ var ATable = (function () {
              */
             onDragEnterColumnHeader : function (e) {
                 var col = e.originalEvent.dataTransfer.getData("text");
-                if (this.movableColumns && $(this.resizeIndicator).css("display") === "none") {
-                    var th = $(e.target).closest("th")[0];
-                    if (th.getAttribute('data-column') !== col) {
-                        $(th.firstChild).addClass("over");
-                    }
+                var th = $(e.target).closest("th")[0];
+                if (th.getAttribute('data-column') !== col) {
+                    $(th.firstChild).addClass("over");
                 }
             },
 
@@ -657,7 +653,7 @@ var ATable = (function () {
                 if (e.preventDefault) {
                     e.preventDefault();
                 }
-                if (this.movableColumns && $(this.resizeIndicator).css("display") === "none") {
+                if (this.movableColumns) {
                     var srcCol = e.originalEvent.dataTransfer.getData("text");
                     var destCol = e.target.parentNode.getAttribute('data-column');
                     if (e.target.tagName === "TH") {
@@ -941,8 +937,21 @@ var ATable = (function () {
      * @return {Worker} Web worker that fetches table data on a separate thread
      */
     function createDataWorker(dataFunctionTagId, callback) {
-        if (window.Blob && window.Worker) {
-            var blob = new Blob([document.querySelector('#' + dataFunctionTagId).textContent, " self.onmessage=function(){" + dataFunctionTagId + "();};"]);
+        var blob;
+        var data = document.querySelector('#' + dataFunctionTagId).textContent + " self.onmessage=function(){" + dataFunctionTagId + "();};";
+        if (typeof Blob === "function") {
+            blob = new Blob([data]);
+        }
+        else {
+            var BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder || window.MSBlobBuilder;
+            if (!BlobBuilder) {
+                throw "Blob support required to use the web worker interface.";
+            }
+            var builder = new BlobBuilder();
+            builder.append(data);
+            blob = builder.getBlob();
+        }
+        if (window.Worker) {
             var url = window.URL || window.webkitURL;
             var worker = new Worker(url.createObjectURL(blob));
             worker.onmessage = function (e) {
@@ -951,7 +960,7 @@ var ATable = (function () {
             return worker;
         }
         else {
-            throw "Blob and Worker support required to use the web worker interface.";
+            throw "Worker support required to use the web worker interface.";
         }
     }
 
