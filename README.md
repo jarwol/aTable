@@ -35,7 +35,13 @@ Grunt will build the development and minified versions of the library (`dist/ata
 <hr/>
 
 ####Browser Compatibility
-Coming soon
+Chrome
+Firefox 5
+IE 10
+Safari 5
+Opera 12
+
+The above browsers have full support for the interactive features in aTable. The table may render properly and be usable via the API in older versions. The web worker data interface requires a browser with Blob/BlobBuilder and Worker support.
 
 <hr/>
 

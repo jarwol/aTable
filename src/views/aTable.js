@@ -444,7 +444,7 @@ var ATable = (function () {
             },
 
             /**
-             * Returns the Column based given its position in the set of <strong>visible</strong> columns
+             * Returns the Column given its position in the set of <strong>visible</strong> columns
              * @param {int} position index of the column, ignoring any invisible columns
              * @returns {Column} the column model at <strong>position</strong>, or null if the position is invalid
              */
