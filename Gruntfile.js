@@ -43,6 +43,13 @@ module.exports = function (grunt) {
                 }
             }
         },
+        wrap : {
+            modules : {
+                src : ['dist/atable.js'],
+                dest : '.',
+                wrapper : ['var ATable = (function () {\n', '\nreturn ATable;\n})();']
+            }
+        },
         jsdoc : {
             dist : {
                 src : ['src/**/*.js', '!src/lib/*'],
@@ -58,9 +65,9 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-qunit');
     grunt.loadNpmTasks('grunt-jsdoc');
+    grunt.loadNpmTasks('grunt-wrap');
 
-// Default task(s).
-    grunt.registerTask('default', ['jshint', 'qunit', 'concat', 'uglify']);
+    // Default task(s).
+    grunt.registerTask('default', ['jshint', 'concat', 'wrap', 'uglify', 'qunit']);
 
-}
-;
+};

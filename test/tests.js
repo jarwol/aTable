@@ -3,7 +3,7 @@ var MIN_COLUMN_WIDTH = 20;
 
 module("Row rendering");
 asyncTest("Initial render 100 rows", 4, function () {
-    var table = createTable('fetchData100Rows1Col', 1);
+    var table = createTable(fetchData100Rows1Col, 1);
     table.render(function () {
         start();
         ok(table.rowHeight > 0, "table.rowHeight should be positive");
@@ -15,7 +15,7 @@ asyncTest("Initial render 100 rows", 4, function () {
 });
 
 asyncTest("Initial render 10 rows", 4, function () {
-    var table = createTable('fetchData10Rows1Col', 1);
+    var table = createTable(fetchData10Rows1Col, 1);
     table.render(function () {
         start();
         ok(table.rowHeight > 0, "table.rowHeight should be positive");
@@ -29,7 +29,9 @@ asyncTest("Initial render 10 rows", 4, function () {
 });
 
 asyncTest("Initial render 0 rows", 4, function () {
-    var table = createTable('fetchData0Rows', 1);
+    var table = createTable(function (atable) {
+        atable.receivedData([]);
+    }, 1);
     table.render(function () {
         start();
         ok(table.rowHeight > 0, "table.rowHeight should be positive");
@@ -62,32 +64,29 @@ asyncTest("Render with invisible column", 2, function () {
     });
 });
 
-asyncTest("Dynamic data source", 2, function () {
-    var table = createTable('fetchDataMultiple', 1);
-    table.render(function () {
-        setTimeout(function () {
-            start();
-            equal(table.rows.length, 50, "table.rows should have 50 rows");
-            var rows = table.tbodyElt.find("tr");
-            var expectedRows = table.visibleRows + BUFFER_ROWS + 2;
-            equal(rows.length, expectedRows, "DOM table should have " + expectedRows + " rows");
-        }, 100);
-    });
+asyncTest("Dynamic data source - web worker", function () {
+    if (Worker && (typeof Blob == "function" || window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder || window.MSBlobBuilder)) {
+        var table = createTable('fetchDataMultiple', 1);
+        table.render(function () {
+            setTimeout(function () {
+                start();
+                equal(table.rows.length, 50, "table.rows should have 50 rows");
+                var rows = table.tbodyElt.find("tr");
+                var expectedRows = table.visibleRows + BUFFER_ROWS + 2;
+                equal(rows.length, expectedRows, "DOM table should have " + expectedRows + " rows");
+            }, 100);
+        });
+    }
+    else {
+        start();
+        raises(function () {
+            createTable('fetchDataMultiple', 1);
+        }, "trying to use web worker without a compatible browser should throw an exception");
+    }
 });
 
 asyncTest("Dynamic data source - callback function", 2, function () {
-    var table = createTable(function (atable) {
-        var count = 0;
-        var interval = setInterval(function () {
-            if (count >= 40) clearInterval(interval);
-            var rows = [];
-            for (var i = 1; i <= 10; i++, count++) {
-                rows.push([count]);
-            }
-            atable.receivedData(rows, true);
-        }, 1);
-    }, 1);
-
+    var table = createTable(fetchDataMultple, 1);
     table.render(function () {
         setTimeout(function () {
             start();
@@ -100,7 +99,7 @@ asyncTest("Dynamic data source - callback function", 2, function () {
 });
 
 asyncTest("Remove rows", 5, function () {
-    var table = createTable('fetchData100Rows1Col', 1);
+    var table = createTable(fetchData100Rows1Col, 1);
     table.render(function () {
         start();
         var rows = table.tbodyElt.find("tr");
@@ -118,7 +117,7 @@ asyncTest("Remove rows", 5, function () {
 });
 
 asyncTest("Scroll table", 32, function () {
-    var table = createTable('fetchData100Rows1Col', 1);
+    var table = createTable(fetchData100Rows1Col, 1);
     table.render(function () {
         start();
         // Scroll down, but not enough to render any new rows in the table
@@ -141,7 +140,7 @@ asyncTest("Scroll table", 32, function () {
 });
 
 asyncTest("Scroll table - dynamic data source", 32, function () {
-    var table = createTable('fetchDataMultiple', 1);
+    var table = createTable(fetchDataMultiple, 1);
     table.render(function () {
         setTimeout(function () {
             start();
@@ -167,7 +166,7 @@ asyncTest("Scroll table - dynamic data source", 32, function () {
 
 module("Column Operations");
 asyncTest("Reorder columns", 12, function () {
-    var table = createTable('fetchData1Row4Cols', 4);
+    var table = createTable(fetchData1Row4Cols, 4);
     table.render(function () {
         start();
         table.moveColumn("col1", "col2");
@@ -194,7 +193,7 @@ asyncTest("Reorder columns", 12, function () {
 });
 
 asyncTest("Resize columns", 22, function () {
-    var table = createTable('fetchData1Row4Cols', 4);
+    var table = createTable(fetchData1Row4Cols, 4);
     table.render(function () {
         start();
         resizeColumnAndTest(table, "col1", 5);
@@ -211,7 +210,7 @@ asyncTest("Resize columns", 22, function () {
 });
 
 asyncTest("Sort table", 38, function () {
-    var table = createTable('fetchData4Rows4Cols', 4);
+    var table = createTable(fetchData4Rows4Cols, 4);
     table.render(function () {
         start();
         equal(typeof table.rows.sortColumn, "undefined", "sort column should start undefined");
@@ -239,10 +238,9 @@ asyncTest("Sort table", 38, function () {
 });
 
 asyncTest("Move sorted columns", 25, function () {
-    var table = createTable('fetchData4Rows4Cols', 4);
+    var table = createTable(fetchData4Rows4Cols, 4);
     table.render(function () {
         start();
-
         // Move sorted column
         table.sort("col2");
         table.moveColumn("col2", "col1");
@@ -300,6 +298,50 @@ asyncTest("Show/hide columns", 6, function () {
 /****************************************************************************************
  * Utility functions
  ****************************************************************************************/
+
+function fetchData4Rows4Cols(atable) {
+    var rows = [];
+    for (var i = 0; i < 4; i++) {
+        rows.push([Math.floor(Math.random() * 100 + 1), Math.floor(Math.random() * 100 + 1), Math.floor(Math.random() * 100 + 1), Math.floor(Math.random() * 100 + 1)]);
+    }
+    atable.receivedData(rows);
+}
+
+function fetchData1Row4Cols(atable) {
+    var rows = [];
+    for (var i = 0; i < 4; i += 4) {
+        rows.push([i, i + 1, i + 2, i + 3]);
+    }
+    atable.receivedData(rows);
+}
+
+function fetchData100Rows1Col(atable) {
+    var rows = [];
+    for (var i = 0; i < 100; i++) {
+        rows.push([i]);
+    }
+    atable.receivedData(rows);
+}
+
+function fetchData10Rows1Col(atable) {
+    var rows = [];
+    for (var i = 0; i < 10; i++) {
+        rows.push([i]);
+    }
+    atable.receivedData(rows);
+}
+
+function fetchDataMultple(atable) {
+    var count = 0;
+    var interval = setInterval(function () {
+        if (count >= 40) clearInterval(interval);
+        var rows = [];
+        for (var i = 1; i <= 10; i++, count++) {
+            rows.push([count]);
+        }
+        atable.receivedData(rows, true);
+    }, 1);
+}
 
 function createTable(dataFunc, cols) {
     var columns = [];

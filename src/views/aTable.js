@@ -20,7 +20,7 @@ var ATable = (function () {
              * @param {boolean} [options.columns.visible=true] set whether the column is visible
              * @param {String|Function} options.dataFunction The dataFunction parameter can be one of two values:
              * <li>{String} the id of a <strong>&lt;script&gt;</strong> element containing a function which has the same name as the script id.
-             * The function should call <strong>self.postMessage(rows, append);</strong> where <i>rows</i> is a 2-dimensional array of table values. If <i>append</i> is true, rows will be added to the table.
+             * The function should call <strong>self.postMessage({data: rows, append: append});</strong> where <i>rows</i> is a 2-dimensional array of table values. If <i>append</i> is true, rows will be added to the table.
              * If false, the rows will completely replace the existing table.</li>
              * <li>{Function} a function responsible for generating the table's dataset. It should have one parameter, <strong>atable</strong>, and call <strong>atable.receivedData(rows, append);</strong> to deliver data to the table</li><br/>
              * *Note that both methods of returning table data may do so many times (e.g. a loop that continuously uses ajax polling to get new data from the server).
@@ -47,7 +47,7 @@ var ATable = (function () {
                 if (err) throw err;
                 setDefaultParameters(options);
                 /**
-                 * The collection of {@link Column} models representing the table columns
+                 * The collection of Column models representing the table columns
                  * @type {ColumnCollection}
                  */
                 this.columns = initColumns(options);
@@ -66,7 +66,7 @@ var ATable = (function () {
                 }
                 options.numColumns = this.columns.length;
                 /**
-                 * The collection of {@link Row} models containing the table's data
+                 * The collection of Row models containing the table's data
                  * @type {RowCollection}
                  */
                 this.rows = new RowCollection([], options);
@@ -849,8 +849,7 @@ var ATable = (function () {
                 this.remove();
                 this.unbind();
             }
-        })
-        ;
+        });
 
     /**
      * Set the heights of the top and bottom buffer row in order to keep the scrollbar size/position correct
@@ -951,7 +950,7 @@ var ATable = (function () {
             builder.append(data);
             blob = builder.getBlob();
         }
-        if (window.Worker) {
+        if (Worker) {
             var url = window.URL || window.webkitURL;
             var worker = new Worker(url.createObjectURL(blob));
             worker.onmessage = function (e) {
