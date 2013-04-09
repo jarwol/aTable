@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Tests
-includes: |
+includes: | 
     <link rel="stylesheet" type="text/css" href="test/qunit.css">
     <link href="css/atable.css" rel="stylesheet">
     <script src="lib/underscore.min.js"></script>
@@ -10,59 +10,8 @@ includes: |
     <script type="text/javascript" src="test/qunit.js"></script>
     <script type="text/javascript" src="test/tests.js"></script>
 ---
-
-<script type="text/javascript" id="fetchData100000Rows1Col">
-    function fetchData100000Rows1Col() {
-        var rows = [];
-        for (var i = 0; i < 100000; i++) {
-            rows.push([i]);
-        }
-        self.postMessage({data : rows});
-    }
-</script>
-<script type="text/javascript" id="fetchData10Rows1Col">
-    function fetchData10Rows1Col() {
-        var rows = [];
-        for (var i = 0; i < 10; i++) {
-            rows.push([i]);
-        }
-        self.postMessage({data : rows});
-    }
-</script>
-<script type="text/javascript" id="fetchData0Rows">
-    function fetchData0Rows() {
-        self.postMessage({data : []});
-    }
-</script>
-<script type="text/javascript" id="fetchData100Rows1Col">
-    function fetchData100Rows1Col() {
-        var rows = [];
-        for (var i = 0; i < 100; i++) {
-            rows.push([i]);
-        }
-        self.postMessage({data : rows});
-    }
-</script>
-<script type="text/javascript" id="fetchData1Row4Cols">
-    function fetchData1Row4Cols() {
-        var rows = [];
-        for (var i = 0; i < 4; i += 4) {
-            rows.push([i, i + 1, i + 2, i + 3]);
-        }
-        self.postMessage({data : rows});
-    }
-</script>
-<script type="text/javascript" id="fetchData4Rows4Cols">
-    function fetchData4Rows4Cols() {
-        var rows = [];
-        for (var i = 0; i < 4; i++) {
-            rows.push([Math.floor(Math.random() * 100 + 1), Math.floor(Math.random() * 100 + 1), Math.floor(Math.random() * 100 + 1), Math.floor(Math.random() * 100 + 1)]);
-        }
-        self.postMessage({data : rows});
-    }
-</script>
-<script type="text/javascript" id="fetchDataMultiple">
-    function fetchDataMultiple() {
+<script type="text/javascript" id="fetchDataMultipleWorker">
+    function fetchDataMultipleWorker() {
         var count = 0;
         var interval = setInterval(function () {
             if (count >= 40) clearInterval(interval);
