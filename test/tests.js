@@ -66,7 +66,7 @@ asyncTest("Render with invisible column", 2, function () {
 
 asyncTest("Dynamic data source - web worker", function () {
     if (Worker && (typeof Blob == "function" || window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder || window.MSBlobBuilder)) {
-        var table = createTable('fetchDataMultiple', 1);
+        var table = createTable('fetchDataMultipleWorker', 1);
         table.render(function () {
             setTimeout(function () {
                 start();
@@ -80,13 +80,13 @@ asyncTest("Dynamic data source - web worker", function () {
     else {
         start();
         raises(function () {
-            createTable('fetchDataMultiple', 1);
+            createTable('fetchDataMultipleWorker', 1);
         }, "trying to use web worker without a compatible browser should throw an exception");
     }
 });
 
 asyncTest("Dynamic data source - callback function", 2, function () {
-    var table = createTable(fetchDataMultple, 1);
+    var table = createTable(fetchDataMultiple, 1);
     table.render(function () {
         setTimeout(function () {
             start();
@@ -331,7 +331,7 @@ function fetchData10Rows1Col(atable) {
     atable.receivedData(rows);
 }
 
-function fetchDataMultple(atable) {
+function fetchDataMultiple(atable) {
     var count = 0;
     var interval = setInterval(function () {
         if (count >= 40) clearInterval(interval);
