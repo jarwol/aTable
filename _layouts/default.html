@@ -13,19 +13,21 @@
     {% endif %}
 </head>
 <body>
+<div class="header">
+    <div class="container-fluid">
+        <div class="row-fluid">
+            <div class="span8 offset2">
+                <a href="index.html">ATable</a>
+                <a href="demo.html">Examples</a>
+                <a href="api.html">Docs</a>
+                <a href="test.html">Tests</a>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="container-fluid">
     <div class="row-fluid">
-        <div class="span8 offset2">
-            <div class="navbar">
-                <div class="navbar-inner">
-                    <a href="index.html" class="brand">ATable</a>
-                    <ul class="nav">
-                        <li{% if page.title == 'Examples' }%} class="active"{% endif %}><a href="demo.html">Examples</a></li>
-                        <li><a href="api.html">Docs</a></li>
-                        <li><a href="test.html">Tests</a></li>
-                    </ul>
-                </div>
-            </div>
+        <div class="content span8 offset2">
             {{content}}
             <footer>
                 <p>Project maintained by <a href="https://github.com/jwoah12">Jared Wolinsky</a></p>
