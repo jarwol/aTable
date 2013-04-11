@@ -3,11 +3,11 @@
 <head>
     <meta charset="utf-8">
     <title>ATable{% if page.title }%} - {{page.title}}{% endif %}</title>
-    <link href="/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/css/demo.css" rel="stylesheet">
-    <link href="/css/styles.css" rel="stylesheet">
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-    <script src="/lib/bootstrap.min.js"></script>
+    <link href="{{page.dir}}/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{page.dir}}/css/demo.css" rel="stylesheet">
+    <link href="{{page.dir}}/css/styles.css" rel="stylesheet">
+    <script src="{{page.dir}}/lib/bootstrap.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     {% if page.includes %}
     {{page.includes}}
     {% endif %}
@@ -18,11 +18,11 @@
     <div class="container-fluid">
         <div class="row-fluid">
             <div class="span8 offset2">
-                <a href="/index.html" class="logo">ATable</a>
-                <a href="/index.html">Home</a>
-                <a href="/demo.html">Examples</a>
-                <a href="/doc/ATable.html">API Docs</a>
-                <a href="/test.html">Tests</a>
+                <a href="{{page.dir}}/index.html" class="logo">ATable</a>
+                <a href="{{page.dir}}/index.html">Home</a>
+                <a href="{{page.dir}}/demo.html">Examples</a>
+                <a href="{{page.dir}}/doc/ATable.html">API Docs</a>
+                <a href="{{page.dir}}/test.html">Tests</a>
             </div>
         </div>
     </div>
