@@ -1,35 +1,49 @@
-.header{
+.header {
     background-color: #f2f2f2;
     position: fixed;
     top: -1px;
     border: solid thin silver;
-    padding: 25px 15px;
+    padding: 20px 15px 10px 15px;
     font-size: large;
     width: 100%;
 }
 
-.header a{
+a{
+    color: #29828a;
+}
+
+.header a {
     display: inline;
+    margin: 20px 50px 0 0;
+    color: #29828a !important;
+    font-family: Verdana, Sans-serif !important;
+}
+
+a.logo{
+    font-family: "Maiandra GD" !important;
+    font-size: x-large;
+    text-decoration: none;
+    color: #2727be !important;
 }
 
 body {
-    font-family: "DejaVu Sans Condensed";
+    font-family: Verdana, Sans-serif;
 }
 
-.content{
-    padding: 50px 20px;
+.content {
+    padding: 65px 20px;
     border-left: solid thin silver;
     border-right: solid thin silver;
-}
-
-hr {
-    width: 75%;
-    margin-left: auto;
-    margin-right: auto;
+    height: 100%;
 }
 
 h4 {
-    margin: 45px 0;
+    margin-top: 25px;
+}
+
+hr {
+    margin-left: auto;
+    margin-right: auto;
 }
 
 pre {

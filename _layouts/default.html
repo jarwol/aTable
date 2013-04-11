@@ -3,33 +3,37 @@
 <head>
     <meta charset="utf-8">
     <title>ATable{% if page.title }%} - {{page.title}}{% endif %}</title>
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/demo.css" rel="stylesheet">
-    <link href="css/styles.css" rel="stylesheet">
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/demo.css" rel="stylesheet">
+    <link href="/css/styles.css" rel="stylesheet">
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-    <script src="lib/bootstrap.min.js"></script>
+    <script src="/lib/bootstrap.min.js"></script>
     {% if page.includes %}
     {{page.includes}}
     {% endif %}
+
 </head>
 <body>
 <div class="header">
     <div class="container-fluid">
         <div class="row-fluid">
             <div class="span8 offset2">
-                <a href="index.html">ATable</a>
-                <a href="demo.html">Examples</a>
-                <a href="api.html">Docs</a>
-                <a href="test.html">Tests</a>
+                <a href="/index.html" class="logo">ATable</a>
+                <a href="/index.html">Home</a>
+                <a href="/demo.html">Examples</a>
+                <a href="/doc/ATable.html">API Docs</a>
+                <a href="/test.html">Tests</a>
             </div>
         </div>
     </div>
 </div>
+<a href="https://github.com/jwoah12/aTable"><img style="position: fixed; top: 0; left: 0; border: 0;" src="/fork.png" alt="Fork me on GitHub"></a>
 <div class="container-fluid">
     <div class="row-fluid">
         <div class="content span8 offset2">
             {{content}}
             <footer>
+                <hr/>
                 <p>Project maintained by <a href="https://github.com/jwoah12">Jared Wolinsky</a></p>
             </footer>
         </div>

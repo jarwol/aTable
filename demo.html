@@ -7,9 +7,7 @@ includes: |
     <script src="lib/backbone.min.js"></script>
     <script src="lib/atable.js"></script>
     <script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
----
-
-<script>
+    <script>
     var rows = [
         ["Kimberly", "Hodges", "Centennial", "887-527-3183"],
         ["Peyton", "Sherlock", "Allentown", "880-475-3976"],
@@ -63,7 +61,7 @@ includes: |
         ["Valeria", "Oldridge", "Greensboro", "881-417-3928"]
     ];
 
-    $(document).ready(function () {
+    $(document).ready(function(){
         new ATable({
             dataFunction : function (atable) {
                 atable.receivedData(rows);
@@ -152,39 +150,41 @@ includes: |
             height : 400
         }).render();
     });
-</script>
-<script type="text/javascript" id="fetchStockData">
-    var stocks = {
-        MSFT : ["Microsoft Corporation", 27.85],
-        AAPL : ["Apple Inc.", 452.6],
-        GOOG : ["Google Inc", 811.1],
-        FB : ["Facebook Inc", 26.32],
-        C : ["Citigroup Inc.", 45],
-        JPM : ["JPMorgan Chase & Co.", 49.23],
-        VZ : ["Verizon Communications Inc.", 47.6]
-    };
+    </script>
+    <script type="text/javascript" id="fetchStockData">
+        var stocks = {
+            MSFT : ["Microsoft Corporation", 27.85],
+            AAPL : ["Apple Inc.", 452.6],
+            GOOG : ["Google Inc", 811.1],
+            FB : ["Facebook Inc", 26.32],
+            C : ["Citigroup Inc.", 45],
+            JPM : ["JPMorgan Chase & Co.", 49.23],
+            VZ : ["Verizon Communications Inc.", 47.6]
+        };
 
-    function fetchStockData() {
-        getDataSet();
-        setInterval(function () {
+        function fetchStockData() {
             getDataSet();
-        }, 3000);
-    }
-
-    function getDataSet() {
-        var data = [];
-        var signs = [1, -1];
-        for (var sym in stocks) {
-            var sign = signs[Math.floor(Math.random() * 2)];
-            var close = Math.round(stocks[sym][1] * 100) / 100;
-            var bid = close + Math.random() * (close * .05) * sign;
-            bid = Math.round(bid * 100) / 100;
-            var ask = Math.round((bid + close * .002) * 100) / 100;
-            data.push([sym, stocks[sym][0], close, bid, ask]);
+            setInterval(function () {
+                getDataSet();
+            }, 3000);
         }
-        self.postMessage({data : data});
-    }
-</script>
+
+        function getDataSet() {
+            var data = [];
+            var signs = [1, -1];
+            for (var sym in stocks) {
+                var sign = signs[Math.floor(Math.random() * 2)];
+                var close = Math.round(stocks[sym][1] * 100) / 100;
+                var bid = close + Math.random() * (close * .05) * sign;
+                bid = Math.round(bid * 100) / 100;
+                var ask = Math.round((bid + close * .002) * 100) / 100;
+                data.push([sym, stocks[sym][0], close, bid, ask]);
+            }
+            self.postMessage({data : data});
+        }
+    </script>
+---
+
 <h4>Static data provided by a callback function</h4>
 
 <div class="row-fluid">
@@ -286,6 +286,7 @@ includes: |
         </div>
     </div>
     <div class="span6" id="columnProps"></div>
+<a name="bigData"></a>
 </div>
 <hr/>
 

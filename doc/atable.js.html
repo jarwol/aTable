@@ -1,4 +1,27 @@
-/*!
+---
+layout: default
+title: "JSDoc: atable.js"
+includes: |
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+---
+
+<div id="main">
+    
+    <h1 class="page-title">Source: atable.js</h1>
+    
+    
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source"><code>/*!
  * aTable v0.2.0
  * Copyright (c) 2012-2013 Jared Wolinsky
  * Licensed under the MIT License - http://opensource.org/licenses/MIT
@@ -49,7 +72,7 @@ var ColumnCollection = Backbone.Collection.extend(
         model : Column,
 
         /**
-         * Comparator function to force sorting of the columns by their <strong>order</strong> attribute
+         * Comparator function to force sorting of the columns by their &lt;strong>order&lt;/strong> attribute
          * @private
          * @param {Column} col Column model to be sorted
          * @return {int} order of the column in the table
@@ -91,8 +114,8 @@ var ColumnCollection = Backbone.Collection.extend(
             var order1 = col1.get("order");
             var order2 = col2.get("order");
             var col;
-            if (order1 < order2) {
-                for (var i = order1 + 1; i <= order2; i++) {
+            if (order1 &lt; order2) {
+                for (var i = order1 + 1; i &lt;= order2; i++) {
                     col = this.at(i);
                     col.set({order : col.get("order") - 1});
                 }
@@ -132,7 +155,7 @@ var RowCollection = (function () {
                     this.sortColumn = null;
                     this.sortDescending = false;
                 }
-                for (var i = 0; i < options.numColumns; i++) {
+                for (var i = 0; i &lt; options.numColumns; i++) {
                     this.columnOrder.push(i);
                 }
             },
@@ -159,7 +182,7 @@ var RowCollection = (function () {
             getRow : function (idx) {
                 var row = this.at(idx).get('row');
                 var ret = [];
-                for (var i = 0; i < row.length; i++) {
+                for (var i = 0; i &lt; row.length; i++) {
                     var col = this.columnOrder[i];
                     ret.push(row[col]);
                 }
@@ -182,19 +205,19 @@ var RowCollection = (function () {
              * @param {int} dest destination index of the column
              */
             moveColumn : function (src, dest) {
-                if (src < dest) {
-                    if (this.sortColumn > src && this.sortColumn <= dest) {
+                if (src &lt; dest) {
+                    if (this.sortColumn > src && this.sortColumn &lt;= dest) {
                         this.sortColumn--;
                     }
                     else if (this.sortColumn === src) {
                         this.sortColumn = dest;
                     }
-                    for (var i = src; i < dest; i++) {
+                    for (var i = src; i &lt; dest; i++) {
                         swap(this.columnOrder, i, i + 1);
                     }
                 }
                 else {
-                    if (this.sortColumn < src && this.sortColumn >= dest) {
+                    if (this.sortColumn &lt; src && this.sortColumn >= dest) {
                         this.sortColumn++;
                     }
                     else if (this.sortColumn === src) {
@@ -292,14 +315,14 @@ var ATable = (function () {
              * @param {String} options.columns.name name of the column. This value must be unique.
              * @param {String} [options.columns.label=name] displayed name of the column. Unlike name, the label need not be unique.
              * @param {int} [options.columns.width] explicit width of the column in pixels
-             * @param {boolean} [options.columns.resizable=true] set whether the column is resizable. This value takes precedence over <strong>options.resizableColumns</strong>.
-             * @param {boolean} [options.columns.sortable=true] set whether the table can be sorted on this column. This value takes precedence over <strong>options.sortableColumns</strong>.
+             * @param {boolean} [options.columns.resizable=true] set whether the column is resizable. This value takes precedence over &lt;strong>options.resizableColumns&lt;/strong>.
+             * @param {boolean} [options.columns.sortable=true] set whether the table can be sorted on this column. This value takes precedence over &lt;strong>options.sortableColumns&lt;/strong>.
              * @param {boolean} [options.columns.visible=true] set whether the column is visible
              * @param {String|Function} options.dataFunction The dataFunction parameter can be one of two values:
-             * <li>{String} the id of a <strong>&lt;script&gt;</strong> element containing a function which has the same name as the script id.
-             * The function should call <strong>self.postMessage({data: rows, append: append});</strong> where <i>rows</i> is a 2-dimensional array of table values. If <i>append</i> is true, rows will be added to the table.
-             * If false, the rows will completely replace the existing table.</li>
-             * <li>{Function} a function responsible for generating the table's dataset. It should have one parameter, <strong>atable</strong>, and call <strong>atable.receivedData(rows, append);</strong> to deliver data to the table</li><br/>
+             * &lt;li>{String} the id of a &lt;strong>&lt;script&gt;&lt;/strong> element containing a function which has the same name as the script id.
+             * The function should call &lt;strong>self.postMessage({data: rows, append: append});&lt;/strong> where &lt;i>rows&lt;/i> is a 2-dimensional array of table values. If &lt;i>append&lt;/i> is true, rows will be added to the table.
+             * If false, the rows will completely replace the existing table.&lt;/li>
+             * &lt;li>{Function} a function responsible for generating the table's dataset. It should have one parameter, &lt;strong>atable&lt;/strong>, and call &lt;strong>atable.receivedData(rows, append);&lt;/strong> to deliver data to the table&lt;/li>&lt;br/>
              * *Note that both methods of returning table data may do so many times (e.g. a loop that continuously uses ajax polling to get new data from the server).
              * @param {String} options.el CSS selector of the DOM element in which to insert the rendered table
              * @param {int} options.height max height of the table in pixels
@@ -398,7 +421,7 @@ var ATable = (function () {
                     }
                     this.generateTableHtml(params);
                     var cols = this.tableElt.find("th");
-                    for (var i = 0; i < cols.length; i++) {
+                    for (var i = 0; i &lt; cols.length; i++) {
                         this.columns.at(i).set('element', $(cols[i]));
                     }
                     this.tbodyElt[0].scrollTop = this.prevScrollTop;
@@ -431,10 +454,10 @@ var ATable = (function () {
                 var first, last;
                 var addedRows = (this.rowRange.last - this.rowRange.first) - (this.rowRange.prevLast - this.rowRange.prevFirst);
                 var max = this.visibleRows + BUFFER_ROWS;
-                if (scrollTop < prevScrollTop) {
+                if (scrollTop &lt; prevScrollTop) {
                     first = this.rowRange.first;
                     last = this.rowRange.prevFirst;
-                    if (this.rowRange.last <= this.rowRange.prevFirst) {
+                    if (this.rowRange.last &lt;= this.rowRange.prevFirst) {
                         first = this.rowRange.first;
                         last = this.rowRange.last;
                     }
@@ -456,7 +479,7 @@ var ATable = (function () {
                 }
                 else if (this.dataAppended) {
                     this.dataAppended = false;
-                    if (this.rowRange.last < this.rows.length && this.rowRange.last < max) {
+                    if (this.rowRange.last &lt; this.rows.length && this.rowRange.last &lt; max) {
                         first = this.rowRange.last;
                         last = this.rows.length;
                         if (last > max) last = max;
@@ -490,7 +513,7 @@ var ATable = (function () {
                 var firstRow = this.tbodyElt[0].firstChild;
                 var lastRow = this.tbodyElt[0].lastChild;
                 var rowToInsertBefore = prepend ? firstRow.nextElementSibling : lastRow;
-                for (var i = start; i < end; i++) {
+                for (var i = start; i &lt; end; i++) {
                     this.addRow(i, rowToInsertBefore);
                 }
             },
@@ -510,7 +533,7 @@ var ATable = (function () {
                     arrowCol = arrow[0].parentNode.parentNode.getAttribute('data-column');
                     arrowWidth = arrow[0].scrollWidth;
                 }
-                for (var i = 0; i < this.columns.length; i++) {
+                for (var i = 0; i &lt; this.columns.length; i++) {
                     var col = this.columns.at(i);
                     if (col.get('visible')) {
                         var div = document.createElement("div");
@@ -547,7 +570,7 @@ var ATable = (function () {
                     start = count + 2 - numRows;
                     end = count + 2;
                 }
-                for (var i = start; i < end; i++) {
+                for (var i = start; i &lt; end; i++) {
                     this.tableElt[0].deleteRow(start);
                 }
             },
@@ -561,10 +584,10 @@ var ATable = (function () {
                 var rows = this.tbodyElt[0].getElementsByTagName("tr");
                 var domRowsCount = rows.length - 2;
                 rows = this.tbodyElt[0].getElementsByTagName("tr");
-                for (var i = 1; i < rows.length - 1; i++) {
+                for (var i = 1; i &lt; rows.length - 1; i++) {
                     var tr = rows[i];
                     var tdList = tr.getElementsByTagName("div");
-                    for (var j = 0; j < tdList.length; j++) {
+                    for (var j = 0; j &lt; tdList.length; j++) {
                         var div = tdList[j];
                         div.innerHTML = this.rows.getValue(firstRow + i - 1, j);
                     }
@@ -578,7 +601,7 @@ var ATable = (function () {
             sizeTable : function () {
                 var cols = this.tableElt.find("th");
                 var newWidth = 0;
-                for (var i = 0; i < cols.length; i++) {
+                for (var i = 0; i &lt; cols.length; i++) {
                     newWidth += $(cols[i])[0].offsetWidth;
                 }
                 this.tableElt.width(newWidth);
@@ -591,7 +614,7 @@ var ATable = (function () {
              if (!this.columns.get(col) && this.availableColumnsHash[col]) {
              // Increase the ordering of columns after insert
              var order = column.get("order");
-             for (var i = order; i < this.columns.length; i++) {
+             for (var i = order; i &lt; this.columns.length; i++) {
              var val = this.columns.at(i);
              val.set({
              order : val.get("order") + 1
@@ -615,7 +638,7 @@ var ATable = (function () {
              var col = this.columns.get(name);
              col.destroy();
              // Decrease the ordering of columns after delete
-             for (var i = col.get('order'); i < this.columns.length; i++) {
+             for (var i = col.get('order'); i &lt; this.columns.length; i++) {
              var val = this.columns.at(i);
              val.set({
              order : val.get("order") - 1
@@ -672,7 +695,7 @@ var ATable = (function () {
             resizeColumn : function (column, newWidth) {
                 var col = this.columns.get(column);
                 if (!col) throw "Invalid column name: " + column;
-                if (newWidth < MIN_COLUMN_WIDTH) newWidth = MIN_COLUMN_WIDTH;
+                if (newWidth &lt; MIN_COLUMN_WIDTH) newWidth = MIN_COLUMN_WIDTH;
                 col.set('width', newWidth);
                 this.resizeColumnElements(col.get('element')[0].cellIndex, newWidth);
             },
@@ -726,13 +749,13 @@ var ATable = (function () {
             },
 
             /**
-             * Returns the Column given its position in the set of <strong>visible</strong> columns
+             * Returns the Column given its position in the set of &lt;strong>visible&lt;/strong> columns
              * @param {int} position index of the column, ignoring any invisible columns
-             * @returns {Column} the column model at <strong>position</strong>, or null if the position is invalid
+             * @returns {Column} the column model at &lt;strong>position&lt;/strong>, or null if the position is invalid
              */
             getColumnByPosition : function (position) {
                 var cols = this.tableElt.find('th');
-                if (position < 0 || position > cols.length) return null;
+                if (position &lt; 0 || position > cols.length) return null;
                 return this.columns.get(cols[position].getAttribute('data-column'));
             },
 
@@ -745,7 +768,7 @@ var ATable = (function () {
                 if (this.prevScrollTop !== e.target.scrollTop) {
                     var firstVisibleRow = parseInt(e.target.scrollTop / this.rowHeight, 10);
                     var firstRenderedRow = firstVisibleRow - BUFFER_ROWS;
-                    if (firstRenderedRow < 0) firstRenderedRow = 0;
+                    if (firstRenderedRow &lt; 0) firstRenderedRow = 0;
                     this.rowRange.prevFirst = this.rowRange.first;
                     this.rowRange.prevLast = this.rowRange.last;
                     this.rowRange.first = firstRenderedRow;
@@ -822,7 +845,7 @@ var ATable = (function () {
                     var leftPad = target.css("padding-left");
                     var rightPad = target.css("padding-right");
                     var left, diff;
-                    if (posCol.left < posTable.left) {
+                    if (posCol.left &lt; posTable.left) {
                         left = posTable.left;
                         diff = posTable.left - posCol.left;
                     }
@@ -860,7 +883,7 @@ var ATable = (function () {
                 var pos = $(this.resizeIndicator).offset();
                 var column = this.columns.get(this.resizeIndicator.getAttribute("data-column"));
                 var width = e.pageX - pos.left;
-                if (width < MIN_COLUMN_WIDTH) {
+                if (width &lt; MIN_COLUMN_WIDTH) {
                     width = MIN_COLUMN_WIDTH;
                 }
                 this.resizeIndicator.style.width = width + "px";
@@ -884,10 +907,10 @@ var ATable = (function () {
                     var col = this.columns.get(gray.getAttribute('data-column'));
                     var posCol = col.get('element').offset();
                     var posTable = this.tableElt.parent().offset();
-                    if (posCol.left < posTable.left) {
+                    if (posCol.left &lt; posTable.left) {
                         grayWidth += (posTable.left - posCol.left);
                     }
-                    width = width < grayWidth ? grayWidth : width;
+                    width = width &lt; grayWidth ? grayWidth : width;
                     gray.style.display = "none";
                     this.resizeColumn(col.get('name'), width);
                 }
@@ -1015,8 +1038,8 @@ var ATable = (function () {
                     var height = this.tbodyElt[0].firstChild.style.height;
                     topRowHeight = height.substr(0, height.length - 2);
                 }
-                var headerRow = '<tr>';
-                for (var i = 0; i < params.columns.length; i++) {
+                var headerRow = '&lt;tr>';
+                for (var i = 0; i &lt; params.columns.length; i++) {
                     if (params.columns[i].visible) {
                         lastCol = params.columns[i];
                         var widthStr = '';
@@ -1025,10 +1048,10 @@ var ATable = (function () {
                         if (params.columns[i].sortable) {
                             classStr = ' class="sortable"';
                         }
-                        headerRow += '<th draggable="true" ' + classStr + ' data-column="' + params.columns[i].name + '"><div ' + widthStr + '>' + params.columns[i].label + '</div></th>';
+                        headerRow += '&lt;th draggable="true" ' + classStr + ' data-column="' + params.columns[i].name + '">&lt;div ' + widthStr + '>' + params.columns[i].label + '&lt;/div>&lt;/th>';
                     }
                 }
-                headerRow += '</tr>';
+                headerRow += '&lt;/tr>';
 
                 var frag = document.createDocumentFragment();
                 var parent = document.createElement("div");
@@ -1057,7 +1080,7 @@ var ATable = (function () {
 
                 if (!this.rowHeight) {
                     var row = document.createElement("tr");
-                    row.innerHTML = "<td>0</td>";
+                    row.innerHTML = "&lt;td>0&lt;/td>";
                     row.style.visibility = "hidden";
                     row.style.position = "absolute";
                     tbody.appendChild(row);
@@ -1078,18 +1101,18 @@ var ATable = (function () {
                     };
                 }
 
-                var body = "<tr style='height: " + topRowHeight + "px;'></tr>";
-                for (var j = this.rowRange.first; j < params.rows.length && j < this.rowRange.last; j++) {
-                    body += '<tr>';
-                    for (var k = 0; k < params.rows[j].row.length; k++) {
+                var body = "&lt;tr style='height: " + topRowHeight + "px;'>&lt;/tr>";
+                for (var j = this.rowRange.first; j &lt; params.rows.length && j &lt; this.rowRange.last; j++) {
+                    body += '&lt;tr>';
+                    for (var k = 0; k &lt; params.rows[j].row.length; k++) {
                         if (params.columns[k].visible) {
                             var width = params.columns[k].width;
-                            body += '<td><div style="width: ' + width + 'px;">' + params.rows[j].row[k] + '</div></td>';
+                            body += '&lt;td>&lt;div style="width: ' + width + 'px;">' + params.rows[j].row[k] + '&lt;/div>&lt;/td>';
                         }
                     }
-                    body += '</tr>';
+                    body += '&lt;/tr>';
                 }
-                body += "<tr style='height: " + (this.rowHeight * (params.rows.length - this.visibleRows - BUFFER_ROWS) - topRowHeight) + "px;'></tr>";
+                body += "&lt;tr style='height: " + (this.rowHeight * (params.rows.length - this.visibleRows - BUFFER_ROWS) - topRowHeight) + "px;'>&lt;/tr>";
                 $(thead).html(headerRow);
                 $(tbody).html(body);
                 this.scrollbarWidth = getScrollbarWidth(tbody);
@@ -1110,7 +1133,7 @@ var ATable = (function () {
                     this.rows.init = true;
                 }
                 var rows = [];
-                for (var i = 0; i < data.length; i++) {
+                for (var i = 0; i &lt; data.length; i++) {
                     rows.push(new Row({row : data[i]}));
                 }
                 if (append) {
@@ -1146,7 +1169,7 @@ var ATable = (function () {
     function adjustBufferRowHeights(tbody, rows, rowHeight, firstRowIdx) {
         var domRowCount = tbody.childElementCount - 2;
         var bufferHeight = (rows.length - domRowCount) * rowHeight;
-        if (bufferHeight < 0) {
+        if (bufferHeight &lt; 0) {
             tbody.firstChild.style.height = 0;
             tbody.lastChild.style.height = 0;
         }
@@ -1189,10 +1212,10 @@ var ATable = (function () {
         if (typeof mouseX === "undefined") {
             mouseX = e.originalEvent.pageX - $(e.target).offset().left;
         }
-        if (!firstCol && mouseX <= RESIZE_PIXELS + 1) {
+        if (!firstCol && mouseX &lt;= RESIZE_PIXELS + 1) {
             return th.previousElementSibling.getAttribute('data-column');
         }
-        else if (e.target.offsetWidth - mouseX <= RESIZE_PIXELS) {
+        else if (e.target.offsetWidth - mouseX &lt;= RESIZE_PIXELS) {
             return th.getAttribute('data-column');
         }
         return null;
@@ -1257,7 +1280,7 @@ var ATable = (function () {
      */
     function initColumns(options) {
         var columns = options.columns;
-        for (var i = 0; i < columns.length; i++) {
+        for (var i = 0; i &lt; columns.length; i++) {
             if (typeof columns[i].width === "undefined") {
                 columns[i].width = getTextWidth(columns[i].label) + 20;
             }
@@ -1286,7 +1309,7 @@ var ATable = (function () {
      */
     function getRowData(rows) {
         var rowArr = [];
-        for (var i = 0; i < rows.length; i++) {
+        for (var i = 0; i &lt; rows.length; i++) {
             rowArr.push({row : rows.getRow(i)});
         }
         return rowArr;
@@ -1305,11 +1328,11 @@ var ATable = (function () {
     /**
      * Determine the width of a string when rendered on the page
      * @private
-     * @param {String} text string to check the width of when rendered in a <th>
+     * @param {String} text string to check the width of when rendered in a &lt;th>
      * @return {int} width of the rendered text in pixels
      */
     function getTextWidth(text) {
-        var o = $('<th>' + text + '</th>').css({
+        var o = $('&lt;th>' + text + '&lt;/th>').css({
             'position' : 'absolute',
             'float' : 'left',
             'white-space' : 'nowrap',
@@ -1357,4 +1380,23 @@ var ATable = (function () {
     }
 })();
 return ATable;
-})();
+})();</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h3>Classes</h3><ul><li><a href="ATable.html">ATable</a></li><li><a href="Column.html">Column</a></li><li><a href="ColumnCollection.html">ColumnCollection</a></li><li><a href="Row.html">Row</a></li><li><a href="RowCollection.html">RowCollection</a></li></ul>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.0-dev</a> on Thu Apr 11 2013 14:16:24 GMT-0400 (EDT)
+</footer>
+
+<script> prettyPrint(); </script>
