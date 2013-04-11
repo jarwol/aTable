@@ -30,7 +30,7 @@ var ATable = (function () {
              * @param {boolean} [options.movableColumns=true] set whether table columns are movable
              * @param {boolean} [options.sortableColumns=true] set whether clicking on column headers sorts the table
              * @param {String} [options.sortColumn] name of the column by which to sort the table
-             * @see http://jwoah12.github.com/aTable/demo.html
+             * @see http://jwoah12.github.com/aTable
              */
             initialize : function (options) {
                 _.bindAll(this);
@@ -72,6 +72,11 @@ var ATable = (function () {
                 this.rows = new RowCollection([], options);
                 this.height = options.height;
                 this.prevScrollTop = 0;
+                /**
+                 * Unique id of this atable on the page
+                 * @type {int}
+                 */
+                this.atableId = 0;
             },
 
             events : {
@@ -562,7 +567,7 @@ var ATable = (function () {
                 // User is moving the column
                 else if (this.movableColumns) {
                     e.target.style.opacity = 0.35;
-                    e.originalEvent.dataTransfer.setData("text", target[0].getAttribute('data-column'));
+                    e.originalEvent.dataTransfer.setData("text", this.atableId + '.' + target[0].getAttribute('data-column'));
                 }
                 else {
                     e.preventDefault();
@@ -653,17 +658,21 @@ var ATable = (function () {
                 if (e.preventDefault) {
                     e.preventDefault();
                 }
-                if (this.movableColumns) {
-                    var srcCol = e.originalEvent.dataTransfer.getData("text");
+                var data = e.originalEvent.dataTransfer.getData("text");
+                var parts = data.split('.');
+                if (this.movableColumns && parts[0] == this.atableId) {
+                    var srcCol = parts[1];
                     var destCol = e.target.parentNode.getAttribute('data-column');
                     if (e.target.tagName === "TH") {
                         destCol = e.target.getAttribute('data-column');
-                        $(e.target.firstChild).removeClass("over");
-                    }
-                    else {
-                        $(e.target).removeClass("over");
                     }
                     this.moveColumn(srcCol, destCol);
+                }
+                if (e.target.tagName === "TH") {
+                    $(e.target.firstChild).removeClass("over");
+                }
+                else {
+                    $(e.target).removeClass("over");
                 }
             },
 
@@ -757,7 +766,7 @@ var ATable = (function () {
                 table.appendChild(tbody);
                 frag.appendChild(parent);
                 if (!this.resizeIndicator) {
-                    this.resizeIndicator = createResizeIndicator();
+                    createResizeIndicator(this);
                     frag.appendChild(this.resizeIndicator);
                 }
                 if (this.parentElt) {
@@ -804,8 +813,6 @@ var ATable = (function () {
                     body += '</tr>';
                 }
                 body += "<tr style='height: " + (this.rowHeight * (params.rows.length - this.visibleRows - BUFFER_ROWS) - topRowHeight) + "px;'></tr>";
-                //thead.innerHTML = headerRow;
-                //tbody.innerHTML = body;
                 $(thead).html(headerRow);
                 $(tbody).html(body);
                 this.scrollbarWidth = getScrollbarWidth(tbody);
@@ -876,9 +883,10 @@ var ATable = (function () {
 
     /**
      * Create a semi-transparent gray div that will indicate a resize operation is occurring
+     * @param {ATable} atable the ATable itself
      * @returns {HTMLElement} div that will become visible as the user resizes a column
      */
-    function createResizeIndicator() {
+    function createResizeIndicator(atable) {
         var nextId = 0;
         $('.resizeIndicator').each(function () {
             nextId = parseInt(this.id.split("resize")[1], 10) + 1;
@@ -886,7 +894,8 @@ var ATable = (function () {
         var gray = document.createElement("div");
         gray.className = "resizeIndicator";
         gray.id = "resize" + nextId;
-        return gray;
+        atable.atableId = nextId;
+        atable.resizeIndicator = gray;
     }
 
     /**

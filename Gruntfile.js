@@ -25,8 +25,7 @@ module.exports = function (grunt) {
         },
         concat : {
             options : {
-                separator : '\n\n',
-                banner : banner + '\n'
+                separator : '\n\n'
             },
             dist : {
                 src : sourceFiles,
@@ -47,7 +46,7 @@ module.exports = function (grunt) {
             modules : {
                 src : ['dist/atable.js'],
                 dest : '.',
-                wrapper : ['var ATable = (function () {\n', '\nreturn ATable;\n})();']
+                wrapper : [banner + '\nvar ATable = (function () {\n', '\nreturn ATable;\n})();']
             }
         },
         jsdoc : {

@@ -38,6 +38,7 @@
     border: solid 1px silver;
     border-top: none;
     padding: 3px;
+    background: white;
 }
 
 .atable th {
