@@ -116,6 +116,7 @@ var ATable = (function () {
                     this.renderTable = false;
                     params.columns = this.columns.toJSON();
                     params.rows = getRowData(this.rows);
+                    params.visibleCount = this.rows.visibleCount;
                     if (this.tbodyElt) {
                         this.prevScrollTop = this.tbodyElt[0].scrollTop;
                     }
@@ -179,9 +180,9 @@ var ATable = (function () {
                 }
                 else if (this.dataAppended) {
                     this.dataAppended = false;
-                    if (this.rowRange.last < this.rows.length && this.rowRange.last < max) {
+                    if (this.rowRange.last < this.rows.visibleCount && this.rowRange.last < max) {
                         first = this.rowRange.last;
-                        last = this.rows.length;
+                        last = this.rows.visibleCount;
                         if (last > max) last = max;
                         this.addRows(first, last, false);
                         this.rowRange.last = last;
@@ -226,20 +227,11 @@ var ATable = (function () {
              */
             addRow : function (index, rowToInsertBefore) {
                 var tr = document.createElement("tr");
-                var arrow = this.tableElt.find('.sortArrow');
-                var arrowCol = null;
-                var arrowWidth;
-                if (arrow.length) {
-                    arrowCol = arrow[0].parentNode.parentNode.getAttribute('data-column');
-                    arrowWidth = arrow[0].scrollWidth;
-                }
                 for (var i = 0; i < this.columns.length; i++) {
                     var col = this.columns.at(i);
                     if (col.get('visible')) {
                         var div = document.createElement("div");
-                        // var width = col.get('element')[0].firstChild.scrollWidth;
                         var width = col.get('width');
-                        //if (col.get('name') === arrowCol) width += arrowWidth;
                         div.style.width = width + "px";
                         div.innerHTML = this.rows.getValue(index, i);
                         var td = document.createElement("td");
@@ -282,8 +274,6 @@ var ATable = (function () {
              */
             refreshRows : function (firstRow) {
                 var rows = this.tbodyElt[0].getElementsByTagName("tr");
-                var domRowsCount = rows.length - 2;
-                rows = this.tbodyElt[0].getElementsByTagName("tr");
                 for (var i = 1; i < rows.length - 1; i++) {
                     var tr = rows[i];
                     var tdList = tr.getElementsByTagName("div");
@@ -347,8 +337,18 @@ var ATable = (function () {
              },
              */
 
-            filter : function (columnIdx, filterStr) {
-                // TODO - implement table filtering
+            /**
+             * Filter the table by displaying only rows which contain <b>filterStr</b> in the contents of <b>column</b>
+             * @param {String} column name of the column to filter on
+             * @param {String} filterStr check specified column for existence of this string
+             */
+            filter : function (column, filterStr) {
+                var col = this.columns.get(column);
+                if (!col) throw "Invalid column name";
+                if (this.rows.filter(col.get('order'), filterStr)) {
+                    this.renderTable = true;
+                    this.render();
+                }
             },
 
             /**
@@ -473,9 +473,9 @@ var ATable = (function () {
                     this.rowRange.prevLast = this.rowRange.last;
                     this.rowRange.first = firstRenderedRow;
                     this.rowRange.last = firstVisibleRow + this.visibleRows + BUFFER_ROWS;
-                    if (this.rowRange.last > this.rows.length) {
-                        this.rowRange.last = this.rows.length;
-                        this.rowRange.first = this.rowRange.last - this.visibleRows - BUFFER_ROWS;
+                    if (this.rowRange.last > this.rows.visibleCount) {
+                        this.rowRange.last = this.rows.visibleCount;
+                        this.rowRange.first = Math.max(0, this.rowRange.last - this.visibleRows - BUFFER_ROWS);
                     }
                     this.renderRows(this.prevScrollTop, e.target.scrollTop);
                 }
@@ -790,8 +790,8 @@ var ATable = (function () {
                 }
                 if (!this.rowRange) {
                     var last = this.visibleRows + BUFFER_ROWS;
-                    if (last > params.rows.length) {
-                        last = params.rows.length;
+                    if (last > params.visibleCount) {
+                        last = params.visibleCount;
                     }
                     this.rowRange = {
                         first : 0,
@@ -802,17 +802,21 @@ var ATable = (function () {
                 }
 
                 var body = "<tr style='height: " + topRowHeight + "px;'></tr>";
-                for (var j = this.rowRange.first; j < params.rows.length && j < this.rowRange.last; j++) {
-                    body += '<tr>';
-                    for (var k = 0; k < params.rows[j].row.length; k++) {
-                        if (params.columns[k].visible) {
-                            var width = params.columns[k].width;
-                            body += '<td><div style="width: ' + width + 'px;">' + params.rows[j].row[k] + '</div></td>';
+                var displayCount = 0;
+                for (var j = this.rowRange.first; j < params.rows.length && displayCount < this.rowRange.last; j++) {
+                    if (params.rows[j].visible) {
+                        body += '<tr>';
+                        for (var k = 0; k < params.rows[j].row.length; k++) {
+                            if (params.columns[k].visible) {
+                                var width = params.columns[k].width;
+                                body += '<td><div style="width: ' + width + 'px;">' + params.rows[j].row[k] + '</div></td>';
+                            }
                         }
+                        body += '</tr>';
+                        displayCount++;
                     }
-                    body += '</tr>';
                 }
-                body += "<tr style='height: " + (this.rowHeight * (params.rows.length - this.visibleRows - BUFFER_ROWS) - topRowHeight) + "px;'></tr>";
+                body += "<tr style='height: " + (this.rowHeight * (params.visibleCount - this.visibleRows - BUFFER_ROWS) - topRowHeight) + "px;'></tr>";
                 $(thead).html(headerRow);
                 $(tbody).html(body);
                 this.scrollbarWidth = getScrollbarWidth(tbody);
@@ -839,7 +843,7 @@ var ATable = (function () {
                 if (append) {
                     this.dataAppended = true;
                     this.rows.add(rows);
-                    this.rows.trigger("reset");
+                    this.render();
                 }
                 else {
                     this.rows.reset(rows);
@@ -868,7 +872,7 @@ var ATable = (function () {
      */
     function adjustBufferRowHeights(tbody, rows, rowHeight, firstRowIdx) {
         var domRowCount = tbody.childElementCount - 2;
-        var bufferHeight = (rows.length - domRowCount) * rowHeight;
+        var bufferHeight = (rows.visibleCount - domRowCount) * rowHeight;
         if (bufferHeight < 0) {
             tbody.firstChild.style.height = 0;
             tbody.lastChild.style.height = 0;
@@ -1010,7 +1014,7 @@ var ATable = (function () {
     function getRowData(rows) {
         var rowArr = [];
         for (var i = 0; i < rows.length; i++) {
-            rowArr.push({row : rows.getRow(i)});
+            rowArr.push({row : rows.getRow(i), visible : rows.at(i).get('visible')});
         }
         return rowArr;
     }

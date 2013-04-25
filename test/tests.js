@@ -164,6 +164,29 @@ asyncTest("Scroll table - dynamic data source", 32, function () {
     });
 });
 
+asyncTest("Filter", 6, function () {
+    var table = createTable(function (atable) {
+        atable.receivedData([
+            ["Some text", 1.50],
+            ["Some more text", 2.50],
+            ["I'm unique", -1.5]
+        ]);
+    }, 2);
+    table.render(function () {
+        start();
+        equal(table.rows.visibleCount, 3, "rows.visibleCount should be 3");
+        table.filter("col1", "e");
+        equal(table.rows.length, 3, "Rows collection should have 3 elements");
+        equal(table.rows.visibleCount, 3, "rows.visibleCount should be 3");
+        var rows = table.tbodyElt.find("tr");
+        equal(rows.length, 5, "DOM table should have 3 visible rows plus 2 buffer rows");
+        table.filter("col1", "text");
+        equal(table.rows.visibleCount, 2, "rows.visibleCount should be 2");
+        rows = table.tbodyElt.find("tr");
+        equal(rows.length, 4, "DOM table should have 2 visible rows plus 2 buffer rows");
+    });
+});
+
 module("Column Operations");
 asyncTest("Reorder columns", 12, function () {
     var table = createTable(fetchData1Row4Cols, 4);

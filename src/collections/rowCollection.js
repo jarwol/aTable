@@ -6,7 +6,7 @@ var RowCollection = (function () {
              * @class Backbone Collection of {@link Row} models representing the dataset of the table
              * @augments Backbone.Collection
              * @constructs
-             * @param models initial set of Row models to add to the collection
+             * @param {Row[]} models initial set of Row models to add to the collection
              * @param {Object} options hash of parameters
              * @param {int} [options.sortColumn] index of the column by which to sort the table
              * @param {boolean} [options.sortDescending=false] if true, sort the rows in descending order
@@ -14,6 +14,8 @@ var RowCollection = (function () {
             initialize : function (models, options) {
                 this.init = false;
                 this.columnOrder = [];
+                this.filterString = null;
+                this.visibleCount = models.length;
                 if (options) {
                     this.sortColumn = options.sortColumn;
                     this.sortDescending = options.sortDescending !== null ? options.sortDescending : false;
@@ -111,6 +113,44 @@ var RowCollection = (function () {
             },
 
             /**
+             * Filter the collection by setting visible=false on rows that don't contain filterStr in the specified column
+             * @param {int} colIdx index of the column to filter on
+             * @param {String} filterStr check specified column for existence of this string
+             * @returns {boolean} true if the filter was applied, false otherwise
+             */
+            filter : function (colIdx, filterStr) {
+                if (filterStr !== this.filterString || this.filterCol !== colIdx) {
+                    this.filterString = filterStr;
+                    this.filterCol = colIdx;
+                    this.visibleCount = 0;
+                    var that = this;
+                    this.each(function (row) {
+                        if (!that.passesFilter(row.get('row'))) {
+                            row.set({visible : false});
+                        }
+                        else {
+                            row.set({visible : true});
+                            that.visibleCount++;
+                        }
+                    });
+                    return true;
+                }
+                return false;
+            },
+
+            /**
+             * Determine whether a row passes the filter (if one exists)
+             * @param {Array} row array of data representing a single row
+             * @returns {boolean} true if the row passes the filter, false otherwise
+             */
+            passesFilter : function (row) {
+                if (row && this.filterString) {
+                    return row[this.columnOrder[this.filterCol]].indexOf(this.filterString) !== -1;
+                }
+                return true;
+            },
+
+            /**
              * Comparator function to sort rows according to the sort column its datatype
              * @private
              * @param {Row} row row model to sort
@@ -118,7 +158,7 @@ var RowCollection = (function () {
              */
             comparator : function (row) {
                 var val = row.get('row')[this.columnOrder[this.sortColumn]];
-                var ret = null;
+                var ret = 0;
 
                 if (typeof val === "number") {
                     ret = val;
@@ -126,9 +166,6 @@ var RowCollection = (function () {
                 else if (typeof val === "object") {
                     if (val instanceof Date) {
                         ret = val.getTime();
-                    }
-                    else {
-                        ret = 0;
                     }
                 }
                 else if (typeof val === "string") {
@@ -148,6 +185,39 @@ var RowCollection = (function () {
                     return ret;
                 }
                 return -ret;
+            },
+
+            /**
+             * Override Backbone collection.add method to support row filtering
+             * @param {Row|Row[]} rows Row model or array of models to add to this collection
+             * @param {Object} options hash of options to pass to Backbone.Collection.add
+             */
+            add : function (rows, options) {
+                if (Object.prototype.toString.call(rows) === "[object Array]") {
+                    for (var i = 0; i < rows.length; i++) {
+                        var row = rows[i];
+                        if (!(row instanceof Row)) {
+                            row = new Row(row);
+                        }
+                        var vis = this.passesFilter(row.get('row'));
+                        row.set({visible : vis});
+                        if (vis) this.visibleCount++;
+                    }
+                }
+                else {
+                    if (!(rows instanceof Row)) {
+                        rows = new Row(rows);
+                    }
+                    var visible = this.passesFilter(rows.get('row'));
+                    rows.set({visible : visible});
+                    if (visible) this.visibleCount++;
+                }
+                Backbone.Collection.prototype.add.call(this, rows, options);
+            },
+
+            reset : function (rows, options) {
+                this.visibleCount = 0;
+                Backbone.Collection.prototype.reset.call(this, rows, options);
             }
         });
 

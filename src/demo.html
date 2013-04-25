@@ -67,6 +67,8 @@
             ["Valeria", "Oldridge", "Greensboro", "881-417-3928"]
         ];
 
+        var filterTable;
+
         $(document).ready(function () {
             new ATable({
                 dataFunction : function (atable) {
@@ -83,8 +85,8 @@
                 height : 400
             }).render();
 
-            // Demonstrate column options
-            new ATable({
+            // Demonstrate column options and filtering
+            filterTable = new ATable({
                 dataFunction : function (atable) {
                     atable.receivedData(rows);
                 },
@@ -224,13 +226,13 @@
     </div>
     <hr/>
 
-    <h4>Optional column configuration</h4>
+    <h4>Filtering and column configuration</h4>
 
     <div class="row-fluid">
         <div class="span6">
             <div class="example">
 <pre class="prettyprint language-javascript">
-    new ATable({
+    filterTable = new ATable({
         dataFunction : function (atable) {
             atable.receivedData(rows);
         },
@@ -251,9 +253,20 @@
         height : 400
     }).render();
 </pre>
+<pre class="prettyprint language-html">
+
+    &lt;!-- This text input will filter the table by the first name column --&gt;
+    &lt;input id="filterFirst" type="text" class="input-medium search-query" <span class='highlight'>onkeyup="filterTable.filter('first', this.value);"</span>&gt;<br/>
+
+</pre>
             </div>
         </div>
-        <div class="span6" id="columnProps"></div>
+        <div class="span6" id="columnProps">
+            <form class="form-inline">
+                <label for="filterFirst">First: </label>
+                <input id="filterFirst" type="text" class="input-medium search-query" onkeyup="filterTable.filter('first', this.value);">
+            </form>
+        </div>
     </div>
     <hr/>
 
