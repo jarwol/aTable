@@ -341,11 +341,12 @@ var ATable = (function () {
              * Filter the table by displaying only rows which contain <b>filterStr</b> in the contents of <b>column</b>
              * @param {String} column name of the column to filter on
              * @param {String} filterStr check specified column for existence of this string
+             * @param {boolean} [caseSensitive=false] use caseSensitive filtering
              */
-            filter : function (column, filterStr) {
+            filter : function (column, filterStr, caseSensitive) {
                 var col = this.columns.get(column);
                 if (!col) throw "Invalid column name";
-                if (this.rows.filter(col.get('order'), filterStr)) {
+                if (this.rows.filter(col.get('order'), filterStr, caseSensitive)) {
                     this.renderTable = true;
                     this.render();
                 }

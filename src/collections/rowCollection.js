@@ -14,7 +14,7 @@ var RowCollection = (function () {
             initialize : function (models, options) {
                 this.init = false;
                 this.columnOrder = [];
-                this.filterString = null;
+                this.filterObj = null;
                 this.visibleCount = models.length;
                 if (options) {
                     this.sortColumn = options.sortColumn;
@@ -115,13 +115,18 @@ var RowCollection = (function () {
             /**
              * Filter the collection by setting visible=false on rows that don't contain filterStr in the specified column
              * @param {int} colIdx index of the column to filter on
-             * @param {String} filterStr check specified column for existence of this string
+             * @param {*} filterStr check specified column for existence of this string
+             * @param {boolean} [caseSensitive=false] do a case-sensitive search when filtering
              * @returns {boolean} true if the filter was applied, false otherwise
              */
-            filter : function (colIdx, filterStr) {
-                if (filterStr !== this.filterString || this.filterCol !== colIdx) {
-                    this.filterString = filterStr;
-                    this.filterCol = colIdx;
+            filter : function (colIdx, filterStr, caseSensitive) {
+                filterStr = filterStr.toString();
+                if (!this.filterObj || filterStr !== this.filter.str || this.filter.column !== colIdx || this.filter.caseSensitive !== caseSensitive) {
+                    this.filterObj = {
+                        str : filterStr,
+                        column : colIdx,
+                        caseSensitive : caseSensitive
+                    };
                     this.visibleCount = 0;
                     var that = this;
                     this.each(function (row) {
@@ -144,8 +149,14 @@ var RowCollection = (function () {
              * @returns {boolean} true if the row passes the filter, false otherwise
              */
             passesFilter : function (row) {
-                if (row && this.filterString) {
-                    return row[this.columnOrder[this.filterCol]].indexOf(this.filterString) !== -1;
+                if (row && this.filterObj) {
+                    var actualVal = row[this.columnOrder[this.filterObj.column]].toString();
+                    var filterVal = this.filterObj.str;
+                    if (!this.filterObj.caseSensitive) {
+                        actualVal = actualVal.toUpperCase();
+                        filterVal = filterVal.toUpperCase();
+                    }
+                    return actualVal.indexOf(filterVal) !== -1;
                 }
                 return true;
             },

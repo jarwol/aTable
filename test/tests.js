@@ -164,7 +164,7 @@ asyncTest("Scroll table - dynamic data source", 32, function () {
     });
 });
 
-asyncTest("Filter", 6, function () {
+asyncTest("Filter", 10, function () {
     var table = createTable(function (atable) {
         atable.receivedData([
             ["Some text", 1.50],
@@ -180,10 +180,18 @@ asyncTest("Filter", 6, function () {
         equal(table.rows.visibleCount, 3, "rows.visibleCount should be 3");
         var rows = table.tbodyElt.find("tr");
         equal(rows.length, 5, "DOM table should have 3 visible rows plus 2 buffer rows");
-        table.filter("col1", "text");
+        table.filter("col1", "tExT");
         equal(table.rows.visibleCount, 2, "rows.visibleCount should be 2");
         rows = table.tbodyElt.find("tr");
         equal(rows.length, 4, "DOM table should have 2 visible rows plus 2 buffer rows");
+        table.filter("col2", 1.5);
+        equal(table.rows.visibleCount, 2, "rows.visibleCount should be 2");
+        rows = table.tbodyElt.find("tr");
+        equal(rows.length, 4, "DOM table should have 2 visible rows plus 2 buffer rows");
+        table.filter("col1", "TEXT", true);
+        equal(table.rows.visibleCount, 0, "rows.visibleCount should be 0");
+        rows = table.tbodyElt.find("tr");
+        equal(rows.length, 2, "DOM table should have 0 visible rows plus 2 buffer rows");
     });
 });
 
