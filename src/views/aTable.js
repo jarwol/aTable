@@ -88,7 +88,8 @@ var ATable = (function () {
                 "dragenter th div" : "onDragEnterColumnHeader",
                 "dragover th div" : "onDragOverColumnHeader",
                 "dragleave th div" : "onDragLeaveColumnHeader",
-                "drop th div" : "onDropColumnHeader"
+                "drop th div" : "onDropColumnHeader",
+                "blur td div" : "onCellValueChanged"
             },
 
             /**
@@ -227,6 +228,7 @@ var ATable = (function () {
              */
             addRow : function (index, rowToInsertBefore) {
                 var tr = document.createElement("tr");
+                tr.setAttribute("data-row", index);
                 for (var i = 0; i < this.columns.length; i++) {
                     var col = this.columns.at(i);
                     if (col.get('visible')) {
@@ -276,6 +278,7 @@ var ATable = (function () {
                 var rows = this.tbodyElt[0].getElementsByTagName("tr");
                 for (var i = 1; i < rows.length - 1; i++) {
                     var tr = rows[i];
+                    tr.setAttribute("data-row", firstRow + i - 1);
                     var tdList = tr.getElementsByTagName("div");
                     for (var j = 0; j < tdList.length; j++) {
                         var div = tdList[j];
@@ -677,6 +680,16 @@ var ATable = (function () {
                 }
             },
 
+            onCellValueChanged : function (e) {
+                var oldVal = e.target.getAttribute('data-origVal');
+                var val = e.target.innerHTML;
+                if(oldVal !== val){
+                    e.target.setAttribute('data-origVal', val);
+                    var rowNum = e.target.parentNode.parentNode.getAttribute('data-row');
+                    this.rows.setValue(parseInt(rowNum, 10), e.target.parentNode.cellIndex, val);
+                }
+            },
+
             /**
              * Add an arrow indicating sort direction on the sort column header
              * @private
@@ -806,11 +819,12 @@ var ATable = (function () {
                 var displayCount = 0;
                 for (var j = this.rowRange.first; j < params.rows.length && displayCount < this.rowRange.last; j++) {
                     if (params.rows[j].visible) {
-                        body += '<tr>';
+                        body += '<tr data-row="' + j + '">';
                         for (var k = 0; k < params.rows[j].row.length; k++) {
                             if (params.columns[k].visible) {
                                 var width = params.columns[k].width;
-                                body += '<td><div style="width: ' + width + 'px;">' + params.rows[j].row[k] + '</div></td>';
+                                var editable = params.columns[k].editable ? "contenteditable='true' " : '';
+                                body += '<td><div data-origVal="' + params.rows[j].row[k] + '" ' + editable + 'style="width: ' + width + 'px;">' + params.rows[j].row[k] + '</div></td>';
                             }
                         }
                         body += '</tr>';
@@ -1001,6 +1015,9 @@ var ATable = (function () {
             if (typeof columns[i].visible === "undefined") {
                 columns[i].visible = true;
             }
+            if (typeof columns[i].editable === "undefined") {
+                columns[i].editable = options.editable;
+            }
             columns[i].order = i;
         }
         return new ColumnCollection(columns);
@@ -1062,6 +1079,9 @@ var ATable = (function () {
         }
         if (typeof options.sortable === "undefined") {
             options.sortable = true;
+        }
+        if (typeof options.editable === "undefined") {
+            options.editable = false;
         }
     }
 

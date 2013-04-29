@@ -195,6 +195,23 @@ asyncTest("Filter", 10, function () {
     });
 });
 
+asyncTest("Edit Data", 1, function () {
+    var table = createTable(function (atable) {
+        atable.receivedData([
+            ["Some text", 1.50],
+            ["Some more text", 2.50],
+            ["I'm unique", -1.5]
+        ]);
+    }, 2, true);
+    table.render(function () {
+        start();
+        var rows = table.tbodyElt.find('tr');
+        rows[1].firstChild.firstChild.innerHTML = "I changed";
+        table.onCellValueChanged({target : rows[1].firstChild.firstChild});
+        equal(table.rows.getValue(0, 0), "I changed", "rows[0][0] should be updated to 'I changed'");
+    });
+});
+
 module("Column Operations");
 asyncTest("Reorder columns", 12, function () {
     var table = createTable(fetchData1Row4Cols, 4);
@@ -374,7 +391,7 @@ function fetchDataMultiple(atable) {
     }, 1);
 }
 
-function createTable(dataFunc, cols) {
+function createTable(dataFunc, cols, editable) {
     var columns = [];
     for (var i = 0; i < cols; i++) {
         columns.push({name : "col" + (i + 1)});
@@ -383,7 +400,8 @@ function createTable(dataFunc, cols) {
         dataFunction : dataFunc,
         columns : columns,
         el : "#qunit-fixture",
-        height : 300
+        height : 300,
+        editable : editable
     });
 }
 

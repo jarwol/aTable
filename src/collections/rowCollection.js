@@ -44,6 +44,18 @@ var RowCollection = (function () {
             },
 
             /**
+             * Set the value at position (rowIdx, ColIdx) to <b>val</b>
+             * @param {int} rowIdx row index of the new value
+             * @param {int} colIdx column index of the new value
+             * @param {String} val new value to set
+             */
+            setValue : function(rowIdx, colIdx, val){
+                var row = this.at(rowIdx).get('row');
+                var actualCol = this.columnOrder[colIdx];
+                row[actualCol] = val;
+            },
+
+            /**
              * Get the row values at a given index
              * @param {int} idx the row index
              * @return {Array} array of values in the row

@@ -77,7 +77,7 @@
                 columns : [
                     {name : "first", label : "First Name"},
                     {name : "last", label : "Last Name"},
-                    {name : "city", label : "City"},
+                    {name : "city", label : "City", editable : true}, // City values are editable
                     {name : "phone", label : "Phone #"}
                 ],
                 el : "#staticDataCallback",
@@ -213,7 +213,7 @@
         columns : [
             {name : "first", label : "First Name"},
             {name : "last", label : "Last Name"},
-            {name : "city", label : "City"},
+            {name : "city", label : "City", editable : true}, // City values are editable
             {name : "phone", label : "Phone #"}
         ],
         el : "#staticDataCallback",
@@ -264,7 +264,8 @@
         <div class="span6" id="columnProps">
             <form class="form-inline">
                 <label for="filterFirst">First: </label>
-                <input id="filterFirst" type="text" class="input-medium search-query" onkeyup="filterTable.filter('first', this.value);">
+                <input id="filterFirst" type="text" class="input-medium search-query"
+                       onkeyup="filterTable.filter('first', this.value);">
             </form>
         </div>
     </div>
