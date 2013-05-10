@@ -18,6 +18,7 @@ var ATable = (function () {
              * @param {boolean} [options.columns.resizable=true] set whether the column is resizable. This value takes precedence over <strong>options.resizableColumns</strong>.
              * @param {boolean} [options.columns.sortable=true] set whether the table can be sorted on this column. This value takes precedence over <strong>options.sortableColumns</strong>.
              * @param {boolean} [options.columns.visible=true] set whether the column is visible
+             * @param {String} [options.columns.cellClasses] space-separated list of CSS classes to apply to the content of all of this column's cells
              * @param {String|Function} options.dataFunction The dataFunction parameter can be one of two values:
              * <li>{String} the id of a <strong>&lt;script&gt;</strong> element containing a function which has the same name as the script id.
              * The function should call <strong>self.postMessage({data: rows, append: append});</strong> where <i>rows</i> is a 2-dimensional array of table values. If <i>append</i> is true, rows will be added to the table.
@@ -29,8 +30,9 @@ var ATable = (function () {
              * @param {boolean} [options.resizableColumns=true] set whether table columns are resizable
              * @param {boolean} [options.movableColumns=true] set whether table columns are movable
              * @param {boolean} [options.sortableColumns=true] set whether clicking on column headers sorts the table
+             * @param {String} [options.cellClasses] space-separated list of CSS classes to apply to the content of all the cells in the table
              * @param {String} [options.sortColumn] name of the column by which to sort the table
-             * @see http://jwoah12.github.com/aTable
+             * @see http://jarwol.com/aTable
              */
             initialize : function (options) {
                 _.bindAll(this);
@@ -233,6 +235,9 @@ var ATable = (function () {
                     var col = this.columns.at(i);
                     if (col.get('visible')) {
                         var div = document.createElement("div");
+                        if(col.get('cellClasses')){
+                            div.setAttribute('class', col.get('cellClasses'));
+                        }
                         var width = col.get('width');
                         div.style.width = width + "px";
                         div.innerHTML = this.rows.getValue(index, i);
@@ -656,7 +661,7 @@ var ATable = (function () {
             /**
              * Initiate a move when a column is successfully dragged onto another column
              * @private
-             * @param {Event} e jQuery drop event
+             * @param {jQuery.Event} e jQuery drop event
              */
             onDropColumnHeader : function (e) {
                 if (e.preventDefault) {
@@ -680,10 +685,14 @@ var ATable = (function () {
                 }
             },
 
+            /**
+             * Modify the data in the row collection when the user edits a cell
+             * @param {jQuery.Event} e jQuery blur event
+             */
             onCellValueChanged : function (e) {
                 var oldVal = e.target.getAttribute('data-origVal');
                 var val = e.target.innerHTML;
-                if(oldVal !== val){
+                if (oldVal !== val) {
                     e.target.setAttribute('data-origVal', val);
                     var rowNum = e.target.parentNode.parentNode.getAttribute('data-row');
                     this.rows.setValue(parseInt(rowNum, 10), e.target.parentNode.cellIndex, val);
@@ -824,7 +833,11 @@ var ATable = (function () {
                             if (params.columns[k].visible) {
                                 var width = params.columns[k].width;
                                 var editable = params.columns[k].editable ? "contenteditable='true' " : '';
-                                body += '<td><div data-origVal="' + params.rows[j].row[k] + '" ' + editable + 'style="width: ' + width + 'px;">' + params.rows[j].row[k] + '</div></td>';
+                                var classes = "";
+                                if (params.columns[k].cellClasses) {
+                                    classes = " class='" + params.columns[k].cellClasses + "'";
+                                }
+                                body += '<td'+ classes + '><div data-origVal="' + params.rows[j].row[k] + '" ' + editable + 'style="width: ' + width + 'px;">' + params.rows[j].row[k] + '</div></td>';
                             }
                         }
                         body += '</tr>';
@@ -1017,6 +1030,9 @@ var ATable = (function () {
             }
             if (typeof columns[i].editable === "undefined") {
                 columns[i].editable = options.editable;
+            }
+            if (typeof columns[i].cellClasses === "undefined") {
+                columns[i].cellClasses = options.cellClasses;
             }
             columns[i].order = i;
         }

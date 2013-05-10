@@ -74,11 +74,14 @@
                 dataFunction : function (atable) {
                     atable.receivedData(rows);
                 },
+                cellClasses : "italic",  // Apply the italic class to all cells in the table
                 columns : [
                     {name : "first", label : "First Name"},
                     {name : "last", label : "Last Name"},
-                    {name : "city", label : "City", editable : true}, // City values are editable
-                    {name : "phone", label : "Phone #"}
+                    // City values are editable
+                    {name : "city", label : "City", editable : true},
+                    // Apply the bold and blue classes to cells in this column (overriding the italic class)
+                    {name : "phone", label : "Phone #", cellClasses : "bold big"}
                 ],
                 el : "#staticDataCallback",
                 // height in pixels is required
@@ -210,13 +213,17 @@
             // Call the atable's <b>receivedData</b> method to update the table's dataset
             <span class="highlight">atable.receivedData(rows);</span>
         },
+        <span class="highlight">cellClasses : "italic"</span>,  // Apply the italic class to all cells in the table
         columns : [
             {name : "first", label : "First Name"},
             {name : "last", label : "Last Name"},
-            {name : "city", label : "City", editable : true}, // City values are editable
-            {name : "phone", label : "Phone #"}
+            // City values are editable
+            {name : "city", label : "City", <span class="highlight">editable : true</span>},
+            // Apply the bold class to cells in this column (overriding the italic class)
+            {name : "phone", label : "Phone #", <span class="highlight">cellClasses : "bold big"</span>}
         ],
         el : "#staticDataCallback",
+        // height in pixels is required
         height : 400
     }).render();
 </pre>

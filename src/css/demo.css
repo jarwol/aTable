@@ -22,3 +22,15 @@ pre {
 .highlight {
     background-color: #FFFF30;
 }
+
+.bold{
+    font-weight: bold;
+}
+
+.big{
+    font-size: x-large;
+}
+
+.italic{
+    font-style: italic;
+}
