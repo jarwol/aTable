@@ -343,6 +343,45 @@ asyncTest("Show/hide columns", 6, function () {
     });
 });
 
+module("Table options");
+asyncTest("Formatter function", 3, function () {
+    var table = new ATable({
+        dataFunction : function (atable) {
+            var date = new Date();
+            date.setFullYear(2008, 11, 24);
+            atable.receivedData([
+                ["Jessica Student", 3.674, date]
+            ]);
+        },
+        columns : [
+            {name : "name"},
+            {name : "gpa"},
+            {name : "graddate"}
+        ],
+        formatter : function(val, row, col, colName){
+            if(colName === "name"){
+                var parts = val.split(" ", 1);
+                return parts[1] + ", " + parts[0];
+            }
+            else if(colName === "gpa"){
+                return (Math.round(val * 10) / 10).toFixed(1);
+            }
+            else if(colName === "graddate"){
+                return val.toDateString();
+            }
+            return val;
+        },
+        height : 300
+    });
+    table.render(function () {
+        start();
+        var row = table.tbodyElt.find('tr')[1];
+        equal(row.cells[0].firstChild.innerHTML, "Student, Jessica", "Format should be 'Last, First'");
+        equal(row.cells[1].firstChild.innerHTML, "3.7", "GPA should be rounded to 1 decimal place");
+        equal(row.cells[2].firstChild.innerHTML, "December 24, 2008", "");
+    });
+});
+
 /****************************************************************************************
  * Utility functions
  ****************************************************************************************/

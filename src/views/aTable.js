@@ -42,6 +42,9 @@ var ATable = (function () {
                 else if (typeof options.dataFunction === "function") {
                     this.dataFunction = options.dataFunction;
                 }
+                this.formatter = options.formatter || function (val, row, col, colName) {
+                    return val
+                };
                 this.browser = detectBrowser();
                 this.renderTable = true;
                 this.dataAppended = false;
@@ -235,12 +238,12 @@ var ATable = (function () {
                     var col = this.columns.at(i);
                     if (col.get('visible')) {
                         var div = document.createElement("div");
-                        if(col.get('cellClasses')){
+                        if (col.get('cellClasses')) {
                             div.setAttribute('class', col.get('cellClasses'));
                         }
                         var width = col.get('width');
                         div.style.width = width + "px";
-                        div.innerHTML = this.rows.getValue(index, i);
+                        div.innerHTML = this.formatter(this.rows.getValue(index, i), index, i, col.get('name'));
                         var td = document.createElement("td");
                         td.appendChild(div);
                         tr.appendChild(td);
@@ -837,7 +840,8 @@ var ATable = (function () {
                                 if (params.columns[k].cellClasses) {
                                     classes = " class='" + params.columns[k].cellClasses + "'";
                                 }
-                                body += '<td'+ classes + '><div data-origVal="' + params.rows[j].row[k] + '" ' + editable + 'style="width: ' + width + 'px;">' + params.rows[j].row[k] + '</div></td>';
+                                var value = this.formatter(params.rows[j].row[k], j, k, params.columns[k].name);
+                                body += '<td' + classes + '><div data-origVal="' + value + '" ' + editable + 'style="width: ' + width + 'px;">' + params.rows[j].row[k] + '</div></td>';
                             }
                         }
                         body += '</tr>';
