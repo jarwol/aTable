@@ -101,7 +101,7 @@ var ATable = (function () {
              */
             render : function (callback) {
                 if (typeof callback === 'function') {
-                    this.renderCallback = callback;
+                    this.renderCallback = _.once(callback);
                 }
                 var params = {};
                 if (!this.rows.init) {
@@ -134,12 +134,8 @@ var ATable = (function () {
                     if (typeof this.rows.sortColumn === "number") {
                         this.displaySortArrow(this.columns.at(this.rows.sortColumn).get('name'), this.rows.sortDescending);
                     }
-                    /* If a callback was passed to render(), invoke it after nulling out the reference. Otherwise we may
-                     wind up in an infinite loop if the callback itself causes a render. */
                     if (typeof this.renderCallback === 'function') {
-                        var cb = this.renderCallback;
-                        this.renderCallback = null;
-                        cb();
+                        this.renderCallback();
                     }
                 }
                 else {
@@ -235,7 +231,7 @@ var ATable = (function () {
                     var col = this.columns.at(i);
                     if (col.get('visible')) {
                         var div = document.createElement("div");
-                        if(col.get('cellClasses')){
+                        if (col.get('cellClasses')) {
                             div.setAttribute('class', col.get('cellClasses'));
                         }
                         var width = col.get('width');
@@ -392,6 +388,9 @@ var ATable = (function () {
                 if (!destCol) throw "Invalid dest column: " + dest;
                 if (column === dest) return;
                 this.renderTable = true;
+                this.renderCallback = function () {
+                    this.trigger("moveColumn", col.get('name'), col.get('order'), destCol.get('order'));
+                };
                 this.rows.moveColumn(col.get('order'), destCol.get('order'));
                 this.columns.moveColumn(col.get('order'), destCol.get('order'));
             },
@@ -837,7 +836,7 @@ var ATable = (function () {
                                 if (params.columns[k].cellClasses) {
                                     classes = " class='" + params.columns[k].cellClasses + "'";
                                 }
-                                body += '<td'+ classes + '><div data-origVal="' + params.rows[j].row[k] + '" ' + editable + 'style="width: ' + width + 'px;">' + params.rows[j].row[k] + '</div></td>';
+                                body += '<td' + classes + '><div data-origVal="' + params.rows[j].row[k] + '" ' + editable + 'style="width: ' + width + 'px;">' + params.rows[j].row[k] + '</div></td>';
                             }
                         }
                         body += '</tr>';
