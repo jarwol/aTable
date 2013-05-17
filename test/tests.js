@@ -343,6 +343,30 @@ asyncTest("Show/hide columns", 6, function () {
     });
 });
 
+asyncTest("Rename column", 4, function () {
+    var table = new ATable({
+        dataFunction : function (atable) {
+            atable.receivedData([
+                [0, 1]
+            ]);
+        },
+        columns : [
+            {name : "col1", label : "Column 1"},
+            {name : "col2", label : "Column 2"}
+        ],
+        height : 300
+    });
+    table.render(function () {
+        start();
+        var headers = table.tableElt.find("th");
+        equal(headers[0].firstChild.innerHTML, "Column 1", "col1 label should be 'Column 1'");
+        equal(headers[1].firstChild.innerHTML, "Column 2", "col2 label should be 'Column 2'");
+        table.renameColumn("col1", "New name");
+        equal(headers[0].firstChild.innerHTML, "New name", "col1 label should be 'New name'");
+        equal(headers[1].firstChild.innerHTML, "Column 2", "col2 label should be 'Column 2'");
+    });
+});
+
 /****************************************************************************************
  * Utility functions
  ****************************************************************************************/

@@ -7,6 +7,18 @@ var Column = Backbone.Model.extend(
          * @constructs
          */
         initialize : function () {
+            this.on("change:label", function(col, newLabel){
+               var th = this.get("element");
+                if(th){
+                    for(var i = 0; i < th[0].firstChild.childNodes.length; i++){
+                        var node = th[0].firstChild.childNodes[i];
+                        if(node.nodeType === 3){
+                            node.textContent = newLabel;
+                            break;
+                        }
+                    }
+                }
+            });
         },
         idAttribute : "name"
     }
