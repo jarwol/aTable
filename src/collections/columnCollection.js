@@ -32,7 +32,7 @@ var ColumnCollection = Backbone.Collection.extend(
             }
             var col = this.get(name);
             if (col) {
-                col.set({name : newLabel});
+                col.set({label : newLabel});
             }
         },
 

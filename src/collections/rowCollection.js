@@ -8,14 +8,18 @@ var RowCollection = (function () {
              * @constructs
              * @param {Row[]} models initial set of Row models to add to the collection
              * @param {Object} options hash of parameters
+             * @param {ColumnCollection} options.columns the table's column collection
              * @param {int} [options.sortColumn] index of the column by which to sort the table
+             * @param {Function} options.formatter function that formats the raw row data into the values display in the table
              * @param {boolean} [options.sortDescending=false] if true, sort the rows in descending order
              */
             initialize : function (models, options) {
                 this.init = false;
                 this.columnOrder = [];
+                this.columns = options.columns;
                 this.filterObj = null;
                 this.visibleCount = models.length;
+                this.formatter = options.formatter;
                 if (options) {
                     this.sortColumn = options.sortColumn;
                     this.sortDescending = options.sortDescending !== null ? options.sortDescending : false;
@@ -24,7 +28,7 @@ var RowCollection = (function () {
                     this.sortColumn = null;
                     this.sortDescending = false;
                 }
-                for (var i = 0; i < options.numColumns; i++) {
+                for (var i = 0; i < options.columns.length; i++) {
                     this.columnOrder.push(i);
                 }
             },
@@ -174,13 +178,14 @@ var RowCollection = (function () {
             },
 
             /**
-             * Comparator function to sort rows according to the sort column its datatype
+             * Comparator function to sort rows according to the sort column's datatype
              * @private
              * @param {Row} row row model to sort
              * @return {int} value to be compared against other rows to determine sorting
              */
             comparator : function (row) {
-                var val = row.get('row')[this.columnOrder[this.sortColumn]];
+                var colIdx = this.columnOrder[this.sortColumn];
+                var val = this.formatter(row.get('row')[colIdx], this.indexOf(row), colIdx, this.columns.at(colIdx).get('name'));
                 var ret = 0;
 
                 if (typeof val === "number") {
@@ -216,6 +221,7 @@ var RowCollection = (function () {
              * @param {Object} options hash of options to pass to Backbone.Collection.add
              */
             add : function (rows, options) {
+                options = options || {};
                 if (Object.prototype.toString.call(rows) === "[object Array]") {
                     for (var i = 0; i < rows.length; i++) {
                         var row = rows[i];
@@ -235,11 +241,14 @@ var RowCollection = (function () {
                     rows.set({visible : visible});
                     if (visible) this.visibleCount++;
                 }
+                if(typeof this.sortColumn !== "number") options.sort = false;
                 Backbone.Collection.prototype.add.call(this, rows, options);
             },
 
             reset : function (rows, options) {
+                options = options || {};
                 this.visibleCount = 0;
+                if(typeof this.sortColumn !== "number") options.sort = false;
                 Backbone.Collection.prototype.reset.call(this, rows, options);
             }
         });

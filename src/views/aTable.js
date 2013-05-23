@@ -32,6 +32,7 @@ var ATable = (function () {
              * @param {boolean} [options.sortableColumns=true] set whether clicking on column headers sorts the table
              * @param {String} [options.cellClasses] space-separated list of CSS classes to apply to the content of all the cells in the table
              * @param {String} [options.sortColumn] name of the column by which to sort the table
+             * @param {Function} [options.formatter] function called on each cell value to provide arbitrary formatting/transformation. Takes the value, row index, column index, and column name as parameters and returns the formatted value.
              * @see http://jarwol.com/aTable
              */
             initialize : function (options) {
@@ -42,9 +43,10 @@ var ATable = (function () {
                 else if (typeof options.dataFunction === "function") {
                     this.dataFunction = options.dataFunction;
                 }
-                this.formatter = options.formatter || function (val, row, col, colName) {
-                    return val
+                options.formatter = options.formatter || function (val) {
+                    return val;
                 };
+                this.formatter = options.formatter;
                 this.browser = detectBrowser();
                 this.renderTable = true;
                 this.dataAppended = false;
@@ -69,7 +71,7 @@ var ATable = (function () {
                         options.sortColumn = 0;
                     }
                 }
-                options.numColumns = this.columns.length;
+                options.columns = this.columns;
                 /**
                  * The collection of Row models containing the table's data
                  * @type {RowCollection}
@@ -286,7 +288,7 @@ var ATable = (function () {
                     var tdList = tr.getElementsByTagName("div");
                     for (var j = 0; j < tdList.length; j++) {
                         var div = tdList[j];
-                        div.innerHTML = this.rows.getValue(firstRow + i - 1, j);
+                        div.innerHTML = this.formatter(this.rows.getValue(firstRow + i - 1, j), firstRow + i - 1, j, this.columns.at(j).get('name'));
                     }
                 }
             },
@@ -356,6 +358,7 @@ var ATable = (function () {
                 if (this.rows.filter(col.get('order'), filterStr, caseSensitive)) {
                     this.renderTable = true;
                     this.render();
+                    this.trigger("filter", column, filterStr, caseSensitive);
                 }
             },
 
@@ -390,9 +393,11 @@ var ATable = (function () {
                 if (!col) throw "Invalid source column: " + column;
                 if (!destCol) throw "Invalid dest column: " + dest;
                 if (column === dest) return;
+                var srcIdx = col.get('order');
+                var destIdx = destCol.get('order');
                 this.renderTable = true;
                 this.renderCallback = function () {
-                    this.trigger("moveColumn", col.get('name'), col.get('order'), destCol.get('order'));
+                    this.trigger("moveColumn", col.get('name'), srcIdx, destIdx);
                 };
                 this.rows.moveColumn(col.get('order'), destCol.get('order'));
                 this.columns.moveColumn(col.get('order'), destCol.get('order'));
@@ -407,8 +412,10 @@ var ATable = (function () {
                 var col = this.columns.get(column);
                 if (!col) throw "Invalid column name: " + column;
                 if (newWidth < MIN_COLUMN_WIDTH) newWidth = MIN_COLUMN_WIDTH;
+                var oldWidth = col.get('width');
                 col.set('width', newWidth);
                 this.resizeColumnElements(col.get('element')[0].cellIndex, newWidth);
+                this.trigger("resizeColumn", col.get('name'), oldWidth, newWidth);
             },
 
             /**
@@ -425,6 +432,7 @@ var ATable = (function () {
                 }
                 this.displaySortArrow(column, this.rows.sortDescending);
                 this.rows.sort();
+                this.trigger("sort", col.get('name'), this.rows.sortDescending);
             },
 
             /**
@@ -434,7 +442,11 @@ var ATable = (function () {
             showColumn : function (name) {
                 var column = this.columns.get(name);
                 if (column) {
+                    if (column.get('visible') === true) return;
                     this.renderTable = true;
+                    this.renderCallback = function () {
+                        this.trigger("showColumn", name);
+                    };
                     column.set({visible : true});
                     this.renderTable = false;
                 }
@@ -450,7 +462,11 @@ var ATable = (function () {
             hideColumn : function (name) {
                 var column = this.columns.get(name);
                 if (column) {
+                    if (!column.get('visible')) return;
                     this.renderTable = true;
+                    this.renderCallback = function () {
+                        this.trigger("hideColumn", name);
+                    };
                     column.set({visible : false});
                     this.renderTable = false;
                 }
@@ -697,7 +713,9 @@ var ATable = (function () {
                 if (oldVal !== val) {
                     e.target.setAttribute('data-origVal', val);
                     var rowNum = e.target.parentNode.parentNode.getAttribute('data-row');
-                    this.rows.setValue(parseInt(rowNum, 10), e.target.parentNode.cellIndex, val);
+                    var col = this.getColumnByPosition(e.target.parentNode.cellIndex);
+                    this.rows.setValue(parseInt(rowNum, 10), col.get('order'), val);
+                    this.trigger("edit", rowNum, col.get('order'), oldVal, val);
                 }
             },
 
@@ -840,7 +858,7 @@ var ATable = (function () {
                                     classes = " class='" + params.columns[k].cellClasses + "'";
                                 }
                                 var value = this.formatter(params.rows[j].row[k], j, k, params.columns[k].name);
-                                body += '<td' + classes + '><div data-origVal="' + value + '" ' + editable + 'style="width: ' + width + 'px;">' + params.rows[j].row[k] + '</div></td>';
+                                body += '<td' + classes + '><div data-origVal="' + value + '" ' + editable + 'style="width: ' + width + 'px;">' + value + '</div></td>';
                             }
                         }
                         body += '</tr>';

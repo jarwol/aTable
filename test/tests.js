@@ -320,6 +320,7 @@ asyncTest("Show/hide columns", 6, function () {
             {name : "col2", label : "Column 2", visible : false},
             {name : "col3", label : "Column 3"}
         ],
+        el : "#qunit-fixture",
         height : 300
     });
     table.render(function () {
@@ -343,45 +344,6 @@ asyncTest("Show/hide columns", 6, function () {
     });
 });
 
-module("Table options");
-asyncTest("Formatter function", 3, function () {
-    var table = new ATable({
-        dataFunction : function (atable) {
-            var date = new Date();
-            date.setFullYear(2008, 11, 24);
-            atable.receivedData([
-                ["Jessica Student", 3.674, date]
-            ]);
-        },
-        columns : [
-            {name : "name"},
-            {name : "gpa"},
-            {name : "graddate"}
-        ],
-        formatter : function(val, row, col, colName){
-            if(colName === "name"){
-                var parts = val.split(" ", 1);
-                return parts[1] + ", " + parts[0];
-            }
-            else if(colName === "gpa"){
-                return (Math.round(val * 10) / 10).toFixed(1);
-            }
-            else if(colName === "graddate"){
-                return val.toDateString();
-            }
-            return val;
-        },
-        height : 300
-    });
-    table.render(function () {
-        start();
-        var row = table.tbodyElt.find('tr')[1];
-        equal(row.cells[0].firstChild.innerHTML, "Student, Jessica", "Format should be 'Last, First'");
-        equal(row.cells[1].firstChild.innerHTML, "3.7", "GPA should be rounded to 1 decimal place");
-        equal(row.cells[2].firstChild.innerHTML, "December 24, 2008", "");
-    });
-});
-
 asyncTest("Rename column", 4, function () {
     var table = new ATable({
         dataFunction : function (atable) {
@@ -393,6 +355,7 @@ asyncTest("Rename column", 4, function () {
             {name : "col1", label : "Column 1"},
             {name : "col2", label : "Column 2"}
         ],
+        el : "#qunit-fixture",
         height : 300
     });
     table.render(function () {
@@ -403,6 +366,211 @@ asyncTest("Rename column", 4, function () {
         table.renameColumn("col1", "New name");
         equal(headers[0].firstChild.innerHTML, "New name", "col1 label should be 'New name'");
         equal(headers[1].firstChild.innerHTML, "Column 2", "col2 label should be 'Column 2'");
+    });
+});
+
+module("Table options");
+asyncTest("Formatter function", 4, function () {
+    var table = new ATable({
+        dataFunction : function (atable) {
+            var date = new Date();
+            date.setFullYear(2008, 11, 24);
+            var date2 = new Date();
+            date2.setFullYear(2009, 4, 15);
+            atable.receivedData([
+                ["Jessica Student", 3.674, date],
+                ["Bill Average", 2.53, date],
+                ["Pete Perfect", 4.0, date2]
+            ]);
+        },
+        columns : [
+            {name : "name"},
+            {name : "gpa"},
+            {name : "graddate"}
+        ],
+        formatter : function (val, row, col, colName) {
+            if (colName === "name") {
+                var parts = val.split(" ", 2);
+                return parts[1] + ", " + parts[0];
+            }
+            else if (colName === "gpa") {
+                return (Math.round(val * 10) / 10).toFixed(1);
+            }
+            else if (colName === "graddate") {
+                return val.toDateString();
+            }
+            return val;
+        },
+        el : "#qunit-fixture",
+        height : 300
+    });
+
+    table.render(function () {
+        start();
+        var row = table.tbodyElt.find('tr')[1];
+        equal(row.cells[0].firstChild.innerHTML, "Student, Jessica", "Format should be 'Last, First'");
+        equal(row.cells[1].firstChild.innerHTML, "3.7", "GPA should be rounded to 1 decimal place");
+        equal(row.cells[2].firstChild.innerHTML, "Wed Dec 24 2008", "");
+        table.sort("gpa", true);
+        row = table.tbodyElt.find('tr')[1];
+        equal(row.cells[0].firstChild.innerHTML, "Perfect, Pete", "Formatting should be retained after a sort");
+    });
+});
+
+module("Event callbacks");
+asyncTest("Move column", 3, function () {
+    var table = new ATable({
+        dataFunction : function (atable) {
+            atable.receivedData([
+                [0, 1]
+            ]);
+        },
+        columns : [
+            {name : "col1", label : "Column 1"},
+            {name : "col2", label : "Column 2"}
+        ],
+        el : "#qunit-fixture",
+        height : 300
+    });
+    table.on("moveColumn", function (colName, sourceIdx, destIdx) {
+        start();
+        equal(colName, "col1", "Column name should be col1");
+        equal(sourceIdx, 0, "Source index should be 0");
+        equal(destIdx, 1, "Destination index should be 1");
+    });
+    table.render(function () {
+        table.moveColumn("col1", "col2");
+    });
+});
+
+asyncTest("Resize column", 3, function () {
+    var table = new ATable({
+        dataFunction : function (atable) {
+            atable.receivedData([
+                [0, 1]
+            ]);
+        },
+        columns : [
+            {name : "col1", label : "Column 1", width : 100},
+            {name : "col2", label : "Column 2"}
+        ],
+        el : "#qunit-fixture",
+        height : 300
+    });
+    table.on("resizeColumn", function (colName, oldWidth, newWidth) {
+        start();
+        equal(colName, "col1", "Column name should be col1");
+        equal(oldWidth, 100, "Old width should be 100");
+        equal(newWidth, 200, "New width should be 200");
+    });
+    table.render(function () {
+        table.resizeColumn("col1", 200);
+    });
+});
+
+asyncTest("Sort table", 2, function () {
+    var table = new ATable({
+        dataFunction : function (atable) {
+            atable.receivedData([
+                [0, 1]
+            ]);
+        },
+        columns : [
+            {name : "col1", label : "Column 1"},
+            {name : "col2", label : "Column 2"}
+        ],
+        el : "#qunit-fixture",
+        height : 300
+    });
+    table.on("sort", function (sortCol, descending) {
+        start();
+        equal(sortCol, "col1", "Sort column should be col1");
+        equal(descending, true, "Descending should be true");
+    });
+    table.render(function () {
+        table.sort("col1", true);
+    });
+});
+
+asyncTest("Show/hide column", 2, function () {
+    var table = new ATable({
+        dataFunction : function (atable) {
+            atable.receivedData([
+                [0, 1]
+            ]);
+        },
+        columns : [
+            {name : "col1", label : "Column 1"},
+            {name : "col2", label : "Column 2"}
+        ],
+        el : "#qunit-fixture",
+        height : 300
+    });
+    table.on("hideColumn", function (col) {
+        start();
+        equal(col, "col1", "Column name should be col1");
+    });
+    table.on("showColumn", function (col) {
+        start();
+        equal(col, "col1", "Column name should be col1");
+    });
+    table.render(function () {
+        table.hideColumn("col1");
+        table.hideColumn("col1"); // Hiding an invisible column should not fire the event
+        table.showColumn("col1");
+    });
+});
+
+asyncTest("Filter", 3, function () {
+    var table = new ATable({
+        dataFunction : function (atable) {
+            atable.receivedData([
+                [0, 1]
+            ]);
+        },
+        columns : [
+            {name : "col1", label : "Column 1"},
+            {name : "col2", label : "Column 2"}
+        ],
+        el : "#qunit-fixture",
+        height : 300
+    });
+    table.on("filter", function (filterCol, filterStr, caseSensitive) {
+        start();
+        equal(filterCol, "col1", "Filter column should be col1");
+        equal(filterStr, "test", "Filter string should be 'test'");
+        ok(caseSensitive, "caseSensitive should be true");
+    });
+    table.render(function () {
+        table.filter("col1", "test", true);
+    });
+});
+
+asyncTest("Edit cell", 4, function () {
+    var table = new ATable({
+        dataFunction : function (atable) {
+            atable.receivedData([
+                ["old value", 1]
+            ]);
+        },
+        columns : [
+            {name : "col1", label : "Column 1"},
+            {name : "col2", label : "Column 2"}
+        ],
+        el : "#qunit-fixture",
+        height : 300
+    });
+    table.on("edit", function (row, col, oldVal, newVal) {
+        start();
+        equal(row, 0, "Edited row should be 0");
+        equal(col, 0, "Edited col should be 0");
+        equal(oldVal, "old value", "Old value should be 'old value'");
+        equal(newVal, "new value", "New value should be 'new value'");
+    });
+    table.render(function () {
+        var row = table.tbodyElt.find("tr")[1];
+        row.cells[0].firstChild.innerHTML = "new value";
+        table.onCellValueChanged({target : row.cells[0].firstChild});
     });
 });
 
