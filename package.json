@@ -12,6 +12,6 @@
         "grunt-wrap" : "~0.2.0"
     },
     "scripts" : {
-        "test" : "node_modules/grunt/ --verbose --force"
+        "test" : "grunt --verbose --force"
     }
 }
