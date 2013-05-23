@@ -68,8 +68,7 @@
     ];
 
     var filterTable;
-
-    $(document).ready(function () {
+    function showStaticData() {
         new ATable({
             dataFunction : function (atable) {
                 atable.receivedData(rows);
@@ -77,16 +76,34 @@
             columns : [
                 {name : "first", label : "First Name"},
                 {name : "last", label : "Last Name"},
-                // City values are editable
-                {name : "city", label : "City", editable : true},
+                {name : "city", label : "City"},
                 {name : "phone", label : "Phone #"}
             ],
             el : "#staticDataCallback",
             // height in pixels is required
             height : 400
         }).render();
+    }
 
-        // Formatting/styles
+    // Demonstrate column options and filtering
+    function showFilter() {
+        filterTable = new ATable({
+            dataFunction : function (atable) {
+                atable.receivedData(rows);
+            },
+            columns : [
+                {name : "first", label : "First Name", sortable : false}, // Disable sorting on this column
+                {name : "last", label : "Last Name", width : 200, resizable : false}, // Set an explicit width of 200px and disable resizing this column
+                {name : "City", editable : true}, // Leave out the <b>label</b> property, and the column's <b>name</b> is displayed. Values in this column are also editable.
+                {name : "phone", label : "Phone #", visible : false} // Don't render this column in the table
+            ],
+            el : "#columnProps",
+            height : 400
+        }).render();
+    }
+
+    // Formatting/styles
+    function showFormatting() {
         new ATable({
             dataFunction : function (atable) {
                 var date = new Date();
@@ -123,22 +140,9 @@
             // height in pixels is required
             height : 400
         }).render();
+    }
 
-        // Demonstrate column options and filtering
-        filterTable = new ATable({
-            dataFunction : function (atable) {
-                atable.receivedData(rows);
-            },
-            columns : [
-                {name : "first", label : "First Name", sortable : false}, // Disable sorting on this column
-                {name : "last", label : "Last Name", width : 200, resizable : false}, // Set an explicit width of 200px and disable resizing this column
-                {name : "City"}, // Leave out the <b>label</b> property, and the column's <b>name</b> is displayed
-                {name : "phone", label : "Phone #", visible : false} // Don't render this column in the table
-            ],
-            el : "#columnProps",
-            height : 400
-        }).render();
-
+    function showDataWorker() {
         new ATable({
             dataFunction : "fetchStockData",
             columns : [
@@ -151,7 +155,9 @@
             el : "#dynamicDataWorker",
             height : 400
         }).render();
+    }
 
+    function showBigData() {
         new ATable({
             dataFunction : function (atable) {
                 var data = [];
@@ -169,7 +175,9 @@
             el : "#bigTable",
             height : 400
         }).render();
+    }
 
+    function showAppendData() {
         new ATable({
             dataFunction : function (atable) {
                 var count = 1;
@@ -196,7 +204,14 @@
             el : "#appendRows",
             height : 400
         }).render();
-    });
+    }
+
+    function displayDemo(div, renderFn) {
+        var elt = document.getElementById(div);
+        if (elt.style.display === "none") elt.style.display = "";
+        else elt.style.display = "none";
+        if ($(elt).find(".atable").length === 0) renderFn();
+    }
 </script>
 <script type="text/javascript" id="fetchStockData">
     var stocks = {
@@ -229,13 +244,15 @@
         }
         self.postMessage({data : data});
     }
+
+    $(document).ready(showStaticData);
 </script>
 </head>
 <body>
 <div class="container-fluid">
-<h4>Static data provided by a callback function</h4>
+<a href='javascript:displayDemo("demo1", showStaticData);'><h4>Static data provided by a callback function</h4></a>
 
-<div class="row-fluid">
+<div id='demo1' class="row-fluid">
     <div class="span6">
         <div class="example">
 <pre class="prettyprint language-javascript">
@@ -243,20 +260,16 @@
     var rows = [["Kimberly", "Hodges", "Centennial", "887-527-3183"], ... ];
 
     // instantiate and render a new table
+    $(document).ready(function () {
     new ATable({
-        // The callback is passed the atable as a parameter
         dataFunction : function (atable) {
-            // Call the atable's <b>receivedData</b> method to update the table's dataset
-            <span class="highlight">atable.receivedData(rows);</span>
+            atable.receivedData(rows);
         },
-        <span class="highlight">cellClasses : "italic"</span>,  // Apply the italic class to all cells in the table
         columns : [
             {name : "first", label : "First Name"},
             {name : "last", label : "Last Name"},
-            // City values are editable
-            {name : "city", label : "City", <span class="highlight">editable : true</span>},
-            // Apply the bold class to cells in this column (overriding the italic class)
-            {name : "phone", label : "Phone #", <span class="highlight">cellClasses : "bold big"</span>}
+            {name : "city", label : "City"},
+            {name : "phone", label : "Phone #"}
         ],
         el : "#staticDataCallback",
         // height in pixels is required
@@ -270,9 +283,9 @@
 
 <hr/>
 
-<h4>Filtering and column configuration</h4>
+<a href='javascript:displayDemo("demo2", showFilter);'><h4>Filtering and column configuration</h4></a>
 
-<div class="row-fluid">
+<div class="row-fluid" style='display: none;' id='demo2'>
     <div class="span6">
         <div class="example">
 <pre class="prettyprint language-javascript">
@@ -287,8 +300,8 @@
             // Set an explicit width of 200px and disable resizing this column
             {name : "last", label : "Last Name", width : 200, resizable : false},
 
-            // Leave out the <b>label</b> property, and the column's <b>name</b> is displayed
-            {name : "City"},
+            // Leave out the <b>label</b> property, and the column's <b>name</b> is displayed. Values in this column are also editable.
+            {name : "City", <span class="highlight">editable : true</span>},
 
             // Don't render this column in the table
             {name : "phone", label : "Phone #", visible : false}
@@ -315,9 +328,10 @@
 </div>
 <hr/>
 
-<h4>Use a formatter callback function and CSS classes to format/style the table content</h4>
+<a href='javascript:displayDemo("demo3", showFormatting);'><h4>Use a formatter callback function and CSS classes to
+    format/style the table content</h4></a>
 
-<div class="row-fluid">
+<div class="row-fluid" style='display: none;' id='demo3'>
     <div class="span6">
         <div class="example">
 <pre class="prettyprint language-javascript">
@@ -351,7 +365,8 @@
             {name : "name", label : "Name", width : 100},
             {name : "gpa", label : "GPA", width : 50},
             // Apply the bold and yellow classes to cells in this column (overriding the italic class)
-            {name : "graddate", label : "Grad Date", width : 150, <span class="highlight">cellClasses : "bold yellow"</span>}
+            {name : "graddate", label : "Grad Date", width : 150, <span
+        class="highlight">cellClasses : "bold yellow"</span>}
         ],
         el : "#formatAndStyle",
         // height in pixels is required
@@ -365,9 +380,9 @@
 
 <hr/>
 
-<h4>Dynamic data provided by a web worker</h4>
+<a href='javascript:displayDemo("demo4", showDataWorker);'><h4>Dynamic data provided by a web worker</h4></a>
 
-<div class="row-fluid">
+<div class="row-fluid" style='display: none;' id='demo4'>
     <div class="span6">
         <div class="example">
 <pre class="prettyprint language-javascript">
@@ -420,9 +435,9 @@
 </div>
 <hr/>
 
-<h4>Big table - 100k rows</h4>
+<a href='javascript:displayDemo("demo5", showBigData);'><h4>Big table - 100k rows</h4></a>
 
-<div class="row-fluid">
+<div class="row-fluid" style='display: none;' id='demo5'>
     <div class="span6">
         <div class="example">
 <pre class="prettyprint language-javascript">
@@ -450,9 +465,9 @@
 </div>
 <hr/>
 
-<h4>Dynamic data - append rows</h4>
+<a href='javascript:displayDemo("demo6", showAppendData);'><h4>Dynamic data - append rows</h4></a>
 
-<div class="row-fluid">
+<div class="row-fluid" style='display: none;' id='demo6'>
     <div class="span6">
         <div class="example">
 <pre class="prettyprint language-javascript">
