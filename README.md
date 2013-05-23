@@ -1,7 +1,5 @@
-#aTable
-
+#aTable  [![Build Status](https://travis-ci.org/jwoah12/aTable.png?branch=master)](https://travis-ci.org/jwoah12/aTable)
 Fast, interactive Javascript table component built on Backbone.js.
-
 **Check out the project page at http://jarwol.com/aTable/ for full API documentation and examples to help you get started**
 
 <hr/>
@@ -27,7 +25,7 @@ Run the following commands to get the aTable source and build the library:
 ```
 git clone https://github.com/jwoah12/aTable.git
 cd aTable
-npm install grunt-cli -g #if you don't already have grunt installed globally
+npm install grunt-cli -g
 npm install
 grunt
 ```
