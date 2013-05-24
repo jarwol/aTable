@@ -1,0 +1,72 @@
+.atableParent {
+    border: solid thin silver;
+    border-right: none;
+    border-bottom: none;
+}
+
+.atable {
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+.atable th>div {
+    border: 1px dashed #e2e2e2;
+    white-space: nowrap;
+    overflow-x: hidden;
+}
+
+.atable th>div.over {
+    border-color: black;
+}
+
+.atable tbody {
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-bottom: solid thin silver;
+}
+
+.atable thead, tbody {
+    display: block;
+}
+
+.atable td>div {
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.atable td, th {
+    border: solid 1px silver;
+    border-top: none;
+    padding: 3px;
+}
+
+.atable th {
+    background: #e2e2e2;
+    font-size: 12pt;
+    cursor: default;
+    padding: 2px;
+}
+
+.atable th.sortable {
+    cursor: pointer;
+}
+
+.atable td:first-child, .atable th:first-child {
+    border-left: none;
+}
+
+.atable tr:last-child td {
+    border-bottom: none;
+}
+
+.atable .sortArrow {
+    float: right;
+    margin-left: 5px;
+}
+
+.resizeIndicator {
+    display: none;
+    position: absolute;
+    background: gray;
+    opacity: .5;
+}
