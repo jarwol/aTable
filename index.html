@@ -9,10 +9,10 @@ includes: |
 ---
 
 <h4 style="margin-top: 10px;">What is ATable?</h4>
-<p>ATable is an interactive Javascript table component build on <a href="http://backbonejs.org/">Backbone.js</a>. You define the columns and a data function, and your ATable will render beautifully.</p>
+<p>ATable is an interactive Javascript table built on <a href="http://backbonejs.org/">Backbone.js</a>. You define the columns and a function that returns data, and your ATable will render automatically.</p>
 <h5>Key features:</h5>
 <ul>
-    <li>Small - At ~17kb minified, ATable is much smaller than the alternatives.</li>
+    <li>Small - At ~5kb minified and gzipped, ATable is delivered to your users very quickly.</li>
     <li>Fast and efficient - Rows are added and removed as the table is scrolled, allowing aTable to be extremely fast
         even for <a href="demo.html#bigData">very large datasets</a>.
     </li>
@@ -37,8 +37,8 @@ cd aTable
 npm install grunt-cli -g #if you don't already have grunt installed globally
 npm install
 grunt</code></pre>
-<p>Grunt will build the development and minified versions of the library (`dist/atable.js` and `dist/atable.min.js`).  Include one of these in your project along with `css/atable.css`, and you are ready to use ATable!</p>
-<p>Check out the <a href="/demo.html">examples</a> page for ideas on how to use ATable.  <strong>HINT</strong> - The tables on this page also happen to be ATables.</p>
+<p>Grunt will build the development and minified versions of the library (<code>dist/atable.js</code> and <code>dist/atable.min.js</code>).  Include one of these in your project along with <code>css/atable.css</code>, and you are ready to use ATable!</p>
+<p>Check out the <a href="demo.html">examples</a> page for ideas on how to use ATable.  <strong>HINT</strong> - The tables on this page also happen to be ATables.</p>
 <h4>Browser Compatibility</h4>
 <div id="browserTable"></div>
 <script>
