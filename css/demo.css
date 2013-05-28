@@ -55,3 +55,24 @@ pre {
 .highlight {
     background-color: #FFFF30;
 }
+
+.bold {
+    font-weight: bold;
+}
+
+.yellow {
+    background-color: #FFFF30;
+}
+
+.italic {
+    font-style: italic;
+}
+
+.bug{
+    background-color: red;
+    color: silver;
+}
+
+.enhancement{
+    background-color: cornflowerblue;
+}

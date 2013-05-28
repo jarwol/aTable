@@ -2,34 +2,38 @@
 layout: default
 dir: .
 includes: |
-    <link href="css/atable.css" rel="stylesheet">
+    <link href="dist/0.3.0/atable.css" rel="stylesheet">
     <script src="lib/underscore.min.js"></script>
     <script src="lib/backbone.min.js"></script>
-    <script src="lib/atable.js"></script>
+    <script src="dist/0.3.0/atable.js"></script>
 ---
 
 <h4 style="margin-top: 10px;">What is ATable?</h4>
-<p>ATable is an interactive Javascript table built on <a href="http://backbonejs.org/">Backbone.js</a>. You define the columns and a function that returns data, and your ATable will render automatically.</p>
+<p>ATable is an interactive Javascript table built on <a href="http://backbonejs.org/">Backbone.js</a>. You define the
+    columns and a function that returns data, and your ATable will render automatically.</p>
 <h5>Key features:</h5>
 <ul>
-    <li>Small - At ~5kb minified and gzipped, ATable is delivered to your users very quickly.</li>
+    <li>Small - At less than 4kb gzipped, ATable is delivered to your users very quickly.</li>
     <li>Fast and efficient - Rows are added and removed as the table is scrolled, allowing aTable to be extremely fast
         even for <a href="demo.html#bigData">very large datasets</a>.
     </li>
     <li>Sortable - Click any column header to sort by that column.</li>
     <li>Resizable columns - Drag between column headers to resize columns.</li>
     <li>Movable columns - Click and drag column headers to move columns.</li>
-    <li><a href="doc/ATable.html">Intuitive API</a> - interact with the table programmatically to resize, move, hide and show columns, and filter and sort the table.</li>
+    <li><a href="doc/ATable.html">Intuitive API</a> - interact with the table programmatically to resize, move, hide and
+        show columns, and filter and sort the table.
+    </li>
     <li><a href="test.html">Unit tests</a> - Have confidence that ATable won't break as new features are added</li>
 </ul>
-
+<br/>
 <h4>How to get it</h4>
 
 <div id="summaryTable"></div>
 
+<br/>
 <h4>Dependencies</h4>
 <div id="dependencyTable"></div>
-
+<br/>
 <h4>Get started</h4>
 <p>Simply download and include the js and css files at the top of the page, or build ATable from source:</p>
 <pre><code>git clone https://github.com/jwoah12/aTable.git
@@ -37,61 +41,99 @@ cd aTable
 npm install grunt-cli -g #if you don't already have grunt installed globally
 npm install
 grunt</code></pre>
-<p>Grunt will build the development and minified versions of the library (<code>dist/atable.js</code> and <code>dist/atable.min.js</code>).  Include one of these in your project along with <code>css/atable.css</code>, and you are ready to use ATable!</p>
-<p>Check out the <a href="demo.html">examples</a> page for ideas on how to use ATable.  <strong>HINT</strong> - The tables on this page also happen to be ATables.</p>
+<p>Grunt will build the development and minified versions of the library (<code>dist/atable.js</code> and <code>dist/atable.min.js</code>).
+    Include one of these in your project along with <code>css/atable.css</code>, and you are ready to use ATable!</p>
+<p>Check out the <a href="demo.html">examples</a> page for ideas on how to use ATable. <strong>HINT</strong> - The
+    tables on this page also happen to be ATables.</p>
+<br/>
 <h4>Browser Compatibility</h4>
 <div id="browserTable"></div>
+<h4>Change Log</h4>
+<div id="changeLog"></div>
 <script>
-    new ATable({
-        dataFunction : function (atable) {
-            atable.receivedData([
-                ["<a href='dist/0.2.0/atable.js'>atable.js</a>", "0.2.0", "The ATable library - development version"],
-                ["<a href='dist/0.2.0/atable.min.js'>atable.min.js</a>", "0.2.0", "The ATable library - minified version"],
-                ["<a href='dist/0.2.0/atable.css'>atable.css</a>", "0.2.0", "ATable stylesheet"],
-                ["<a href='https://github.com/jwoah12/aTable/archive/master.tar.gz'>master.tar.gz</a>", "latest", "ATable source - tar.gz"],
-                ["<a href='https://github.com/jwoah12/aTable/archive/master.zip'>master.zip</a>", "latest", "ATable source - zip"]
-            ]);
-        },
-        columns : [
-            {name : "File"},
-            {name : "Version"},
-            {name : "Description", width: 300}
-        ],
-        height : 300,
-        el : "#summaryTable"
-    }).render()
+    function showPrevVersion(div) {
+        var elt = document.getElementById(div);
+        if (elt.style.display === "none") elt.style.display = "";
+        else elt.style.display = "none";
+    }
 
-    new ATable({
-        dataFunction : function (atable) {
-            atable.receivedData([
-                ["<a href='//jquery.com'>jQuery</a>"],
-                ["<a href='//underscorejs.org'>Underscore.js</a>"],
-                ["<a href='//backbonejs.org'>Backbone.js</a>"]
-            ]);
-        },
-        columns : [
-            {name : "Library", width: 150}
-        ],
-        height : 300,
-        el : "#dependencyTable"
-    }).render()
+    $(document).ready(function () {
+        new ATable({
+            dataFunction : function (atable) {
+                atable.receivedData([
+                    ["<a href='dist/{{site.atable_version}}/atable.js'>atable.js</a>", "{{site.atable_version}}", "The ATable library - development version"],
+                    ["<a href='dist/{{site.atable_version}}/atable.min.js'>atable.min.js</a>", "{{site.atable_version}}", "The ATable library - minified version"],
+                    ["<a href='dist/{{site.atable_version}}/atable.css'>atable.css</a>", "{{site.atable_version}}", "ATable stylesheet"],
+                    ["<a href='https://github.com/jwoah12/aTable/archive/master.tar.gz'>master.tar.gz</a>", "latest", "ATable source - tar.gz"],
+                    ["<a href='https://github.com/jwoah12/aTable/archive/master.zip'>master.zip</a>", "latest", "ATable source - zip"]
+                ]);
+            },
+            columns : [
+                {name : "File"},
+                {name : "Version"},
+                {name : "Description", width : 300}
+            ],
+            height : 300,
+            el : "#summaryTable"
+        }).render();
 
-    new ATable({
-        dataFunction : function (atable) {
-            atable.receivedData([
-                ["Chrome", "3", "17"],
-                ["Firefox", "5", "18"],
-                ["Internet Explorer", "10", "n/a"],
-                ["Safari", "5", "n/a"],
-                ["Opera", "12", "n/a"]
-            ]);
-        },
-        columns : [
-            {name : "Browser", width: 125},
-            {name : "ATable Support", width: 165},
-            {name : "Web Worker Support", width: 200}
-        ],
-        height : 300,
-        el : "#browserTable"
-    }).render()
+        new ATable({
+            dataFunction : function (atable) {
+                atable.receivedData([
+                    ["<a href='//jquery.com'>jQuery</a>"],
+                    ["<a href='//underscorejs.org'>Underscore.js</a>"],
+                    ["<a href='//backbonejs.org'>Backbone.js</a>"]
+                ]);
+            },
+            columns : [
+                {name : "Library", width : 150}
+            ],
+            height : 300,
+            el : "#dependencyTable"
+        }).render();
+
+        new ATable({
+            dataFunction : function (atable) {
+                atable.receivedData([
+                    ["Chrome", "3", "17"],
+                    ["Firefox", "5", "18"],
+                    ["Internet Explorer", "10", "n/a"],
+                    ["Safari", "5", "n/a"],
+                    ["Opera", "12", "n/a"]
+                ]);
+            },
+            columns : [
+                {name : "Browser", width : 125},
+                {name : "ATable Support", width : 165},
+                {name : "Web Worker Support", width : 200}
+            ],
+            height : 300,
+            el : "#browserTable"
+        }).render();
+
+        new ATable({
+            dataFunction : function (atable) {
+                var rows = [];
+                $.get("https://api.github.com/repos/jwoah12/aTable/issues?milestone=3&state=closed", function (data) {
+                    for (var i = 0; i < data.length; i++) {
+                        var label = "";
+                        if (data[i].labels.length > 0) {
+                            label = "<div class='" + data[i].labels[0].name + "' >" + data[i].labels[0].name + "</div>";
+                        }
+                        var title = "<a href='" + data[i].html_url + "'>" + data[i].title + "</a>";
+                        rows.push([title, label]);
+                    }
+                    atable.receivedData(rows);
+                });
+
+            },
+            columns : [
+                {name : "Description", width : 450},
+                {name : "Label", width : 125}
+            ],
+            sortable : false,
+            height : 300,
+            el : "#changeLog"
+        }).render();
+    });
 </script>
