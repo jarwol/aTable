@@ -319,6 +319,7 @@ var RowCollection = (function () {
                     }
                 }
                 else if (typeof val === "string") {
+                    val = $("<div>" + val + "</div>").text();
                     if (!this.sortDescending) {
                         return val;
                     }
@@ -676,7 +677,7 @@ var ATable = (function () {
                 for (var i = 1; i < rows.length - 1; i++) {
                     var tr = rows[i];
                     tr.setAttribute("data-row", firstRow + i - 1);
-                    var tdList = tr.getElementsByTagName("div");
+                    var tdList = $(tr).find("td").children("div");
                     for (var j = 0; j < tdList.length; j++) {
                         var div = tdList[j];
                         div.innerHTML = this.formatter(this.rows.getValue(firstRow + i - 1, j), firstRow + i - 1, j, this.columns.at(j).get('name'));
@@ -697,45 +698,6 @@ var ATable = (function () {
                 this.tableElt.width(newWidth);
                 this.parentElt.width(newWidth);
             },
-
-            /* TODO - implement add/remove
-             addColumn : function (col) {
-             var column = this.columns.get(this.columnTarget);
-             if (!this.columns.get(col) && this.availableColumnsHash[col]) {
-             // Increase the ordering of columns after insert
-             var order = column.get("order");
-             for (var i = order; i < this.columns.length; i++) {
-             var val = this.columns.at(i);
-             val.set({
-             order : val.get("order") + 1
-             }, {
-             silent : true
-             });
-             }
-             var textWidth = getTextWidth(col) + 15;
-             this.columns.add({
-             columnName : col,
-             entityField : col,
-             blotterName : this.blotterType,
-             order : order,
-             width : textWidth
-             });
-             this.columns.save(this.admin);
-             }
-             },
-
-             removeColumn : function (name) {
-             var col = this.columns.get(name);
-             col.destroy();
-             // Decrease the ordering of columns after delete
-             for (var i = col.get('order'); i < this.columns.length; i++) {
-             var val = this.columns.at(i);
-             val.set({
-             order : val.get("order") - 1
-             });
-             }
-             },
-             */
 
             /**
              * Filter the table by displaying only rows which contain <b>filterStr</b> in the contents of <b>column</b>
