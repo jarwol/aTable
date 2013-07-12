@@ -197,6 +197,7 @@ var RowCollection = (function () {
                     }
                 }
                 else if (typeof val === "string") {
+                    val = $("<div>" + val + "</div>").text();
                     if (!this.sortDescending) {
                         return val;
                     }
