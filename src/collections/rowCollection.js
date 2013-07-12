@@ -6,6 +6,7 @@ var RowCollection = (function () {
              * @class Backbone Collection of {@link Row} models representing the dataset of the table
              * @augments Backbone.Collection
              * @constructs
+             * @function
              * @param {Row[]} models initial set of Row models to add to the collection
              * @param {Object} options hash of parameters
              * @param {ColumnCollection} options.columns the table's column collection
@@ -37,9 +38,10 @@ var RowCollection = (function () {
 
             /**
              * Get the table value at position (rowIdx, colIdx)
+             * @function
              * @param {int} rowIdx the row index of the cell
              * @param {int} colIdx the column index of the cell in the DOM table
-             * @return {*} the value of the table cell at index (row, col)
+             * @returns {*} the value of the table cell at index (row, col)
              */
             getValue : function (rowIdx, colIdx) {
                 var row = this.at(rowIdx).get('row');
@@ -49,6 +51,7 @@ var RowCollection = (function () {
 
             /**
              * Set the value at position (rowIdx, ColIdx) to <b>val</b>
+             * @function
              * @param {int} rowIdx row index of the new value
              * @param {int} colIdx column index of the new value
              * @param {String} val new value to set
@@ -61,8 +64,9 @@ var RowCollection = (function () {
 
             /**
              * Get the row values at a given index
+             * @function
              * @param {int} idx the row index
-             * @return {Array} array of values in the row
+             * @returns {Array} array of values in the row
              */
             getRow : function (idx) {
                 var row = this.at(idx).get('row');
@@ -76,8 +80,9 @@ var RowCollection = (function () {
 
             /**
              * Get the actual column index in the column collection from the index in the DOM table
+             * @function
              * @param {int} col the index of the column in the DOM table
-             * @return {int} the column index in the collection
+             * @returns {int} the column index in the collection
              */
             getColumnIndex : function (col) {
                 return this.columnOrder[col];
@@ -130,6 +135,7 @@ var RowCollection = (function () {
 
             /**
              * Filter the collection by setting visible=false on rows that don't contain filterStr in the specified column
+             * @function
              * @param {int} colIdx index of the column to filter on
              * @param {*} filterStr check specified column for existence of this string
              * @param {boolean} [caseSensitive=false] do a case-sensitive search when filtering
@@ -161,6 +167,7 @@ var RowCollection = (function () {
 
             /**
              * Determine whether a row passes the filter (if one exists)
+             * @function
              * @param {Array} row array of data representing a single row
              * @returns {boolean} true if the row passes the filter, false otherwise
              */
@@ -181,7 +188,7 @@ var RowCollection = (function () {
              * Comparator function to sort rows according to the sort column's datatype
              * @private
              * @param {Row} row row model to sort
-             * @return {int} value to be compared against other rows to determine sorting
+             * @returns {int} value to be compared against other rows to determine sorting
              */
             comparator : function (row) {
                 var colIdx = this.columnOrder[this.sortColumn];
@@ -218,6 +225,7 @@ var RowCollection = (function () {
 
             /**
              * Override Backbone collection.add method to support row filtering
+             * @function
              * @param {Row|Row[]} rows Row model or array of models to add to this collection
              * @param {Object} options hash of options to pass to Backbone.Collection.add
              */

@@ -212,6 +212,8 @@
         else elt.style.display = "none";
         if ($(elt).find(".atable").length === 0) renderFn();
     }
+
+    $(document).ready(showStaticData);
 </script>
 <script type="text/javascript" id="fetchStockData">
     var stocks = {
@@ -244,8 +246,6 @@
         }
         self.postMessage({data : data});
     }
-
-    $(document).ready(showStaticData);
 </script>
 </head>
 <body>
