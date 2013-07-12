@@ -10,6 +10,7 @@ var ATable = (function () {
              * @class The master Backbone View that instantiates the table. The constructor accepts a hash of parameters.
              * @augments Backbone.View
              * @constructs
+             * @function initialize
              * @param {Object} options hash of parameters
              * @param {Object[]} options.columns array of objects defining the table columns. Each object has the following properties:
              * @param {String} options.columns.name name of the column. This value must be unique.
@@ -55,7 +56,7 @@ var ATable = (function () {
                 setDefaultParameters(options);
                 /**
                  * The collection of Column models representing the table columns
-                 * @type {ColumnCollection}
+                 * @field {ColumnCollection} columns
                  */
                 this.columns = initColumns(options);
                 this.columns.bind("reset", this.render, this);
@@ -74,7 +75,7 @@ var ATable = (function () {
                 options.columns = this.columns;
                 /**
                  * The collection of Row models containing the table's data
-                 * @type {RowCollection}
+                 * @field {RowCollection} rows
                  */
                 this.rows = new RowCollection([], options);
                 this.height = options.height;
@@ -101,6 +102,7 @@ var ATable = (function () {
 
             /**
              * Generates the ATable and adds it to the DOM
+             * @function render
              * @param {function} [callback] function to call when the ATable is rendered
              * @return {ATable} a reference to this ATable
              */
@@ -345,9 +347,10 @@ var ATable = (function () {
              }
              },
              */
-
+            /** @module API */
             /**
              * Filter the table by displaying only rows which contain <b>filterStr</b> in the contents of <b>column</b>
+             * @function filter
              * @param {String} column name of the column to filter on
              * @param {String} filterStr check specified column for existence of this string
              * @param {boolean} [caseSensitive=false] use caseSensitive filtering
@@ -364,6 +367,7 @@ var ATable = (function () {
 
             /**
              * Change the label (display name) of a column
+             * @function renameColumn
              * @param {String} name unique name of the column
              * @param {String} newLabel new label for the column
              */
@@ -373,6 +377,7 @@ var ATable = (function () {
 
             /**
              * Move a column to a different position, shifting all columns in between
+             * @function moveColumn
              * @param {String|int} column name or position of the column to be moved
              * @param {String|int} dest name of the column currently in the desired position, or the position itself
              */
@@ -405,6 +410,7 @@ var ATable = (function () {
 
             /**
              * Resize a column. Causes the table to re-render.
+             * @function resizeColumn
              * @param {String} column name of the column to resize
              * @param {int} newWidth new column width in pixels
              */
@@ -420,6 +426,7 @@ var ATable = (function () {
 
             /**
              * Sort the table rows by the specified column and order
+             * @function sort
              * @param {String} column name of the column to sort on
              * @param {boolean} [descending=false] sort in descending order
              */
@@ -437,6 +444,7 @@ var ATable = (function () {
 
             /**
              * Make a column visible, causing it to render
+             * @function showColumn
              * @param {String} name unique column name
              */
             showColumn : function (name) {
@@ -457,6 +465,7 @@ var ATable = (function () {
 
             /**
              * Make a column invisible, causing it to not render
+             * @function hideColumn
              * @param {String} name unique column name
              */
             hideColumn : function (name) {
@@ -477,6 +486,7 @@ var ATable = (function () {
 
             /**
              * Returns the Column given its position in the set of <strong>visible</strong> columns
+             * @function getColumnByPosition
              * @param {int} position index of the column, ignoring any invisible columns
              * @returns {Column} the column model at <strong>position</strong>, or null if the position is invalid
              */
@@ -488,6 +498,7 @@ var ATable = (function () {
 
             /**
              * Determine the rows that should be rendered in the DOM based on the scroll position
+             * @function
              * @private
              * @param {jQuery.Event} e jQuery scroll event
              */
@@ -510,6 +521,7 @@ var ATable = (function () {
 
             /**
              * Set the cursor to e-resize if mouse is in between column headers
+             * @function
              * @private
              * @param {jQuery.Event} e jQuery mouse event
              */
@@ -526,6 +538,7 @@ var ATable = (function () {
 
             /**
              * Ensure the resize cursor style is removed when the cursor leaves a column header
+             * @function
              * @private
              * @param {jQuery.Event} e jQuery mouseleave event
              */
@@ -536,6 +549,7 @@ var ATable = (function () {
 
             /**
              * Sort the row collection when a column header is clicked
+             * @function
              * @private
              * @param {jQuery.Event} e jQuery click event object
              */
@@ -705,6 +719,8 @@ var ATable = (function () {
 
             /**
              * Modify the data in the row collection when the user edits a cell
+             * @function
+             * @private
              * @param {jQuery.Event} e jQuery blur event
              */
             onCellValueChanged : function (e) {
@@ -772,7 +788,7 @@ var ATable = (function () {
              * Generate the actual table markup and add it to the DOM
              * @private
              * @param {Object} params Parameters needed to render the table
-             * @return {DocumentFragment} the table DocumentFragment ready to be inserted into the DOM
+             * @returns {DocumentFragment} the table DocumentFragment ready to be inserted into the DOM
              */
             generateTableHtml : function (params) {
                 var topRowHeight = 0;
@@ -877,6 +893,7 @@ var ATable = (function () {
 
             /**
              * Update the row collection with new data from the data function
+             * @function receivedData
              * @param {Array[]} data matrix of row data returned by the data function
              * @param {boolean} [append] if true, append new rows to the dataset, otherwise replace the dataset
              */
@@ -901,6 +918,7 @@ var ATable = (function () {
 
             /**
              * Remove this aTable from the DOM, and unbind all events
+             * @function close
              */
             close : function () {
                 if (this.resizeIndicator) {
@@ -936,6 +954,7 @@ var ATable = (function () {
 
     /**
      * Create a semi-transparent gray div that will indicate a resize operation is occurring
+     * @private
      * @param {ATable} atable the ATable itself
      * @returns {HTMLElement} div that will become visible as the user resizes a column
      */
@@ -995,7 +1014,7 @@ var ATable = (function () {
      * @private
      * @param {String} dataFunctionTagId DOM id of the script tag containing the data function
      * @param {Function} callback Callback function to call when the worker returns with data
-     * @return {Worker} Web worker that fetches table data on a separate thread
+     * @returns {Worker} Web worker that fetches table data on a separate thread
      */
     function createDataWorker(dataFunctionTagId, callback) {
         var blob;
@@ -1029,7 +1048,7 @@ var ATable = (function () {
      * Initialize the collection of table columns
      * @private
      * @param {Object} options parameter hash passed into the ATable constructor
-     * @return {ColumnCollection} Backbone collection of Column models
+     * @returns {ColumnCollection} Backbone collection of Column models
      */
     function initColumns(options) {
         var columns = options.columns;
@@ -1078,7 +1097,7 @@ var ATable = (function () {
      * Get the width of the scrollbar, if it's present
      * @private
      * @param {HTMLElement} elt element to check the scrollbar width
-     * @return {int} width in pixels
+     * @returns {int} width in pixels
      */
     function getScrollbarWidth(elt) {
         return elt ? elt.offsetWidth - elt.clientWidth : 0;
@@ -1088,7 +1107,7 @@ var ATable = (function () {
      * Determine the width of a string when rendered on the page
      * @private
      * @param {String} text string to check the width of when rendered in a <th>
-     * @return {int} width of the rendered text in pixels
+     * @returns {int} width of the rendered text in pixels
      */
     function getTextWidth(text) {
         var o = $('<th>' + text + '</th>').css({
