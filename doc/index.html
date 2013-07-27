@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="default.css" rel="stylesheet">
+    <title>ATable Documentation</title>
+</head>
+<body>
+<div class="row-fluid">
+    <div class="span2 navbar hidden-phone">
+        
+    <a href="#file_aTable.js">aTable.js</a><br/>
+
+    <div id="nav_aTable.js">
+        
+            
+            
+                <div class="navbar-container">
+                    <a href="#aTable.js_default_Fields">Fields</a><br/>
+
+                    <div id="nav_aTable.js_default_Fields">
+                        
+                            <div class="navbar-container">
+                                
+                                    
+                                    
+                                        <a href="#aTable.js_default_columns">columns</a>
+                                    
+                                
+                            </div>
+                        
+                            <div class="navbar-container">
+                                
+                                    
+                                    
+                                        <a href="#aTable.js_default_rows">rows</a>
+                                    
+                                
+                            </div>
+                        
+                    </div>
+                </div>
+            
+                <div class="navbar-container">
+                    <a href="#aTable.js_default_Functions">Functions</a><br/>
+
+                    <div id="nav_aTable.js_default_Functions">
+                        
+                            <div class="navbar-container">
+                                
+                            </div>
+                        
+                            <div class="navbar-container">
+                                
+                                    
+                                        <a href="#aTable.js_default_close">close</a>
+                                    
+                                    
+                                
+                            </div>
+                        
+                            <div class="navbar-container">
+                                
+                                    
+                                        <a href="#aTable.js_default_filter">filter</a>
+                                    
+                                    
+                                
+                            </div>
+                        
+                            <div class="navbar-container">
+                                
+                                    
+                                        <a href="#aTable.js_default_getColumnByPosition">getColumnByPosition</a>
+                                    
+                                    
+                                
+                            </div>
+                        
+                            <div class="navbar-container">
+                                
+                                    
+                                        <a href="#aTable.js_default_hideColumn">hideColumn</a>
+                                    
+                                    
+                                
+                            </div>
+                        
+                            <div class="navbar-container">
+                                
+                                    
+                                        <a href="#aTable.js_default_initialize">initialize</a>
+                                    
+                                    
+                                
+                            </div>
+                        
+                            <div class="navbar-container">
+                                
+                                    
+                                        <a href="#aTable.js_default_moveColumn">moveColumn</a>
+                                    
+                                    
+                                
+                            </div>
+                        
+                            <div class="navbar-container">
+                                
+                                    
+                                        <a href="#aTable.js_default_receivedData">receivedData</a>
+                                    
+                                    
+                                
+                            </div>
+                        
+                            <div class="navbar-container">
+                                
+                                    
+                                        <a href="#aTable.js_default_renameColumn">renameColumn</a>
+                                    
+                                    
+                                
+                            </div>
+                        
+                            <div class="navbar-container">
+                                
+                                    
+                                        <a href="#aTable.js_default_render">render</a>
+                                    
+                                    
+                                
+                            </div>
+                        
+                            <div class="navbar-container">
+                                
+                                    
+                                        <a href="#aTable.js_default_resizeColumn">resizeColumn</a>
+                                    
+                                    
+                                
+                            </div>
+                        
+                            <div class="navbar-container">
+                                
+                                    
+                                        <a href="#aTable.js_default_showColumn">showColumn</a>
+                                    
+                                    
+                                
+                            </div>
+                        
+                            <div class="navbar-container">
+                                
+                                    
+                                        <a href="#aTable.js_default_sort">sort</a>
+                                    
+                                    
+                                
+                            </div>
+                        
+                    </div>
+                </div>
+            
+            
+
+        
+    </div>
+
+    </div>
+    <div class="span6 offset2 doc-content">
+        
+            <a href="javascript:toggleVisible('file_aTable.js');"><h2>File: aTable.js</h2></a>
+
+            <div class="content-container" id="file_aTable.js">
+                
+                    
+                    
+                        <a href="javascript:toggleVisible('aTable.js_default_Fields');">
+                            <h4>Fields</h4></a>
+
+                        <div class="content-container" id="aTable.js_default_Fields">
+                            
+                                
+                                    
+                                    
+                                        <ul id="aTable.js_default_columns">
+    <li>
+        <span class="identifier">columns</span><span class="type"> : ColumnCollection</span>
+        <span> - The collection of Column models representing the table columns</span>
+    </li>
+</ul>
+                                    
+                                    <hr/>
+                                
+                            
+                                
+                                    
+                                    
+                                        <ul id="aTable.js_default_rows">
+    <li>
+        <span class="identifier">rows</span><span class="type"> : RowCollection</span>
+        <span> - The collection of Row models containing the table's data</span>
+    </li>
+</ul>
+                                    
+                                    <hr/>
+                                
+                            
+                        </div>
+                    
+                        <a href="javascript:toggleVisible('aTable.js_default_Functions');">
+                            <h4>Functions</h4></a>
+
+                        <div class="content-container" id="aTable.js_default_Functions">
+                            
+                                
+                            
+                                
+                                    
+                                        <div class="function" id="aTable.js_default_close">
+    <h4><span class="functionName">close</span> ()</h4>
+
+    <div class="function-body">
+        
+            <div class="description">Remove this aTable from the DOM, and unbind all events</div>
+        
+        
+        
+    </div>
+</div>
+                                    
+                                    
+                                    <hr/>
+                                
+                            
+                                
+                                    
+                                        <div class="function" id="aTable.js_default_filter">
+    <h4><span class="functionName">filter</span> ( column, filterStr, caseSensitive )</h4>
+
+    <div class="function-body">
+        
+            <div class="description">Filter the table by displaying only rows which contain <b>filterStr</b> in the contents of <b>column</b></div>
+        
+        <h5>Parameters</h5>
+            <ul>
+                
+                    <li>
+                    <span class="identifier">
+                        column
+                    </span>
+                        <span class="type"> : String</span>
+                        <div class="description">name of the column to filter on</div>
+                        
+                    </li>
+                
+                    <li>
+                    <span class="identifier">
+                        filterStr
+                    </span>
+                        <span class="type"> : String</span>
+                        <div class="description">check specified column for existence of this string</div>
+                        
+                    </li>
+                
+                    <li>
+                    <span class="identifier">
+                        caseSensitive
+                    </span>
+                        <span class="type"> : boolean
+                            (Optional)</span>
+                        <div class="description">use caseSensitive filtering</div>
+                        
+                    </li>
+                
+            </ul>
+        
+        
+    </div>
+</div>
+                                    
+                                    
+                                    <hr/>
+                                
+                            
+                                
+                                    
+                                        <div class="function" id="aTable.js_default_getColumnByPosition">
+    <h4><span class="functionName">getColumnByPosition</span> ( position )</h4>
+
+    <div class="function-body">
+        
+            <div class="description">Returns the Column given its position in the set of <strong>visible</strong> columns</div>
+        
+        <h5>Parameters</h5>
+            <ul>
+                
+                    <li>
+                    <span class="identifier">
+                        position
+                    </span>
+                        <span class="type"> : int</span>
+                        <div class="description">index of the column, ignoring any invisible columns</div>
+                        
+                    </li>
+                
+            </ul>
+        
+        
+            <h5>Returns</h5>
+            <ul>
+                <li>
+                    <span class="type">Column </span>
+                    <span> - the column model at <strong>position</strong>, or null if the position is invalid</span>
+                </li>
+            </ul>
+        
+    </div>
+</div>
+                                    
+                                    
+                                    <hr/>
+                                
+                            
+                                
+                                    
+                                        <div class="function" id="aTable.js_default_hideColumn">
+    <h4><span class="functionName">hideColumn</span> ( name )</h4>
+
+    <div class="function-body">
+        
+            <div class="description">Make a column invisible, causing it to not render</div>
+        
+        <h5>Parameters</h5>
+            <ul>
+                
+                    <li>
+                    <span class="identifier">
+                        name
+                    </span>
+                        <span class="type"> : String</span>
+                        <div class="description">unique column name</div>
+                        
+                    </li>
+                
+            </ul>
+        
+        
+    </div>
+</div>
+                                    
+                                    
+                                    <hr/>
+                                
+                            
+                                
+                                    
+                                        <div class="function" id="aTable.js_default_initialize">
+    <h4><span class="functionName">initialize</span> ( options )</h4>
+
+    <div class="function-body">
+        
+        <h5>Parameters</h5>
+            <ul>
+                
+                    <li>
+                    <span class="identifier">
+                        options
+                    </span>
+                        <span class="type"> : Object</span>
+                        <div class="description">hash of parameters</div>
+                        
+                            <ul>
+                    <li>
+                    <span class="identifier">
+                        options.columns
+                    </span>
+                        <span class="type"> : Object[]</span>
+                        <div class="description">array of objects defining the table columns. Each object has the following properties:</div>
+                        
+                            <ul>
+                    <li>
+                    <span class="identifier">
+                        options.columns.name
+                    </span>
+                        <span class="type"> : String</span>
+                        <div class="description">name of the column. This value must be unique.</div>
+                        
+                    </li>
+                
+                    <li>
+                    <span class="identifier">
+                        options.columns.label
+                    </span>
+                        <span class="type"> : String
+                            (Optional)</span>
+                        <div class="description">displayed name of the column. Unlike name, the label need not be unique.</div>
+                        
+                    </li>
+                
+                    <li>
+                    <span class="identifier">
+                        options.columns.width
+                    </span>
+                        <span class="type"> : int
+                            (Optional)</span>
+                        <div class="description">explicit width of the column in pixels</div>
+                        
+                    </li>
+                
+                    <li>
+                    <span class="identifier">
+                        options.columns.resizable
+                    </span>
+                        <span class="type"> : boolean
+                            (Optional)</span>
+                        <div class="description">set whether the column is resizable. This value takes precedence over <strong>options.resizableColumns</strong>.</div>
+                        
+                    </li>
+                
+                    <li>
+                    <span class="identifier">
+                        options.columns.sortable
+                    </span>
+                        <span class="type"> : boolean
+                            (Optional)</span>
+                        <div class="description">set whether the table can be sorted on this column. This value takes precedence over <strong>options.sortableColumns</strong>.</div>
+                        
+                    </li>
+                
+                    <li>
+                    <span class="identifier">
+                        options.columns.visible
+                    </span>
+                        <span class="type"> : boolean
+                            (Optional)</span>
+                        <div class="description">set whether the column is visible</div>
+                        
+                    </li>
+                
+                    <li>
+                    <span class="identifier">
+                        options.columns.cellClasses
+                    </span>
+                        <span class="type"> : String
+                            (Optional)</span>
+                        <div class="description">space-separated list of CSS classes to apply to the content of all of this column's cells</div>
+                        
+                    </li>
+                </ul>
+                    </li>
+                
+                    <li>
+                    <span class="identifier">
+                        options.dataFunction
+                    </span>
+                        <span class="type"> : String|Function</span>
+                        <div class="description">The dataFunction parameter can be one of two values:
+<li>{String} the id of a <strong>&lt;script&gt;</strong> element containing a function which has the same name as the script id.
+The function should call <strong>self.postMessage({data: rows, append: append});</strong> where <i>rows</i> is a 2-dimensional array of table values. If <i>append</i> is true, rows will be added to the table.
+If false, the rows will completely replace the existing table.</li>
+<li>{Function} a function responsible for generating the table's dataset. It should have one parameter, <strong>atable</strong>, and call <strong>atable.receivedData(rows, append);</strong> to deliver data to the table</li><br/>
+ *Note that both methods of returning table data may do so many times (e.g. a loop that continuously uses ajax polling to get new data from the server).</div>
+                        
+                    </li>
+                
+                    <li>
+                    <span class="identifier">
+                        options.el
+                    </span>
+                        <span class="type"> : String</span>
+                        <div class="description">CSS selector of the DOM element in which to insert the rendered table</div>
+                        
+                    </li>
+                
+                    <li>
+                    <span class="identifier">
+                        options.height
+                    </span>
+                        <span class="type"> : int</span>
+                        <div class="description">max height of the table in pixels</div>
+                        
+                    </li>
+                
+                    <li>
+                    <span class="identifier">
+                        options.resizableColumns
+                    </span>
+                        <span class="type"> : boolean
+                            (Optional)</span>
+                        <div class="description">set whether table columns are resizable</div>
+                        
+                    </li>
+                
+                    <li>
+                    <span class="identifier">
+                        options.movableColumns
+                    </span>
+                        <span class="type"> : boolean
+                            (Optional)</span>
+                        <div class="description">set whether table columns are movable</div>
+                        
+                    </li>
+                
+                    <li>
+                    <span class="identifier">
+                        options.sortableColumns
+                    </span>
+                        <span class="type"> : boolean
+                            (Optional)</span>
+                        <div class="description">set whether clicking on column headers sorts the table</div>
+                        
+                    </li>
+                
+                    <li>
+                    <span class="identifier">
+                        options.cellClasses
+                    </span>
+                        <span class="type"> : String
+                            (Optional)</span>
+                        <div class="description">space-separated list of CSS classes to apply to the content of all the cells in the table</div>
+                        
+                    </li>
+                
+                    <li>
+                    <span class="identifier">
+                        options.sortColumn
+                    </span>
+                        <span class="type"> : String
+                            (Optional)</span>
+                        <div class="description">name of the column by which to sort the table</div>
+                        
+                    </li>
+                
+                    <li>
+                    <span class="identifier">
+                        options.formatter
+                    </span>
+                        <span class="type"> : Function
+                            (Optional)</span>
+                        <div class="description">function called on each cell value to provide arbitrary formatting/transformation. Takes the value, row index, column index, and column name as parameters and returns the formatted value.</div>
+                        
+                    </li>
+                </ul>
+                    </li>
+                
+            </ul>
+        
+        
+    </div>
+</div>
+                                    
+                                    
+                                    <hr/>
+                                
+                            
+                                
+                                    
+                                        <div class="function" id="aTable.js_default_moveColumn">
+    <h4><span class="functionName">moveColumn</span> ( column, dest )</h4>
+
+    <div class="function-body">
+        
+            <div class="description">Move a column to a different position, shifting all columns in between</div>
+        
+        <h5>Parameters</h5>
+            <ul>
+                
+                    <li>
+                    <span class="identifier">
+                        column
+                    </span>
+                        <span class="type"> : String|int</span>
+                        <div class="description">name or position of the column to be moved</div>
+                        
+                    </li>
+                
+                    <li>
+                    <span class="identifier">
+                        dest
+                    </span>
+                        <span class="type"> : String|int</span>
+                        <div class="description">name of the column currently in the desired position, or the position itself</div>
+                        
+                    </li>
+                
+            </ul>
+        
+        
+    </div>
+</div>
+                                    
+                                    
+                                    <hr/>
+                                
+                            
+                                
+                                    
+                                        <div class="function" id="aTable.js_default_receivedData">
+    <h4><span class="functionName">receivedData</span> ( data, append )</h4>
+
+    <div class="function-body">
+        
+            <div class="description">Update the row collection with new data from the data function</div>
+        
+        <h5>Parameters</h5>
+            <ul>
+                
+                    <li>
+                    <span class="identifier">
+                        data
+                    </span>
+                        <span class="type"> : Array[]</span>
+                        <div class="description">matrix of row data returned by the data function</div>
+                        
+                    </li>
+                
+                    <li>
+                    <span class="identifier">
+                        append
+                    </span>
+                        <span class="type"> : boolean
+                            (Optional)</span>
+                        <div class="description">if true, append new rows to the dataset, otherwise replace the dataset</div>
+                        
+                    </li>
+                
+            </ul>
+        
+        
+    </div>
+</div>
+                                    
+                                    
+                                    <hr/>
+                                
+                            
+                                
+                                    
+                                        <div class="function" id="aTable.js_default_renameColumn">
+    <h4><span class="functionName">renameColumn</span> ( name, newLabel )</h4>
+
+    <div class="function-body">
+        
+            <div class="description">Change the label (display name) of a column</div>
+        
+        <h5>Parameters</h5>
+            <ul>
+                
+                    <li>
+                    <span class="identifier">
+                        name
+                    </span>
+                        <span class="type"> : String</span>
+                        <div class="description">unique name of the column</div>
+                        
+                    </li>
+                
+                    <li>
+                    <span class="identifier">
+                        newLabel
+                    </span>
+                        <span class="type"> : String</span>
+                        <div class="description">new label for the column</div>
+                        
+                    </li>
+                
+            </ul>
+        
+        
+    </div>
+</div>
+                                    
+                                    
+                                    <hr/>
+                                
+                            
+                                
+                                    
+                                        <div class="function" id="aTable.js_default_render">
+    <h4><span class="functionName">render</span> ( callback )</h4>
+
+    <div class="function-body">
+        
+            <div class="description">Generates the ATable and adds it to the DOM</div>
+        
+        <h5>Parameters</h5>
+            <ul>
+                
+                    <li>
+                    <span class="identifier">
+                        callback
+                    </span>
+                        <span class="type"> : function
+                            (Optional)</span>
+                        <div class="description">function to call when the ATable is rendered</div>
+                        
+                    </li>
+                
+            </ul>
+        
+        
+    </div>
+</div>
+                                    
+                                    
+                                    <hr/>
+                                
+                            
+                                
+                                    
+                                        <div class="function" id="aTable.js_default_resizeColumn">
+    <h4><span class="functionName">resizeColumn</span> ( column, newWidth )</h4>
+
+    <div class="function-body">
+        
+            <div class="description">Resize a column. Causes the table to re-render.</div>
+        
+        <h5>Parameters</h5>
+            <ul>
+                
+                    <li>
+                    <span class="identifier">
+                        column
+                    </span>
+                        <span class="type"> : String</span>
+                        <div class="description">name of the column to resize</div>
+                        
+                    </li>
+                
+                    <li>
+                    <span class="identifier">
+                        newWidth
+                    </span>
+                        <span class="type"> : int</span>
+                        <div class="description">new column width in pixels</div>
+                        
+                    </li>
+                
+            </ul>
+        
+        
+    </div>
+</div>
+                                    
+                                    
+                                    <hr/>
+                                
+                            
+                                
+                                    
+                                        <div class="function" id="aTable.js_default_showColumn">
+    <h4><span class="functionName">showColumn</span> ( name )</h4>
+
+    <div class="function-body">
+        
+            <div class="description">Make a column visible, causing it to render</div>
+        
+        <h5>Parameters</h5>
+            <ul>
+                
+                    <li>
+                    <span class="identifier">
+                        name
+                    </span>
+                        <span class="type"> : String</span>
+                        <div class="description">unique column name</div>
+                        
+                    </li>
+                
+            </ul>
+        
+        
+    </div>
+</div>
+                                    
+                                    
+                                    <hr/>
+                                
+                            
+                                
+                                    
+                                        <div class="function" id="aTable.js_default_sort">
+    <h4><span class="functionName">sort</span> ( column, descending )</h4>
+
+    <div class="function-body">
+        
+            <div class="description">Sort the table rows by the specified column and order</div>
+        
+        <h5>Parameters</h5>
+            <ul>
+                
+                    <li>
+                    <span class="identifier">
+                        column
+                    </span>
+                        <span class="type"> : String</span>
+                        <div class="description">name of the column to sort on</div>
+                        
+                    </li>
+                
+                    <li>
+                    <span class="identifier">
+                        descending
+                    </span>
+                        <span class="type"> : boolean
+                            (Optional)</span>
+                        <div class="description">sort in descending order</div>
+                        
+                    </li>
+                
+            </ul>
+        
+        
+    </div>
+</div>
+                                    
+                                    
+                                    <hr/>
+                                
+                            
+                        </div>
+                    
+                    
+                
+                <footer>
+                    Documentation generated by <a href="https://github.com/jarwol/jardoc">JarDoc</a>
+                </footer>
+            </div>
+        
+    </div>
+</div>
+<script type="text/javascript">
+    function toggleVisible(divId) {
+        var div = document.getElementById(divId);
+        if (div) {
+            if (div.style.display === "none") {
+                div.style.display = "block";
+            }
+            else {
+                div.style.display = "none";
+            }
+        }
+    }
+</script>
+</body>
+</html>

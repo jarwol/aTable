@@ -308,6 +308,31 @@ asyncTest("Move sorted columns", 25, function () {
     });
 });
 
+asyncTest("Sort with HTML content", 3, function () {
+    var table = new ATable({
+        dataFunction : function (atable) {
+            atable.receivedData([
+                ["<a href='google.com'>Google</a>"],
+                ["<a href='yahoo.com'>Yahoo!</a>"],
+                ["<a id='appleLink' href='apple.com'>Apple</a>"]
+            ]);
+        },
+        columns : [
+            {name : "col1"}
+        ],
+        el : "#qunit-fixture",
+        height : 300
+    });
+    table.render(function () {
+        start();
+        table.sort("col1");
+        var rows = table.tbodyElt.find("tr");
+        equal($(rows[1]).find("a")[0].innerHTML, "Apple");
+        equal($(rows[2]).find("a")[0].innerHTML, "Google");
+        equal($(rows[3]).find("a")[0].innerHTML, "Yahoo!");
+    });
+});
+
 asyncTest("Show/hide columns", 6, function () {
     var table = new ATable({
         dataFunction : function (atable) {

@@ -1,0 +1,60 @@
+.function-body {
+    margin-bottom: 25px;
+}
+
+.function {
+    margin-left: 0;
+}
+
+.identifier {
+    font-size: larger;
+    font-weight: bold;
+}
+
+.type {
+    font-weight: bold;
+    font-style: italic;
+}
+
+.navbar-container {
+    margin-left: 10%;
+}
+
+.navbar {
+    padding: 10px;
+    position: fixed;
+
+}
+
+.navbar {
+    display: none;
+}
+
+.navbar a {
+    line-height: 120%;
+    font-size: 120%;
+}
+
+a.hide {
+    margin-left: 15px;
+    font-size: x-large;
+}
+
+.doc-content .description {
+    background-color: #eeeeee;
+    padding: 4px;
+    border-radius: 5px;
+    margin: 4px 0;
+}
+
+.content-container {
+    margin-left: 4%;
+}
+
+footer {
+    margin-bottom: 10px;
+}
+
+.functionName{
+    color: #c67605;
+}
