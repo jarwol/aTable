@@ -8,7 +8,7 @@
     width: 100%;
 }
 
-a{
+a {
     color: #29828a;
 }
 
@@ -19,7 +19,7 @@ a{
     font-family: Verdana, Sans-serif !important;
 }
 
-a.logo{
+a.logo {
     font-family: "Maiandra GD" !important;
     font-size: x-large;
     text-decoration: none;
@@ -30,11 +30,27 @@ body {
     font-family: Verdana, Sans-serif;
 }
 
-.content {
-    padding: 65px 20px;
-    border-left: solid thin silver;
-    border-right: solid thin silver;
-    height: 100%;
+@media (min-width: 900px) {
+    .content {
+        padding: 65px 20px;
+        border-left: solid thin silver;
+        border-right: solid thin silver;
+        height: 100%;
+    }
+
+    #smallNav {
+        display: none;
+    }
+}
+
+@media (max-width: 899px) {
+    .header, #forkImg {
+        display: none;
+    }
+
+    #smallNav a{
+        font-size: larger;
+    }
 }
 
 h4 {
@@ -68,11 +84,11 @@ pre {
     font-style: italic;
 }
 
-.bug{
+.bug {
     background-color: red;
     color: silver;
 }
 
-.enhancement{
+.enhancement {
     background-color: cornflowerblue;
 }

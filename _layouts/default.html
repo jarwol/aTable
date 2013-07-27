@@ -27,10 +27,20 @@
         </div>
     </div>
 </div>
-<a href="https://github.com/jwoah12/aTable"><img style="position: fixed; top: 0; left: 0; border: 0;" src="{{page.dir}}/fork.png" alt="Fork me on GitHub"></a>
+<a href="https://github.com/jwoah12/aTable" id="forkImg"><img style="position: fixed; top: 0; left: 0; border: 0;"
+                                                              src="{{page.dir}}/fork.png" alt="Fork me on GitHub"></a>
+
 <div class="container-fluid">
     <div class="row-fluid">
         <div class="content span8 offset2">
+            <div id="smallNav">
+                <a href="{{page.dir}}/index.html" class="logo">ATable</a><br/>
+                <a href="{{page.dir}}/index.html">Home</a> |
+                <a href="{{page.dir}}/demo.html">Examples</a> |
+                <a href="{{page.dir}}/doc/ATable.html">API Docs</a> |
+                <a href="{{page.dir}}/test.html">Tests</a>
+                <hr/>
+            </div>
             {{content}}
             <footer>
                 <hr/>
