@@ -1,4 +1,4 @@
-#aTable  [![Build Status](https://travis-ci.org/jwoah12/aTable.png?branch=master)](https://travis-ci.org/jwoah12/aTable)
+#aTable  [![Build Status](https://travis-ci.org/jarwol/aTable.png?branch=master)](https://travis-ci.org/jarwol/aTable)
 Fast, interactive Javascript table component built on Backbone.js.
 **Check out the project page at http://jarwol.com/aTable/ for full API documentation and examples to help you get started**
 
