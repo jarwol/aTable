@@ -347,7 +347,7 @@ var ATable = (function () {
              }
              },
              */
-            /** @module API */
+            
             /**
              * Filter the table by displaying only rows which contain <b>filterStr</b> in the contents of <b>column</b>
              * @function filter
