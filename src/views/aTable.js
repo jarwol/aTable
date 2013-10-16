@@ -37,7 +37,8 @@ var ATable = (function () {
              * @see http://jarwol.com/aTable
              */
             initialize : function (options) {
-                _.bindAll(this);
+                _.bindAll(this, "receivedData", "onTableScrolled", "onMouseMoveColumnHeader", "onMouseLeaveColumnHeader", "onClickColumnHeader", "onStartDragColumnHeader", 
+                    "onDragResizeIndicator", "onEndDragColumnHeader", "onDragEnterColumnHeader", "onDragEnterColumnHeader", "onDragLeaveColumnHeader", "onDropColumnHeader");
                 if (typeof options.dataFunction === "string") {
                     this.dataWorker = createDataWorker(options.dataFunction, this.receivedData);
                 }
@@ -347,7 +348,7 @@ var ATable = (function () {
              }
              },
              */
-            
+
             /**
              * Filter the table by displaying only rows which contain <b>filterStr</b> in the contents of <b>column</b>
              * @function filter
