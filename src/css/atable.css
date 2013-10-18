@@ -3,10 +3,13 @@
     border-right: none;
     border-bottom: none;
 }
-
+.atable *{
+    box-sizing: content-box;
+}
 .atable {
     table-layout: fixed;
     border-collapse: collapse;
+    border: none;
 }
 
 .atable th>div {

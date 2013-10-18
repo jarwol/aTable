@@ -261,20 +261,21 @@
 
     // instantiate and render a new table
     $(document).ready(function () {
-    new ATable({
-        dataFunction : function (atable) {
-            atable.receivedData(rows);
-        },
-        columns : [
-            {name : "first", label : "First Name"},
-            {name : "last", label : "Last Name"},
-            {name : "city", label : "City"},
-            {name : "phone", label : "Phone #"}
-        ],
-        el : "#staticDataCallback",
-        // height in pixels is required
-        height : 400
-    }).render();
+        new ATable({
+            dataFunction : function (atable) {
+                atable.receivedData(rows);
+            },
+            columns : [
+                {name : "first", label : "First Name"},
+                {name : "last", label : "Last Name"},
+                {name : "city", label : "City"},
+                {name : "phone", label : "Phone #"}
+            ],
+            el : "#staticDataCallback",
+            // height in pixels is required
+            height : 400
+        }).render();
+    }
 </pre>
         </div>
     </div>
