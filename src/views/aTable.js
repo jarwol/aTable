@@ -664,9 +664,9 @@ var ATable = (function () {
              * @param {jQuery.Event} e jQuery dragenter event
              */
             onDragEnterColumnHeader : function (e) {
-                var col = e.originalEvent.dataTransfer.getData("text");
+                var parts = e.originalEvent.dataTransfer.getData("text").split('.');
                 var th = $(e.target).closest("th")[0];
-                if (th.getAttribute('data-column') !== col) {
+                if (this.atableId == parts[0] && th.getAttribute('data-column') !== parts[1]) {
                     $(th.firstChild).addClass("over");
                 }
             },
@@ -688,7 +688,8 @@ var ATable = (function () {
              * @param {jQuery.Event} e jQuery dragleave event
              */
             onDragLeaveColumnHeader : function (e) {
-                $(e.target).removeClass("over");
+                var tgt = $(e.target);
+                tgt.removeClass("over");
             },
 
             /**

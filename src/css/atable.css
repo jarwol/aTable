@@ -3,9 +3,11 @@
     border-right: none;
     border-bottom: none;
 }
-.atable *{
+
+.atable * {
     box-sizing: content-box;
 }
+
 .atable {
     table-layout: fixed;
     border-collapse: collapse;
