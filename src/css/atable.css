@@ -11,7 +11,7 @@
 .atable {
     table-layout: fixed;
     border-collapse: collapse;
-    border: none;
+    border-right: solid 1px silver;
 }
 
 .atable th>div {
@@ -54,6 +54,10 @@
 
 .atable th.sortable {
     cursor: pointer;
+}
+
+.atable thead th:last-child {
+    border-right: none;
 }
 
 .atable td:first-child, .atable th:first-child {

@@ -39,6 +39,12 @@ var ATable = (function () {
             initialize : function (options) {
                 _.bindAll(this, "receivedData", "onTableScrolled", "onMouseMoveColumnHeader", "onMouseLeaveColumnHeader", "onClickColumnHeader", "onStartDragColumnHeader", 
                     "onDragResizeIndicator", "onEndDragColumnHeader", "onDragEnterColumnHeader", "onDragEnterColumnHeader", "onDragLeaveColumnHeader", "onDropColumnHeader");
+
+                var elt = document.createElement("div");
+                this.el.appendChild(elt);
+                this.el = elt;
+                this.$el = $(this.el);
+
                 if (typeof options.dataFunction === "string") {
                     this.dataWorker = createDataWorker(options.dataFunction, this.receivedData);
                 }
