@@ -36,7 +36,7 @@ includes: |
 <br/>
 <h4>Get started</h4>
 <p>Simply download and include the js and css files at the top of the page, or build ATable from source:</p>
-<pre><code>git clone https://github.com/jwoah12/aTable.git
+<pre><code>git clone https://github.com/jarwol/aTable.git
 cd aTable
 npm install grunt-cli -g #if you don't already have grunt installed globally
 npm install
@@ -64,8 +64,8 @@ grunt</code></pre>
                     ["<a href='dist/{{site.atable_version}}/atable.js'>atable.js</a>", "{{site.atable_version}}", "The ATable library - development version"],
                     ["<a href='dist/{{site.atable_version}}/atable.min.js'>atable.min.js</a>", "{{site.atable_version}}", "The ATable library - minified version"],
                     ["<a href='dist/{{site.atable_version}}/atable.css'>atable.css</a>", "{{site.atable_version}}", "ATable stylesheet"],
-                    ["<a href='https://github.com/jwoah12/aTable/archive/master.tar.gz'>master.tar.gz</a>", "latest", "ATable source - tar.gz"],
-                    ["<a href='https://github.com/jwoah12/aTable/archive/master.zip'>master.zip</a>", "latest", "ATable source - zip"]
+                    ["<a href='https://github.com/jarwol/aTable/archive/master.tar.gz'>master.tar.gz</a>", "latest", "ATable source - tar.gz"],
+                    ["<a href='https://github.com/jarwol/aTable/archive/master.zip'>master.zip</a>", "latest", "ATable source - zip"]
                 ]);
             },
             columns : [
@@ -114,7 +114,7 @@ grunt</code></pre>
         new ATable({
             dataFunction : function (atable) {
                 var rows = [];
-                $.get("https://api.github.com/repos/jwoah12/aTable/issues?milestone=3&state=closed", function (data) {
+                $.get("https://api.github.com/repos/jarwol/aTable/issues?milestone=3&state=closed", function (data) {
                     for (var i = 0; i < data.length; i++) {
                         var label = "";
                         if (data[i].labels.length > 0) {
