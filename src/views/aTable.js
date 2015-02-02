@@ -930,10 +930,10 @@ var ATable = (function () {
              */
             close : function () {
                 if (this.resizeIndicator) {
-                    document.removeChild(this.resizeIndicator);
+                    this.resizeIndicator.parentNode.removeChild(this.resizeIndicator);
+                    this.resizeIndicator = null;
                 }
                 this.remove();
-                this.unbind();
             }
         });
 
