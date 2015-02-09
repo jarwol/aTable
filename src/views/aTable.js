@@ -575,7 +575,7 @@ var ATable = (function () {
              * @param {jQuery.Event} e jQuery dragstart event
              */
             onStartDragColumnHeader : function (e) {
-                var target = $(e.target);
+                var target = $(e.target).closest("th");
                 var col = getResizeColumn(e);
                 // Mouse in resize position
                 if (col) {
