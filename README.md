@@ -23,7 +23,7 @@ Fast, interactive Javascript table component built on Backbone.js.
 ####Get started
 Run the following commands to get the aTable source and build the library:
 ```
-git clone https://github.com/jwoah12/aTable.git
+git clone https://github.com/jarwol/aTable.git
 cd aTable
 npm install grunt-cli -g
 npm install
@@ -45,7 +45,7 @@ The above browsers have full support for the interactive features in aTable. The
 
 ####Contributing
 Pull requests are welcome!  Please follow these guidelines before submitting:
-* Check out the [open issues](https://github.com/jwoah12/aTable/issues?state=open) and commit against one of those, or open your own issue first.  
+* Check out the [open issues](https://github.com/jarwol/aTable/issues?state=open) and commit against one of those, or open your own issue first.  
 * Add unit tests to `test/tests.js` and make sure all tests pass. 
 * Try to stick to the existing code style as much as possible, and document new functions and classes with JSDoc.
 
