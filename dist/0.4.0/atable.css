@@ -56,8 +56,8 @@
     cursor: pointer;
 }
 
-.atable thead th:last-child {
-    border-right: none;
+.atable thead {
+    border-right: solid 1px silver;
 }
 
 .atable td:first-child, .atable th:first-child {
